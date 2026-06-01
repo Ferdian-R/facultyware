@@ -224,8 +224,9 @@ router.delete(
   }
 );
 
-// Import questionController
+// Import questionController & partnerController
 const questionController = require("../controllers/questionController");
+const partnerController = require("../controllers/partnerController");
 
 /**
  * GET /api/questions
@@ -250,6 +251,34 @@ router.post(
   ],
   validateRequest,
   questionController.apiCreateQuestion
+);
+
+/**
+ * GET /api/partners
+ * Fetch all candidate partners.
+ */
+router.get("/partners", partnerController.apiGetPartners);
+
+/**
+ * POST /api/partners
+ * Create a new candidate partner programmatically via JSON API with primary contact.
+ */
+router.post(
+  "/partners",
+  [
+    body("name").notEmpty().withMessage("Nama mitra wajib diisi."),
+    body("type")
+      .isIn(["university", "company", "government", "ngo", "other"])
+      .withMessage("Tipe mitra tidak valid. Harus university, company, government, ngo, atau other."),
+    body("email").optional({ checkFalsy: true }).isEmail().withMessage("Format email mitra tidak valid."),
+    body("phone").optional({ checkFalsy: true }).isString(),
+    body("contact_name").notEmpty().withMessage("Nama kontak utama wajib diisi."),
+    body("contact_position").notEmpty().withMessage("Jabatan kontak utama wajib diisi."),
+    body("contact_email").optional({ checkFalsy: true }).isEmail().withMessage("Format email kontak tidak valid."),
+    body("contact_phone").optional({ checkFalsy: true }).isString()
+  ],
+  validateRequest,
+  partnerController.apiCreatePartner
 );
 
 module.exports = router;

@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Detail Kemitraan SUKAFTI — FTI Universitas Andalas." />
+  <title><%= title %></title>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <!-- Basecoat UI -->
+  <link rel="stylesheet" href="https://unpkg.com/basecoat-css@latest/dist/basecoat.min.css" />
+  <!-- Dashboard CSS -->
+  <link rel="stylesheet" href="/css/dashboard.css" />
+  <!-- HTMX -->
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  
+  <style>
+    /* Dialog Overlay styling */
+    dialog::backdrop {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+    }
+    dialog {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      margin: 0;
+      padding: 2.25rem;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+      width: 500px;
+      max-width: 90%;
+      background: #ffffff;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .dialog-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .dialog-header i {
+      color: var(--dk-primary);
+    }
+    .form-group {
+      margin-bottom: 1.15rem;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.825rem;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 0.4rem;
+    }
+    .form-control {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background: #f8fafc;
+      color: #0f172a;
+      outline: none;
+      font-family: inherit;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .form-control:focus {
+      border-color: var(--dk-primary);
+      background: #fff;
+    }
+
+    /* Badging */
+    .badge-type {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.725rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .badge-type--univ { background: #dbeafe; color: #1e40af; }
+    .badge-type--company { background: #e0f2fe; color: #0369a1; }
+    .badge-type--gov { background: #fef3c7; color: #92400e; }
+    .badge-type--ngo { background: #dcfce7; color: #166534; }
+    .badge-type--other { background: #f1f5f9; color: #475569; }
+    
+    .alert-banner {
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+    }
+    .alert-banner--success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+    .alert-banner--error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+    /* Profile Panel Styling */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    @media (max-width: 992px) {
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .profile-card {
+      background: #ffffff;
+      border: 1px solid var(--dk-s200);
+      border-radius: 12px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      background: #f1f5f9;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.25rem;
+      font-weight: 800;
+      margin: 0 auto 1.25rem auto;
+      border: 2px solid var(--dk-s200);
+    }
+    .profile-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 0.5rem;
+      line-height: 1.3;
+    }
+    .profile-meta-list {
+      text-align: left;
+      margin-top: 1.75rem;
+      border-top: 1px solid var(--dk-s200);
+      padding-top: 1.25rem;
+    }
+    .profile-meta-item {
+      margin-bottom: 1rem;
+    }
+    .profile-meta-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+    .profile-meta-val {
+      font-size: 0.875rem;
+      color: #1e293b;
+      line-height: 1.4;
+    }
+
+    /* Contacts and Surveys Listing */
+    .section-card {
+      background: #ffffff;
+      border: 1px solid var(--dk-s200);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .section-card__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid var(--dk-s100);
+      padding-bottom: 0.75rem;
+    }
+    .section-card__header h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .contact-item {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 0.85rem;
+      border: 1px solid var(--dk-s200);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      transition: all 0.2s;
+    }
+    .contact-item:hover {
+      border-color: var(--dk-s400);
+      background: #fafafa;
+    }
+    .contact-info {
+      display: flex;
+      gap: 12px;
+    }
+    .contact-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: #f1f5f9;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+    .contact-name {
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge-primary-contact {
+      background: #dcfce7;
+      color: #15803d;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ══════════════════════════════════
+       SIDEBAR
+       ══════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="admin-avatar" style="width:38px; height:38px; border-radius:10px; font-size:1.1rem;">FTI</div>
+      <div>
+        <div class="sidebar__wordmark">SUKAFTI</div>
+        <div class="sidebar__tagline">Survey Kerjasama FTI</div>
+      </div>
+    </div>
+
+    <div class="nav-section-label">Menu Utama</div>
+    <ul class="nav-list">
+      <li class="nav-item"><a href="/admin/dashboard" id="nav-dashboard"><i data-lucide="layout-dashboard"></i>Dashboard</a></li>
+      <li class="nav-item"><a href="/admin/questions" id="nav-questions"><i data-lucide="help-circle"></i>Pertanyaan Survey</a></li>
+      <li class="nav-item"><a href="/admin/partners" class="active" id="nav-mitra"><i data-lucide="building-2"></i>Manajemen Mitra</a></li>
+      <li class="nav-item"><a href="#" id="nav-pin" style="opacity: 0.6; cursor: not-allowed;"><i data-lucide="key-round"></i>Kelola PIN Survey</a></li>
+      <li class="nav-item"><a href="#" id="nav-hasil" style="opacity: 0.6; cursor: not-allowed;"><i data-lucide="bar-chart-3"></i>Hasil Survey</a></li>
+    </ul>
+
+    <div class="nav-section-label" style="margin-top:.75rem;">Pengaturan</div>
+    <ul class="nav-list">
+      <li class="nav-item"><a href="#" id="nav-profile" style="opacity: 0.6; cursor: not-allowed;"><i data-lucide="user-cog"></i>Profil Admin</a></li>
+    </ul>
+
+    <div class="sidebar__footer">
+      <a href="/logout" id="btn-logout"><i data-lucide="log-out"></i>Keluar</a>
+    </div>
+  </aside>
+
+  <!-- ══════════════════════════════════
+       MAIN WRAPPER
+       ══════════════════════════════════ -->
+  <div class="main-wrapper">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar__left" style="display:flex; align-items:center; gap:12px;">
+        <a href="/admin/partners" class="action-btn" title="Kembali ke daftar mitra" style="height:36px; width:36px; display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--dk-s200); border-radius:8px;"><i data-lucide="chevron-left"></i></a>
+        <div>
+          <h2>Detail Profil Kemitraan</h2>
+          <p id="topbar-date">Rincian profil, kontak person, dan riwayat survey</p>
+        </div>
+      </div>
+      <div class="topbar__right">
+        <div class="admin-chip" id="admin-chip">
+          <div class="admin-avatar">AF</div>
+          <span class="admin-chip__name"><%= user %></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT AREA -->
+    <main class="content-area" id="main-content">
+
+      <!-- Alerts -->
+      <% if (error) { %>
+        <div class="alert-banner alert-banner--error"><%= error %></div>
+      <% } %>
+      <% if (success) { %>
+        <div class="alert-banner alert-banner--success"><%= success %></div>
+      <% } %>
+
+      <div class="detail-grid">
+        
+        <!-- LEFT COLUMN: Profile Card -->
+        <div>
+          <div class="profile-card">
+            <% const avatarStr = partner.name.substring(0, 2).toUpperCase(); %>
+            <div class="profile-avatar"><%= avatarStr %></div>
+            <div class="profile-name"><%= partner.name %></div>
+            
+            <!-- Type badge -->
+            <% 
+               let typeBadgeClass = 'badge-type--other';
+               let typeText = 'Lainnya';
+               if (partner.type === 'university') { typeBadgeClass = 'badge-type--univ'; typeText = 'Perguruan Tinggi'; }
+               else if (partner.type === 'company') { typeBadgeClass = 'badge-type--company'; typeText = 'Swasta / Bisnis'; }
+               else if (partner.type === 'government') { typeBadgeClass = 'badge-type--gov'; typeText = 'Pemerintah / BUMN'; }
+               else if (partner.type === 'ngo') { typeBadgeClass = 'badge-type--ngo'; typeText = 'NGO / LSM'; }
+            %>
+            <div style="margin-bottom: 0.5rem;"><span class="badge-type <%= typeBadgeClass %>"><%= typeText %></span></div>
+            
+            <!-- Status Badge -->
+            <div>
+              <span class="pill <%= partner.status === 'active' ? 'pill--active' : 'pill--pending' %>" style="font-size:0.75rem;">
+                <%= partner.status === 'active' ? 'Akun Aktif' : 'Akun Ditangguhkan' %>
+              </span>
+            </div>
+
+            <div class="profile-meta-list">
+              
+              <div class="profile-meta-item">
+                <div class="profile-meta-label">Email Instansi Resmi</div>
+                <div class="profile-meta-val"><%= partner.email || '—' %></div>
+              </div>
+
+              <div class="profile-meta-item">
+                <div class="profile-meta-label">Nomor Telepon</div>
+                <div class="profile-meta-val"><%= partner.phone || '—' %></div>
+              </div>
+
+              <div class="profile-meta-item">
+                <div class="profile-meta-label">Alamat Kantor</div>
+                <div class="profile-meta-val" style="white-space: pre-line;"><%= partner.address || '—' %></div>
+              </div>
+
+              <div class="profile-meta-item" style="margin-bottom: 0px;">
+                <div class="profile-meta-label">Fokus Deskripsi Kerjasama</div>
+                <div class="profile-meta-val" style="font-style: italic;"><%= partner.description || 'Tidak ada catatan deskripsi.' %></div>
+              </div>
+
+            </div>
+
+            <button class="btn btn--ghost-muted" id="btn-edit-profile" style="width:100%; border:1px solid var(--dk-s200); border-radius:6px; margin-top:1.5rem; display:flex; align-items:center; justify-content:center; gap:8px;">
+              <i data-lucide="edit-3" style="width:14px; height:14px;"></i> Ubah Profil
+            </button>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Contacts and Surveys -->
+        <div>
+          
+          <!-- Section Card 1: Narahubung / Contact Persons -->
+          <div class="section-card">
+            <div class="section-card__header">
+              <h3><i data-lucide="contact"></i> Kontak Hubung &amp; Perwakilan</h3>
+              <button class="btn-generate" id="btn-add-contact" style="padding: 0.35rem 0.75rem; font-size:0.75rem;" type="button">
+                <i data-lucide="plus-circle" style="width:13px; height:13px;"></i> Tambah Kontak
+              </button>
+            </div>
+
+            <div id="contacts-list">
+              <% if (locals.contacts && contacts.length > 0) { %>
+                <% contacts.forEach(function(c) { %>
+                  <div class="contact-item" id="contact-row-<%= c.id %>">
+                    <div class="contact-info">
+                      <div class="contact-icon"><i data-lucide="user"></i></div>
+                      <div>
+                        <div class="contact-name">
+                          <%= c.name %> 
+                          <% if (c.is_primary === 1) { %>
+                            <span class="badge-primary-contact">Utama</span>
+                          <% } %>
+                        </div>
+                        <div style="font-size:0.75rem; color:#64748b; margin-top:2px;"><%= c.position %></div>
+                        <div style="font-size:0.75rem; color:#334155; margin-top:4px; display:flex; gap:12px;">
+                          <span><i data-lucide="mail" style="width:10px; height:10px; display:inline-block; margin-right:4px;"></i><%= c.email || '—' %></span>
+                          <span><i data-lucide="phone" style="width:10px; height:10px; display:inline-block; margin-right:4px;"></i><%= c.phone || '—' %></span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <% if (c.is_primary !== 1) { %>
+                      <button class="action-btn action-btn--del"
+                              hx-delete="/admin/partners/contacts/<%= c.id %>"
+                              hx-confirm="Apakah Anda yakin ingin menghapus perwakilan kontak ini dari database?"
+                              hx-target="#contact-row-<%= c.id %>"
+                              hx-swap="outerHTML"
+                              title="Hapus Kontak">
+                        <i data-lucide="trash-2" style="width:14px; height:14px;"></i>
+                      </button>
+                    <% } %>
+                  </div>
+                <% }) %>
+              <% } else { %>
+                <div style="text-align:center; color:#94a3b8; font-size:0.875rem; padding: 2rem 0;">
+                  Belum ada perwakilan kontak terdaftar.
+                </div>
+              <% } %>
+            </div>
+          </div>
+
+          <!-- Section Card 2: Riwayat Survei & Token PIN -->
+          <div class="section-card">
+            <div class="section-card__header">
+              <h3><i data-lucide="history"></i> Riwayat Survei &amp; Aktivitas</h3>
+              
+              <!-- PDF Report Download Button -->
+              <a href="/admin/partners/<%= partner.id %>/export-pdf" class="btn" style="background-color: #0f172a; color: white; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 600;">
+                <i data-lucide="printer" style="width:12px; height:12px;"></i> Cetak PDF Laporan
+              </a>
+            </div>
+
+            <div style="overflow-x:auto;">
+              <table class="data-table" style="box-shadow:none; border: 1px solid var(--dk-s200);">
+                <thead>
+                  <tr>
+                    <th>Judul Survei</th>
+                    <th>PIN Akses</th>
+                    <th>Status PIN</th>
+                    <th>Selesai Pada</th>
+                    <th style="text-align:center;">Skor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (locals.surveys && surveys.length > 0) { %>
+                    <% surveys.forEach(function(s) { %>
+                      <tr>
+                        <td style="font-weight: 600; color: #1e293b; font-size:0.825rem;"><%= s.survey_title %></td>
+                        <td><span class="pin-code" style="font-size:0.775rem;"><%= s.pin %></span></td>
+                        <td>
+                          <span class="pill <%= s.is_used === 1 ? 'pill--used' : 'pill--active' %>" style="font-size:0.7rem; text-transform: uppercase;">
+                            <%= s.is_used === 1 ? 'Terpakai' : 'Aktif' %>
+                          </span>
+                        </td>
+                        <td style="font-size:0.8rem; color:#64748b;">
+                          <% if (s.used_at) { 
+                               const d = new Date(s.used_at);
+                          %>
+                            <%= d.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'}) %>
+                          <% } else { %>
+                            —
+                          <% } %>
+                        </td>
+                        <td style="text-align:center; font-weight:700; color:#0f172a; font-size:0.825rem;">
+                          <%= s.is_used === 1 ? `${s.score_total} Poin` : '—' %>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  <% } else { %>
+                    <tr>
+                      <td colspan="5" style="text-align:center; color:#94a3b8; padding: 2rem 0; font-size:0.825rem;">
+                        Mitra belum diundang untuk mengikuti survei kerja sama mana pun.
+                      </td>
+                    </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     MODAL DIALOG: TAMBAH KONTAK BARU
+     ══════════════════════════════════ -->
+<dialog id="contact-dialog">
+  <div class="dialog-header">
+    <i data-lucide="contact"></i>
+    <h3 style="margin:0; font-size: 1.25rem; color: #0f172a;">Tambah Perwakilan Kontak Baru</h3>
+  </div>
+  <p style="color:#64748b; margin-bottom:1.5rem; font-size:0.825rem; line-height:1.4;">Tambahkan data staf/perwakilan penghubung dari instansi <%= partner.name %>.</p>
+  
+  <form action="/admin/partners/<%= partner.id %>/contacts" method="POST" id="form-add-contact">
+    
+    <div class="form-group">
+      <label for="contact-name-input">Nama Lengkap Narahubung</label>
+      <input type="text" id="contact-name-input" name="name" class="form-control" placeholder="Nama lengkap beserta gelar..." required />
+    </div>
+
+    <div class="form-group">
+      <label for="contact-position-input">Jabatan Narahubung</label>
+      <input type="text" id="contact-position-input" name="position" class="form-control" placeholder="Misal: Staff Hubungan Kerja Sama" required />
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="contact-email-input">Email Kontak</label>
+        <input type="email" id="contact-email-input" name="email" class="form-control" placeholder="kontak@perusahaan.com" />
+      </div>
+
+      <div class="form-group">
+        <label for="contact-phone-input">No Telepon / WhatsApp</label>
+        <input type="text" id="contact-phone-input" name="phone" class="form-control" placeholder="08xxxxxxxxxx" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="contact-primary-input">Jadikan Kontak Utama?</label>
+      <select id="contact-primary-input" name="is_primary" class="form-control">
+        <option value="0" selected>Tidak (Kontak Pendukung)</option>
+        <option value="1">Ya (Gantikan Kontak Utama Saat Ini)</option>
+      </select>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top: 1.75rem;">
+      <button type="button" id="btn-close-contact-modal" class="btn btn--ghost-muted" style="border:1px solid #cbd5e1;">Batal</button>
+      <button type="submit" class="btn btn--primary" style="background:#0f172a; color:white; border:none; border-radius:6px; padding:0.6rem 1.25rem;">
+        Simpan Kontak
+      </button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ══════════════════════════════════
+     MODAL DIALOG: UBAH PROFIL MITRA
+     ══════════════════════════════════ -->
+<dialog id="edit-dialog">
+  <div class="dialog-header">
+    <i data-lucide="edit-3"></i>
+    <h3 style="margin:0; font-size: 1.25rem; color: #0f172a;">Ubah Profil Kemitraan</h3>
+  </div>
+  <p style="color:#64748b; margin-bottom:1.5rem; font-size:0.825rem; line-height:1.4;">Perbarui rincian informasi dan legalitas perusahaan mitra terdaftar.</p>
+  
+  <form action="/admin/partners/<%= partner.id %>/update" method="POST" id="form-edit-partner">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+      
+      <div class="form-group" style="grid-column: span 2;">
+        <label for="edit-name">Nama Instansi / Perusahaan</label>
+        <input type="text" id="edit-name" name="name" value="<%= partner.name %>" class="form-control" required />
+      </div>
+
+      <div class="form-group">
+        <label for="edit-type">Tipe Kemitraan</label>
+        <select id="edit-type" name="type" class="form-control" required>
+          <option value="university" <%= partner.type === 'university' ? 'selected' : '' %>>Perguruan Tinggi</option>
+          <option value="company" <%= partner.type === 'company' ? 'selected' : '' %>>Swasta / Perusahaan</option>
+          <option value="government" <%= partner.type === 'government' ? 'selected' : '' %>>Instansi Pemerintah</option>
+          <option value="ngo" <%= partner.type === 'ngo' ? 'selected' : '' %>>NGO / LSM</option>
+          <option value="other" <%= partner.type === 'other' ? 'selected' : '' %>>Lainnya</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="edit-status">Status Akun</label>
+        <select id="edit-status" name="status" class="form-control" required>
+          <option value="active" <%= partner.status === 'active' ? 'selected' : '' %>>Aktif</option>
+          <option value="inactive" <%= partner.status === 'inactive' ? 'selected' : '' %>>Non-Aktif</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="edit-email">Email Resmi</label>
+        <input type="email" id="edit-email" name="email" value="<%= partner.email || '' %>" class="form-control" />
+      </div>
+
+      <div class="form-group">
+        <label for="edit-phone">Nomor Telepon</label>
+        <input type="text" id="edit-phone" name="phone" value="<%= partner.phone || '' %>" class="form-control" />
+      </div>
+
+      <div class="form-group" style="grid-column: span 2;">
+        <label for="edit-address">Alamat Lengkap</label>
+        <textarea id="edit-address" name="address" class="form-control" rows="2"><%= partner.address || '' %></textarea>
+      </div>
+
+      <div class="form-group" style="grid-column: span 2; margin-bottom:0.5rem;">
+        <label for="edit-description">Deskripsi Singkat Kerja Sama</label>
+        <textarea id="edit-description" name="description" class="form-control" rows="2"><%= partner.description || '' %></textarea>
+      </div>
+
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top: 1.5rem;">
+      <button type="button" id="btn-close-edit-modal" class="btn btn--ghost-muted" style="border:1px solid #cbd5e1;">Batal</button>
+      <button type="submit" class="btn btn--primary" style="background:#0f172a; color:white; border:none; border-radius:6px; padding:0.6rem 1.25rem;">
+        Simpan Rincian
+      </button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  // ── Lucide Icons ───────────────────────────────────────
+  lucide.createIcons();
+
+  // Set Current Date in Header
+  const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  document.getElementById('topbar-date').innerText = new Date().toLocaleDateString('id-ID', dateOptions) + " — Informasi Detail";
+
+  // ── Modal Dialogue Forms Logic ─────────────────────────
+  const contactModal = document.getElementById('contact-dialog');
+  const editProfileModal = document.getElementById('edit-dialog');
+
+  const btnAddContact = document.getElementById('btn-add-contact');
+  const btnCloseContactModal = document.getElementById('btn-close-contact-modal');
+
+  const btnEditProfile = document.getElementById('btn-edit-profile');
+  const btnCloseEditModal = document.getElementById('btn-close-edit-modal');
+
+  // Trigger Narahubung Modal
+  if (btnAddContact) {
+    btnAddContact.addEventListener('click', () => {
+      contactModal.showModal();
+    });
+  }
+  btnCloseContactModal.addEventListener('click', () => {
+    contactModal.close();
+  });
+
+  // Trigger Profile Edit Modal
+  if (btnEditProfile) {
+    btnEditProfile.addEventListener('click', () => {
+      editProfileModal.showModal();
+    });
+  }
+  btnCloseEditModal.addEventListener('click', () => {
+    editProfileModal.close();
+  });
+
+  // Listening to custom HTMX triggers for alerts
+  document.body.addEventListener('showAlert', function(evt) {
+    alert(evt.detail.value);
+  });
+
+  // Resequence or refresh view if HTMX deletes a contact dynamically
+  document.body.addEventListener('htmx:afterOnLoad', function(evt) {
+    if (evt.detail.requestConfig.method === 'DELETE' && evt.detail.requestConfig.path.includes('/admin/partners/contacts/')) {
+      alert('Kontak perwakilan berhasil dihapus secara permanen!');
+    }
+  });
+
+</script>
+</body>
+</html>

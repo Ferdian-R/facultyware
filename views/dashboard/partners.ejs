@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Manajemen Kemitraan SUKAFTI — FTI Universitas Andalas." />
+  <title><%= title %></title>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <!-- Basecoat UI -->
+  <link rel="stylesheet" href="https://unpkg.com/basecoat-css@latest/dist/basecoat.min.css" />
+  <!-- Dashboard CSS -->
+  <link rel="stylesheet" href="/css/dashboard.css" />
+  <!-- HTMX -->
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  
+  <style>
+    /* Dialog Overlay styling */
+    dialog::backdrop {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+    }
+    dialog {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      margin: 0;
+      padding: 2.25rem;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+      width: 550px;
+      max-width: 90%;
+      background: #ffffff;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .dialog-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .dialog-header i {
+      color: var(--dk-primary);
+    }
+    
+    /* Layout grid for dialog form groups */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .form-group {
+      margin-bottom: 1.15rem;
+    }
+    .form-group--full {
+      grid-column: span 2;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.825rem;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 0.4rem;
+    }
+    .form-control {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background: #f8fafc;
+      color: #0f172a;
+      outline: none;
+      font-family: inherit;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .form-control:focus {
+      border-color: var(--dk-primary);
+      background: #fff;
+    }
+    
+    .section-divider {
+      grid-column: span 2;
+      border-bottom: 1px solid var(--dk-s200);
+      margin: 0.5rem 0 1rem 0;
+      padding-bottom: 0.25rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--dk-s800);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Badging types */
+    .badge-type {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.725rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .badge-type--univ { background: #dbeafe; color: #1e40af; }
+    .badge-type--company { background: #e0f2fe; color: #0369a1; }
+    .badge-type--gov { background: #fef3c7; color: #92400e; }
+    .badge-type--ngo { background: #dcfce7; color: #166534; }
+    .badge-type--other { background: #f1f5f9; color: #475569; }
+    
+    .alert-banner {
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+    }
+    .alert-banner--success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+    .alert-banner--error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+    /* Custom styles for detail and edit actions */
+    .company-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .company-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ══════════════════════════════════
+       SIDEBAR
+       ══════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="admin-avatar" style="width:38px; height:38px; border-radius:10px; font-size:1.1rem;">FTI</div>
+      <div>
+        <div class="sidebar__wordmark">SUKAFTI</div>
+        <div class="sidebar__tagline">Survey Kerjasama FTI</div>
+      </div>
+    </div>
+
+    <div class="nav-section-label">Menu Utama</div>
+    <ul class="nav-list">
+      <li class="nav-item"><a href="/admin/dashboard" id="nav-dashboard"><i data-lucide="layout-dashboard"></i>Dashboard</a></li>
+      <li class="nav-item"><a href="/admin/questions" id="nav-questions"><i data-lucide="help-circle"></i>Pertanyaan Survey</a></li>
+      <li class="nav-item"><a href="/admin/partners" class="active" id="nav-mitra"><i data-lucide="building-2"></i>Manajemen Mitra</a></li>
+      <li class="nav-item"><a href="#" id="nav-pin" style="opacity: 0.6; cursor: not-allowed;"><i data-lucide="key-round"></i>Kelola PIN Survey</a></li>
+      <li class="nav-item"><a href="#" id="nav-hasil" style="opacity: 0.6; cursor: not-allowed;"><i data-lucide="bar-chart-3"></i>Hasil Survey</a></li>
+    </ul>
+
+    <div class="nav-section-label" style="margin-top:.75rem;">Pengaturan</div>
+    <ul class="nav-list">
+      <li class="nav-item"><a href="#" id="nav-profile" style="opacity: 0.6; cursor: not-allowed;"><i data-lucide="user-cog"></i>Profil Admin</a></li>
+    </ul>
+
+    <div class="sidebar__footer">
+      <a href="/logout" id="btn-logout"><i data-lucide="log-out"></i>Keluar</a>
+    </div>
+  </aside>
+
+  <!-- ══════════════════════════════════
+       MAIN WRAPPER
+       ══════════════════════════════════ -->
+  <div class="main-wrapper">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar__left">
+        <h2>Kelola Mitra Industri</h2>
+        <p id="topbar-date">Manajemen portofolio partner kerja sama FTI</p>
+      </div>
+      <div class="topbar__right">
+        <div class="admin-chip" id="admin-chip">
+          <div class="admin-avatar">AF</div>
+          <span class="admin-chip__name"><%= user %></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT AREA -->
+    <main class="content-area" id="main-content">
+
+      <!-- Alerts -->
+      <% if (error) { %>
+        <div class="alert-banner alert-banner--error"><%= error %></div>
+      <% } %>
+      <% if (success) { %>
+        <div class="alert-banner alert-banner--success"><%= success %></div>
+      <% } %>
+
+      <!-- ① STAT CARDS -->
+      <div class="stats-grid" style="margin-bottom: 1.5rem;">
+        
+        <!-- Total Partners -->
+        <div class="stat-card stat-card--a" style="padding: 1.25rem;">
+          <div class="stat__icon icon-slate"><i data-lucide="building-2"></i></div>
+          <div style="flex:1;">
+            <div class="stat__label">Total Mitra Industri</div>
+            <div class="stat__value"><%= stats.total %></div>
+            <div class="stat__sub">Instansi mitra terdaftar</div>
+          </div>
+        </div>
+
+        <!-- Active Partners -->
+        <div class="stat-card stat-card--a" style="padding: 1.25rem;">
+          <div class="stat__icon icon-emerald"><i data-lucide="check-circle-2"></i></div>
+          <div style="flex:1;">
+            <div class="stat__label">Mitra Aktif</div>
+            <div class="stat__value" style="color: #10b981;"><%= stats.active %></div>
+            <div class="stat__sub">Kerja sama berjalan aktif</div>
+          </div>
+        </div>
+
+        <!-- Inactive Partners -->
+        <div class="stat-card stat-card--a" style="padding: 1.25rem;">
+          <div class="stat__icon icon-amber" style="background:#fee2e2; color:#ef4444;"><i data-lucide="alert-triangle"></i></div>
+          <div style="flex:1;">
+            <div class="stat__label">Mitra Non-Aktif</div>
+            <div class="stat__value" style="color: #ef4444;"><%= stats.inactive %></div>
+            <div class="stat__sub">Mitra ditangguhkan/tidak aktif</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ② FILTER & SEARCH BAR -->
+      <div class="table-card" style="padding: 1.25rem 1.5rem; margin-bottom: 0px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          
+          <form method="GET" action="/admin/partners" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div style="position:relative;">
+              <input type="text" name="search" placeholder="Cari nama/email..." value="<%= search %>" class="form-control" style="width: 240px; padding-left: 2rem; margin: 0;" />
+              <i data-lucide="search" style="position:absolute; left:8px; top:50%; transform:translateY(-50%); width:14px; height:14px; color:#64748b;"></i>
+            </div>
+            
+            <select name="type" class="form-control" style="width: 160px; margin: 0;" onchange="this.form.submit()">
+              <option value="">-- Semua Tipe --</option>
+              <option value="university" <%= selectedType === 'university' ? 'selected' : '' %>>Perguruan Tinggi</option>
+              <option value="company" <%= selectedType === 'company' ? 'selected' : '' %>>Swasta/Perusahaan</option>
+              <option value="government" <%= selectedType === 'government' ? 'selected' : '' %>>Pemerintah</option>
+              <option value="ngo" <%= selectedType === 'ngo' ? 'selected' : '' %>>NGO/LSM</option>
+              <option value="other" <%= selectedType === 'other' ? 'selected' : '' %>>Lainnya</option>
+            </select>
+
+            <select name="status" class="form-control" style="width: 140px; margin: 0;" onchange="this.form.submit()">
+              <option value="">-- Semua Status --</option>
+              <option value="active" <%= selectedStatus === 'active' ? 'selected' : '' %>>Aktif</option>
+              <option value="inactive" <%= selectedStatus === 'inactive' ? 'selected' : '' %>>Non-Aktif</option>
+            </select>
+            
+            <% if (search || selectedType || selectedStatus) { %>
+              <a href="/admin/partners" class="action-btn" title="Reset Filter" style="display: inline-flex; align-items: center; justify-content: center; height: 35px; width: 35px;"><i data-lucide="x"></i></a>
+            <% } %>
+          </form>
+
+          <div>
+            <button class="btn-generate" id="btn-add-partner" type="button">
+              <i data-lucide="plus-circle"></i> Tambah Mitra Baru
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ③ DATA TABLE -->
+      <div class="table-card">
+        <div class="table-card__header">
+          <div>
+            <h2>Daftar Mitra Kandidat Survei</h2>
+            <p>Daftar resmi perusahaan/instansi yang dikirimkan PIN survey</p>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Perusahaan/Instansi Mitra</th>
+                <th>Tipe</th>
+                <th>Kontak Resmi</th>
+                <th>Status</th>
+                <th style="width: 130px; text-align: center;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (locals.partners && partners.length > 0) { %>
+                <% partners.forEach(function(p) { 
+                     const avatarStr = p.name.substring(0, 2).toUpperCase();
+                     
+                     let typeBadgeClass = 'badge-type--other';
+                     let typeText = 'Lainnya';
+                     if (p.type === 'university') { typeBadgeClass = 'badge-type--univ'; typeText = 'Univ / Akademik'; }
+                     else if (p.type === 'company') { typeBadgeClass = 'badge-type--company'; typeText = 'Swasta / Bisnis'; }
+                     else if (p.type === 'government') { typeBadgeClass = 'badge-type--gov'; typeText = 'Pemerintah / BUMN'; }
+                     else if (p.type === 'ngo') { typeBadgeClass = 'badge-type--ngo'; typeText = 'NGO / LSM'; }
+                %>
+                <tr id="row-partner-<%= p.id %>">
+                  <td>
+                    <div class="company-cell">
+                      <div class="company-avatar" style="background:#f1f5f9; color:#1e293b;"><%= avatarStr %></div>
+                      <div>
+                        <div class="company-name" style="font-weight:600; color:#0f172a;"><%= p.name %></div>
+                        <div class="company-id" style="font-size:0.75rem; color:#64748b;">#MITRA-<%= p.id.toString().padStart(3, '0') %></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge-type <%= typeBadgeClass %>"><%= typeText %></span>
+                  </td>
+                  <td>
+                    <div style="font-size:0.825rem; color:#334155; line-height: 1.4;">
+                      <div><i data-lucide="mail" style="width:11px; height:11px; display:inline-block; margin-right:4px;"></i><%= p.email || '—' %></div>
+                      <div style="color:#64748b;"><i data-lucide="phone" style="width:11px; height:11px; display:inline-block; margin-right:4px;"></i><%= p.phone || '—' %></div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="pill <%= p.status === 'active' ? 'pill--active' : 'pill--pending' %>" style="text-transform: capitalize;">
+                      <%= p.status === 'active' ? 'Aktif' : 'Non-Aktif' %>
+                    </span>
+                  </td>
+                  <td>
+                    <div class="action-group" style="justify-content: center;">
+                      <a href="/admin/partners/<%= p.id %>" class="action-btn" title="Lihat Profil Detail" style="color:var(--dk-s700);">
+                        <i data-lucide="eye"></i>
+                      </a>
+                      <button class="action-btn btn-edit-partner" 
+                              data-id="<%= p.id %>" 
+                              data-name="<%= p.name %>" 
+                              data-type="<%= p.type %>"
+                              data-email="<%= p.email %>"
+                              data-phone="<%= p.phone %>"
+                              data-address="<%= p.address %>"
+                              data-description="<%= p.description %>"
+                              data-status="<%= p.status %>"
+                              title="Ubah Profil">
+                        <i data-lucide="edit-3"></i>
+                      </button>
+                      <button class="action-btn action-btn--del" 
+                              hx-delete="/admin/partners/<%= p.id %>"
+                              hx-confirm="Apakah Anda yakin ingin menghapus data mitra ini beserta seluruh data kontak & riwayat survey terkait secara permanen?"
+                              hx-target="#row-partner-<%= p.id %>"
+                              hx-swap="outerHTML"
+                              title="Hapus Mitra">
+                        <i data-lucide="trash-2"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="5" style="text-align:center; color:#94a3b8; padding:4rem;">
+                    <i data-lucide="building-2" style="width:40px; height:40px; stroke-width:1; margin-bottom:10px; color:#cbd5e1;"></i>
+                    <div>Belum ada data mitra terdaftar. Klik tombol Tambah Mitra untuk menginisialisasi.</div>
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Footer -->
+        <% if (locals.totalPages && totalPages > 1) { %>
+          <div class="pagination-footer" style="display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-top:1px solid var(--dk-s100);">
+            <div style="font-size:0.75rem; color:var(--dk-s500);">
+              Menampilkan halaman <strong><%= page %></strong> dari <strong><%= totalPages %></strong> (Total: <%= totalItems %> mitra)
+            </div>
+            <div class="pagination-buttons" style="display:flex; gap:6px;">
+              <% if (page > 1) { %>
+                <a href="?search=<%= search %>&type=<%= selectedType %>&status=<%= selectedStatus %>&page=<%= page - 1 %>" class="action-btn" title="Sebelumnya"><i data-lucide="chevron-left"></i></a>
+              <% } else { %>
+                <span class="action-btn" style="opacity: 0.4; cursor: not-allowed;"><i data-lucide="chevron-left"></i></span>
+              <% } %>
+              
+              <% for(let i = 1; i <= totalPages; i++) { %>
+                <a href="?search=<%= search %>&type=<%= selectedType %>&status=<%= selectedStatus %>&page=<%= i %>" class="action-btn" style="<%= page === i ? 'background:var(--dk-s700); color:white;' : '' %>"><%= i %></a>
+              <% } %>
+              
+              <% if (page < totalPages) { %>
+                <a href="?search=<%= search %>&type=<%= selectedType %>&status=<%= selectedStatus %>&page=<%= page + 1 %>" class="action-btn" title="Selanjutnya"><i data-lucide="chevron-right"></i></a>
+              <% } else { %>
+                <span class="action-btn" style="opacity: 0.4; cursor: not-allowed;"><i data-lucide="chevron-right"></i></span>
+              <% } %>
+            </div>
+          </div>
+        <% } %>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     MODAL DIALOG: TAMBAH MITRA BARU
+     ══════════════════════════════════ -->
+<dialog id="add-dialog">
+  <div class="dialog-header">
+    <i data-lucide="building-2"></i>
+    <h3 style="margin:0; font-size: 1.25rem; color: #0f172a;">Tambah Mitra Industri Baru</h3>
+  </div>
+  <p style="color:#64748b; margin-bottom:1.25rem; font-size:0.825rem; line-height:1.4;">Inisialisasi akun mitra kerjasama beserta data narahubung/kontak utama mereka.</p>
+  
+  <form action="/admin/partners" method="POST" id="form-add-partner">
+    <div class="form-row">
+      
+      <!-- Profil Mitra -->
+      <div class="section-divider">Profil Perusahaan Mitra</div>
+      
+      <div class="form-group form-group--full">
+        <label for="add-name">Nama Instansi / Perusahaan</label>
+        <input type="text" id="add-name" name="name" class="form-control" placeholder="Misal: PT Teknologi Maju Indonesia" required />
+      </div>
+
+      <div class="form-group">
+        <label for="add-type">Tipe Kemitraan</label>
+        <select id="add-type" name="type" class="form-control" required>
+          <option value="" disabled selected>-- Pilih Tipe --</option>
+          <option value="university">Perguruan Tinggi</option>
+          <option value="company">Swasta / Perusahaan</option>
+          <option value="government">Instansi Pemerintah</option>
+          <option value="ngo">NGO / LSM</option>
+          <option value="other">Lainnya</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="add-status">Status Akun</label>
+        <select id="add-status" name="status" class="form-control" required>
+          <option value="active" selected>Aktif</option>
+          <option value="inactive">Non-Aktif</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="add-email">Email Resmi</label>
+        <input type="email" id="add-email" name="email" class="form-control" placeholder="info@perusahaan.com" />
+      </div>
+
+      <div class="form-group">
+        <label for="add-phone">Nomor Telepon</label>
+        <input type="text" id="add-phone" name="phone" class="form-control" placeholder="021-xxxxxxxx" />
+      </div>
+
+      <div class="form-group form-group--full">
+        <label for="add-address">Alamat Lengkap</label>
+        <textarea id="add-address" name="address" class="form-control" rows="2" placeholder="Alamat kantor pusat..."></textarea>
+      </div>
+
+      <div class="form-group form-group--full">
+        <label for="add-description">Deskripsi Singkat Kerja Sama</label>
+        <textarea id="add-description" name="description" class="form-control" rows="2" placeholder="Detail fokus kerjasama kependidikan..."></textarea>
+      </div>
+
+      <!-- Kontak Utama -->
+      <div class="section-divider">Kontak Narahubung Utama (Primary Contact)</div>
+
+      <div class="form-group form-group--full">
+        <label for="add-contact-name">Nama Narahubung Utama</label>
+        <input type="text" id="add-contact-name" name="contact_name" class="form-control" placeholder="Nama lengkap perwakilan mitra" required />
+      </div>
+
+      <div class="form-group">
+        <label for="add-contact-position">Jabatan</label>
+        <input type="text" id="add-contact-position" name="contact_position" class="form-control" placeholder="Misal: HRD Manager / CEO" required />
+      </div>
+
+      <div class="form-group">
+        <label for="add-contact-phone">No HP / WhatsApp</label>
+        <input type="text" id="add-contact-phone" name="contact_phone" class="form-control" placeholder="08xxxxxxxxxx" />
+      </div>
+
+      <div class="form-group form-group--full" style="margin-bottom:0.5rem;">
+        <label for="add-contact-email">Email Kontak</label>
+        <input type="email" id="add-contact-email" name="contact_email" class="form-control" placeholder="kontak@perusahaan.com" />
+      </div>
+
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top: 1.75rem;">
+      <button type="button" id="btn-close-add" class="btn btn--ghost-muted" style="border:1px solid #cbd5e1;">Batal</button>
+      <button type="submit" class="btn btn--primary" style="background:#0f172a; color:white; border:none; border-radius:6px; padding:0.6rem 1.25rem; font-weight:600; font-size:0.875rem;">
+        Simpan Kemitraan
+      </button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ══════════════════════════════════
+     MODAL DIALOG: UBAH PROFIL MITRA
+     ══════════════════════════════════ -->
+<dialog id="edit-dialog">
+  <div class="dialog-header">
+    <i data-lucide="edit-3"></i>
+    <h3 style="margin:0; font-size: 1.25rem; color: #0f172a;">Ubah Profil Mitra</h3>
+  </div>
+  <p style="color:#64748b; margin-bottom:1.5rem; font-size:0.825rem; line-height:1.4;">Perbarui rincian data profil dan legalitas perusahaan mitra terdaftar.</p>
+  
+  <form id="form-edit-partner" method="POST">
+    <div class="form-row">
+      
+      <div class="form-group form-group--full">
+        <label for="edit-name">Nama Instansi / Perusahaan</label>
+        <input type="text" id="edit-name" name="name" class="form-control" required />
+      </div>
+
+      <div class="form-group">
+        <label for="edit-type">Tipe Kemitraan</label>
+        <select id="edit-type" name="type" class="form-control" required>
+          <option value="university">Perguruan Tinggi</option>
+          <option value="company">Swasta / Perusahaan</option>
+          <option value="government">Instansi Pemerintah</option>
+          <option value="ngo">NGO / LSM</option>
+          <option value="other">Lainnya</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="edit-status">Status Akun</label>
+        <select id="edit-status" name="status" class="form-control" required>
+          <option value="active">Aktif</option>
+          <option value="inactive">Non-Aktif</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="edit-email">Email Resmi</label>
+        <input type="email" id="edit-email" name="email" class="form-control" />
+      </div>
+
+      <div class="form-group">
+        <label for="edit-phone">Nomor Telepon</label>
+        <input type="text" id="edit-phone" name="phone" class="form-control" />
+      </div>
+
+      <div class="form-group form-group--full">
+        <label for="edit-address">Alamat Lengkap</label>
+        <textarea id="edit-address" name="address" class="form-control" rows="2"></textarea>
+      </div>
+
+      <div class="form-group form-group--full" style="margin-bottom:0.5rem;">
+        <label for="edit-description">Deskripsi Singkat Kerja Sama</label>
+        <textarea id="edit-description" name="description" class="form-control" rows="2"></textarea>
+      </div>
+
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top: 1.5rem;">
+      <button type="button" id="btn-close-edit" class="btn btn--ghost-muted" style="border:1px solid #cbd5e1;">Batal</button>
+      <button type="submit" class="btn btn--primary" style="background:#0f172a; color:white; border:none; border-radius:6px; padding:0.6rem 1.25rem; font-weight:600; font-size:0.875rem;">
+        Simpan Perubahan
+      </button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  // ── Lucide Icons ───────────────────────────────────────
+  lucide.createIcons();
+
+  // Set Current Date in Header
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  document.getElementById('topbar-date').innerText = new Date().toLocaleDateString('id-ID', options) + " — Kelola kemitraan";
+
+  // ── Modal Dialogue Forms Logic ─────────────────────────
+  const addDialog = document.getElementById('add-dialog');
+  const editDialog = document.getElementById('edit-dialog');
+  
+  const btnAddPartner = document.getElementById('btn-add-partner');
+  const btnCloseAdd = document.getElementById('btn-close-add');
+  const btnCloseEdit = document.getElementById('btn-close-edit');
+
+  const formEditPartner = document.getElementById('form-edit-partner');
+
+  // Trigger Add Dialog Modal
+  if (btnAddPartner) {
+    btnAddPartner.addEventListener('click', () => {
+      addDialog.showModal();
+    });
+  }
+
+  btnCloseAdd.addEventListener('click', () => {
+    addDialog.close();
+  });
+
+  // Trigger Edit Dialog Modal and populate fields
+  document.querySelectorAll('.btn-edit-partner').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const id = this.getAttribute('data-id');
+      const name = this.getAttribute('data-name');
+      const type = this.getAttribute('data-type');
+      const email = this.getAttribute('data-email');
+      const phone = this.getAttribute('data-phone');
+      const address = this.getAttribute('data-address');
+      const description = this.getAttribute('data-description');
+      const status = this.getAttribute('data-status');
+
+      // Set form post URL dynamically
+      formEditPartner.action = `/admin/partners/${id}/update`;
+
+      // Fill in inputs
+      document.getElementById('edit-name').value = name || '';
+      document.getElementById('edit-type').value = type || 'company';
+      document.getElementById('edit-status').value = status || 'active';
+      document.getElementById('edit-email').value = email === 'null' || !email ? '' : email;
+      document.getElementById('edit-phone').value = phone === 'null' || !phone ? '' : phone;
+      document.getElementById('edit-address').value = address === 'null' || !address ? '' : address;
+      document.getElementById('edit-description').value = description === 'null' || !description ? '' : description;
+
+      editDialog.showModal();
+    });
+  });
+
+  btnCloseEdit.addEventListener('click', () => {
+    editDialog.close();
+  });
+
+  // Resequence row metrics if HTMX deletes a partner dynamically
+  document.body.addEventListener('htmx:afterOnLoad', function(evt) {
+    if (evt.detail.requestConfig.method === 'DELETE' && evt.detail.requestConfig.path.includes('/admin/partners/')) {
+      alert('Data mitra berhasil dihapus secara permanen dari sistem!');
+      // Reload stats cards or refresh page counts if needed
+      window.location.reload();
+    }
+  });
+
+</script>
+</body>
+</html>

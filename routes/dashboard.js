@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const dashboardController = require("../controllers/dashboardController");
 const questionController = require("../controllers/questionController");
+const partnerController = require("../controllers/partnerController");
 const { isAdmin } = require("../middlewares/auth");
 
 // Admin Dashboard - UI view page
@@ -20,5 +21,20 @@ router.post("/questions", isAdmin, questionController.createQuestion);
 router.post("/questions/:id/update", isAdmin, questionController.updateQuestion);
 router.post("/questions/:id/delete", isAdmin, questionController.deleteQuestion);
 router.delete("/questions/:id", isAdmin, questionController.deleteQuestion);
+
+// Admin - Kelola Mitra
+router.get("/partners", isAdmin, partnerController.showPartnersPage);
+router.post("/partners", isAdmin, partnerController.createPartner);
+router.get("/partners/:id", isAdmin, partnerController.showPartnerDetailPage);
+router.post("/partners/:id/update", isAdmin, partnerController.updatePartner);
+router.post("/partners/:id/delete", isAdmin, partnerController.deletePartner);
+router.delete("/partners/:id", isAdmin, partnerController.deletePartner);
+
+// Admin - Kelola Kontak Mitra dari Halaman Detail
+router.post("/partners/:id/contacts", isAdmin, partnerController.addPartnerContact);
+router.delete("/partners/contacts/:contactId", isAdmin, partnerController.deletePartnerContact);
+
+// Admin - Cetak PDF Detail Mitra
+router.get("/partners/:id/export-pdf", isAdmin, partnerController.exportPartnerPDF);
 
 module.exports = router;
