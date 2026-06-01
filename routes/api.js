@@ -224,4 +224,32 @@ router.delete(
   }
 );
 
+// Import questionController
+const questionController = require("../controllers/questionController");
+
+/**
+ * GET /api/questions
+ * Fetch all survey questions.
+ */
+router.get("/questions", questionController.apiGetQuestions);
+
+/**
+ * POST /api/questions
+ * Create a new survey question programmatically via JSON API.
+ */
+router.post(
+  "/questions",
+  [
+    body("survey_id").isInt().withMessage("Survey ID must be an integer."),
+    body("question_text").notEmpty().withMessage("Question text is required."),
+    body("type")
+      .isIn(["essay", "multiple_choice", "rating"])
+      .withMessage("Type must be essay, multiple_choice, or rating."),
+    body("order_number").optional().isInt().withMessage("Order number must be an integer."),
+    body("options").optional().isArray().withMessage("Options must be an array of options with option_text and score.")
+  ],
+  validateRequest,
+  questionController.apiCreateQuestion
+);
+
 module.exports = router;
