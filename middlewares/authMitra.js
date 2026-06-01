@@ -11,7 +11,7 @@ function isMitra(req, res, next) {
   if (req.xhr || req.headers.accept.indexOf('json') > -1) {
     return res.status(401).json({ message: "Unauthorized: Partner session expired or invalid." });
   }
-  res.redirect("/portal/login");
+  res.redirect("/login-mitra");
 }
 
 module.exports = {

@@ -9,6 +9,7 @@ var MySQLStore = require('express-mysql-session')(session);
 var indexRouter = require('./routes/index');
 const dashboardRouter = require('./routes/dashboard');
 const apiRouter = require('./routes/api');
+const surveyMitraRouter = require('./routes/surveyMitra');
 const { notFoundHandler, errorHandler } = require('./middlewares/error');
 
 var app = express();
@@ -46,6 +47,7 @@ app.use(session({
 app.use('/', indexRouter);
 app.use('/admin', dashboardRouter);
 app.use('/api', apiRouter);
+app.use('/survey-mitra', surveyMitraRouter);
 
 // catch 404 and forward to error handler
 app.use(notFoundHandler);

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Rekap Jawaban Survei SUKAFTI — FTI Universitas Andalas." />
+  <title><%= title %></title>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <!-- Basecoat UI -->
+  <link rel="stylesheet" href="https://unpkg.com/basecoat-css@latest/dist/basecoat.min.css" />
+  <!-- Dashboard CSS -->
+  <link rel="stylesheet" href="/css/dashboard.css" />
+  
+  <style>
+    dialog::backdrop {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+    }
+    dialog {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      margin: 0;
+      padding: 2.5rem;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+      width: 650px;
+      max-width: 90%;
+      background: #ffffff;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    .dialog-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 0.75rem;
+    }
+    .dialog-header i {
+      color: #1e293b;
+    }
+    
+    .answer-detail-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin: 1.5rem 0;
+    }
+    
+    .answer-detail-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.25rem;
+    }
+    
+    .answer-detail-q {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #0f172a;
+      line-height: 1.4;
+      margin-bottom: 0.5rem;
+    }
+    
+    .answer-detail-ans {
+      font-size: 0.9rem;
+      color: #334155;
+      background: white;
+      border: 1px solid #cbd5e1;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      margin-top: 0.5rem;
+      line-height: 1.4;
+    }
+    
+    .answer-detail-score {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #cbd5e1;
+      color: #0f172a;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ══════════════════════════════════
+       SIDEBAR
+       ══════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="admin-avatar" style="width:38px; height:38px; border-radius:10px; font-size:1.1rem;">FTI</div>
+      <div>
+        <div class="sidebar__wordmark">SUKAFTI</div>
+        <div class="sidebar__tagline">Survey Kerjasama FTI</div>
+      </div>
+    </div>
+
+    <div class="nav-section-label">Menu Utama</div>
+    <ul class="nav-list">
+      <li class="nav-item"><a href="/admin/dashboard" id="nav-dashboard"><i data-lucide="layout-dashboard"></i>Dashboard</a></li>
+      <li class="nav-item"><a href="/admin/questions" id="nav-questions"><i data-lucide="help-circle"></i>Pertanyaan Survey</a></li>
+      <li class="nav-item"><a href="/admin/partners" id="nav-mitra"><i data-lucide="building-2"></i>Manajemen Mitra</a></li>
+      <li class="nav-item"><a href="#" id="nav-pin" style="opacity: 0.6; cursor: not-allowed;"><i data-lucide="key-round"></i>Kelola PIN Survey</a></li>
+      <li class="nav-item"><a href="/admin/recap-answers" class="active" id="nav-hasil"><i data-lucide="bar-chart-3"></i>Hasil Survey</a></li>
+    </ul>
+
+    <div class="nav-section-label" style="margin-top:.75rem;">Pengaturan</div>
+    <ul class="nav-list">
+      <li class="nav-item"><a href="#" id="nav-profile" style="opacity: 0.6; cursor: not-allowed;"><i data-lucide="user-cog"></i>Profil Admin</a></li>
+    </ul>
+
+    <div class="sidebar__footer">
+      <a href="/logout" id="btn-logout"><i data-lucide="log-out"></i>Keluar</a>
+    </div>
+  </aside>
+
+  <!-- ══════════════════════════════════
+       MAIN WRAPPER
+       ══════════════════════════════════ -->
+  <div class="main-wrapper">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar__left">
+        <h2>Rekap Jawaban Mitra</h2>
+        <p id="topbar-date">Kelola dan analisis hasil kuesioner evaluasi kerjasama</p>
+      </div>
+      <div class="topbar__search">
+        <i data-lucide="search"></i>
+        <input type="text" id="topbar-search" placeholder="Cari nama mitra atau survey (tekan enter)..." value="<%= search %>" autocomplete="off" />
+      </div>
+      <div class="topbar__right">
+        <div class="admin-chip" id="admin-chip">
+          <div class="admin-avatar">AF</div>
+          <span class="admin-chip__name"><%= user %></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT AREA -->
+    <main class="content-area" id="main-content">
+
+      <!-- ① DATA TABLE -->
+      <div class="table-card">
+        <div class="table-card__header">
+          <div>
+            <h2>Tabel Rekapitulasi Respon Kuesioner</h2>
+            <p>Jawaban mentah hasil pengisian survei dari seluruh mitra FTI</p>
+          </div>
+          <div>
+            <a href="/admin/recap-answers/export-excel" class="btn" style="background-color: #0f172a; color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600;">
+              <i data-lucide="file-spreadsheet"></i> Ekspor Excel (.xlsx)
+            </a>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Nama Perusahaan Mitra</th>
+                <th>Judul Survei Kemitraan</th>
+                <th style="text-align: center;">Total Skor</th>
+                <th>Tanggal Pengisian</th>
+                <th style="width: 120px; text-align: center;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (locals.responses && responses.length > 0) { %>
+                <% responses.forEach(function(r) { 
+                     const avatarStr = r.partner_name.substring(0, 2).toUpperCase();
+                     
+                     let formattedDate = "—";
+                     if (r.submitted_at) {
+                         const dateObj = new Date(r.submitted_at);
+                         formattedDate = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) + " " + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                     }
+                %>
+                <tr>
+                  <td>
+                    <div class="company-cell">
+                      <div class="company-avatar" style="background:#f1f5f9;color:#1e293b;"><%= avatarStr %></div>
+                      <div>
+                        <div class="company-name" style="font-weight: 600;"><%= r.partner_name %></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div style="font-weight: 500; color: #334155;"><%= r.survey_title %></div>
+                  </td>
+                  <td style="text-align: center; font-weight: 700; color: #0f172a;">
+                    <span style="background: #f1f5f9; padding: 0.25rem 0.6rem; border-radius: 6px;"><%= r.score_total %> Poin</span>
+                  </td>
+                  <td style="color: #475569;"><%= formattedDate %></td>
+                  <td style="text-align: center;">
+                    <button class="btn btn--ghost btn-view-detail" data-id="<%= r.id %>" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                      <i data-lucide="eye" style="width:14px; height:14px;"></i> Detail
+                    </button>
+                  </td>
+                </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="5" style="text-align:center; color:#94a3b8; padding:3rem;">
+                    Belum ada kuesioner yang diselesaikan oleh mitra.
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Footer -->
+        <% if (locals.totalPages && totalPages > 1) { %>
+          <div class="pagination-footer" style="display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-top:1px solid #e2e8f0;">
+            <div style="font-size:0.75rem; color:#64748b;">
+              Menampilkan halaman <strong><%= page %></strong> dari <strong><%= totalPages %></strong> (Total: <%= totalItems %> data)
+            </div>
+            <div class="pagination-buttons" style="display:flex; gap:6px;">
+              <% if (page > 1) { %>
+                <a href="?search=<%= search %>&page=<%= page - 1 %>" class="action-btn" title="Sebelumnya"><i data-lucide="chevron-left"></i></a>
+              <% } else { %>
+                <span class="action-btn" style="opacity: 0.4; cursor: not-allowed;"><i data-lucide="chevron-left"></i></span>
+              <% } %>
+              
+              <% for(let i = 1; i <= totalPages; i++) { %>
+                <a href="?search=<%= search %>&page=<%= i %>" class="action-btn" style="<%= page === i ? 'background:#1e293b; color:white;' : '' %>"><%= i %></a>
+              <% } %>
+              
+              <% if (page < totalPages) { %>
+                <a href="?search=<%= search %>&page=<%= page + 1 %>" class="action-btn" title="Selanjutnya"><i data-lucide="chevron-right"></i></a>
+              <% } else { %>
+                <span class="action-btn" style="opacity: 0.4; cursor: not-allowed;"><i data-lucide="chevron-right"></i></span>
+              <% } %>
+            </div>
+          </div>
+        <% } %>
+      </div><!-- /.table-card -->
+
+    </main><!-- /.content-area -->
+  </div><!-- /.main-wrapper -->
+</div><!-- /.app-shell -->
+
+<!-- ══════════════════════════════════
+     MODAL DIALOG: DETAIL JAWABAN
+     ══════════════════════════════════ -->
+<dialog id="detail-dialog">
+  <div class="dialog-header">
+    <i data-lucide="file-text"></i>
+    <h3 style="margin:0; font-size: 1.25rem; color: #0f172a;">Rincian Jawaban Kuesioner</h3>
+  </div>
+  
+  <div style="font-size:0.875rem; color:#64748b; margin-bottom:1.5rem; line-height:1.5; border-bottom:1px solid #f1f5f9; padding-bottom:1rem;">
+    <div style="margin-bottom:4px;"><strong>Mitra Perusahaan:</strong> <span id="lbl-detail-partner">...</span></div>
+    <div style="margin-bottom:4px;"><strong>Judul Kuesioner:</strong> <span id="lbl-detail-survey">...</span></div>
+    <div style="margin-bottom:4px;"><strong>Tanggal Kirim:</strong> <span id="lbl-detail-date">...</span></div>
+    <div><strong>Total Nilai Evaluasi:</strong> <span id="lbl-detail-score" style="font-weight:700; color:#0f172a;">...</span></div>
+  </div>
+  
+  <div id="detail-loading" style="text-align:center; padding:2rem; color:#64748b;">
+    <p>Memuat rincian data...</p>
+  </div>
+  
+  <div class="answer-detail-list" id="detail-answers-list" style="display:none;">
+    <!-- Dihasilkan secara dinamis lewat AJAX -->
+  </div>
+
+  <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top: 1.5rem;">
+    <button type="button" id="btn-close-detail" class="btn btn--ghost-muted" style="border:1px solid #cbd5e1;">Tutup</button>
+  </div>
+</dialog>
+
+<script>
+  // ── Lucide Icons ───────────────────────────────────────
+  lucide.createIcons();
+
+  // Set Current Date in Topbar
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  document.getElementById('topbar-date').innerText = new Date().toLocaleDateString('id-ID', options);
+
+  // Enter triggers Search
+  document.getElementById('topbar-search').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      window.location.href = '?search=' + encodeURIComponent(this.value);
+    }
+  });
+
+  // Modal Details Dialog Logic
+  const detailDialog = document.getElementById('detail-dialog');
+  const btnCloseDetail = document.getElementById('btn-close-detail');
+  
+  const lblPartner = document.getElementById('lbl-detail-partner');
+  const lblSurvey = document.getElementById('lbl-detail-survey');
+  const lblDate = document.getElementById('lbl-detail-date');
+  const lblScore = document.getElementById('lbl-detail-score');
+  
+  const loadingBlock = document.getElementById('detail-loading');
+  const answersList = document.getElementById('detail-answers-list');
+
+  document.querySelectorAll('.btn-view-detail').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const id = this.getAttribute('data-id');
+      
+      // Reset UI state
+      loadingBlock.style.display = 'block';
+      answersList.style.display = 'none';
+      answersList.innerHTML = '';
+      
+      // Open dialog
+      detailDialog.showModal();
+      
+      // Fetch answers JSON
+      fetch(`/admin/recap-answers/${id}/json`)
+        .then(res => res.json())
+        .then(res => {
+          if (res.success) {
+            const data = res.data;
+            
+            // Set metadata
+            lblPartner.innerText = data.response.partner_name;
+            lblSurvey.innerText = data.response.survey_title;
+            lblScore.innerText = data.response.score_total + ' Poin';
+            
+            const dateObj = new Date(data.response.submitted_at);
+            lblDate.innerText = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) + ' ' + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            
+            // Build answers DOM
+            data.answers.forEach((ans, index) => {
+              const item = document.createElement('div');
+              item.className = 'answer-detail-item';
+              
+              const qText = document.createElement('div');
+              qText.className = 'answer-detail-q';
+              qText.innerText = `${index + 1}. ${ans.question_text}`;
+              item.appendChild(qText);
+              
+              const answerTextVal = ans.question_type === 'essay' 
+                ? (ans.answer_text || '— Tidak diisi —')
+                : `${ans.option_text || '—'} (Skor: ${ans.score})`;
+              
+              const ansDiv = document.createElement('div');
+              ansDiv.className = 'answer-detail-ans';
+              ansDiv.innerText = answerTextVal;
+              item.appendChild(ansDiv);
+
+              if (ans.question_type !== 'essay') {
+                const scoreBadge = document.createElement('span');
+                scoreBadge.className = 'answer-detail-score';
+                scoreBadge.innerHTML = `<i data-lucide="check" style="width:12px; height:12px;"></i> Skor Bobot: ${ans.score}`;
+                item.appendChild(scoreBadge);
+              }
+              
+              answersList.appendChild(item);
+            });
+            
+            // Toggle view
+            loadingBlock.style.display = 'none';
+            answersList.style.display = 'flex';
+            lucide.createIcons();
+          } else {
+            loadingBlock.innerHTML = `<p style="color:#ef4444;">Gagal memuat detail: ${res.message}</p>`;
+          }
+        })
+        .catch(err => {
+          loadingBlock.innerHTML = '<p style="color:#ef4444;">Terjadi kesalahan sistem saat memuat data.</p>';
+        });
+    });
+  });
+
+  btnCloseDetail.addEventListener('click', () => {
+    detailDialog.close();
+  });
+</script>
+</body>
+</html>

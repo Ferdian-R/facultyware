@@ -281,4 +281,245 @@ router.post(
   partnerController.apiCreatePartner
 );
 
+/**
+ * GET /api/survey-responses
+ * Fetch all survey responses (along with details/answers).
+ */
+router.get("/survey-responses", async (req, res, next) => {
+  try {
+    const surveyId = parseInt(req.query.survey_id);
+    const partnerId = parseInt(req.query.partner_id);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    let whereClause = "1=1";
+    let params = [];
+
+    if (surveyId) {
+      whereClause += " AND sr.survey_id = ?";
+      params.push(surveyId);
+    }
+    if (partnerId) {
+      whereClause += " AND sr.partner_id = ?";
+      params.push(partnerId);
+    }
+
+    // Get count
+    const [countRows] = await db.query(
+      `SELECT COUNT(*) AS total FROM survey_responses sr WHERE ${whereClause}`,
+      params
+    );
+    const total = countRows[0].total;
+
+    // Get responses
+    const selectParams = [...params, limit, offset];
+    const [responses] = await db.query(
+      `SELECT sr.id, sr.survey_id, sr.partner_id, sr.survey_invitation_id, sr.status, sr.score_total, sr.submitted_at, sr.created_at,
+              s.title AS survey_title, p.name AS partner_name
+       FROM survey_responses sr
+       JOIN surveys s ON sr.survey_id = s.id
+       JOIN partners p ON sr.partner_id = p.id
+       WHERE ${whereClause}
+       ORDER BY sr.submitted_at DESC
+       LIMIT ? OFFSET ?`,
+      selectParams
+    );
+
+    if (responses.length === 0) {
+      return res.json({
+        success: true,
+        data: [],
+        pagination: { totalItems: total, totalPages: Math.ceil(total / limit), currentPage: page, limit }
+      });
+    }
+
+    // Get all answers for these responses
+    const responseIds = responses.map(r => r.id);
+    const [answers] = await db.query(
+      `SELECT sa.id, sa.survey_response_id, sa.survey_question_id, sa.survey_question_option_id, sa.answer_text, sa.score,
+              sq.question_text, sq.type AS question_type, sqo.option_text
+       FROM survey_answers sa
+       JOIN survey_questions sq ON sa.survey_question_id = sq.id
+       LEFT JOIN survey_question_options sqo ON sa.survey_question_option_id = sqo.id
+       WHERE sa.survey_response_id IN (?)
+       ORDER BY sa.survey_response_id DESC, sq.order_number ASC, sq.id ASC`,
+      [responseIds]
+    );
+
+    // Map answers to responses
+    const data = responses.map(r => {
+      return {
+        ...r,
+        answers: answers.filter(a => a.survey_response_id === r.id).map(a => ({
+          id: a.id,
+          survey_question_id: a.survey_question_id,
+          question_text: a.question_text,
+          question_type: a.question_type,
+          survey_question_option_id: a.survey_question_option_id,
+          option_text: a.option_text,
+          answer_text: a.answer_text,
+          score: a.score
+        }))
+      };
+    });
+
+    res.json({
+      success: true,
+      data,
+      pagination: {
+        totalItems: total,
+        totalPages: Math.ceil(total / limit),
+        currentPage: page,
+        limit
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/**
+ * POST /api/survey-responses
+ * Programmatic submission of a survey response.
+ */
+router.post(
+  "/survey-responses",
+  [
+    body("survey_id").isInt().withMessage("Survey ID must be an integer."),
+    body("partner_id").isInt().withMessage("Partner ID must be an integer."),
+    body("survey_invitation_id").optional().isInt().withMessage("Survey Invitation ID must be an integer."),
+    body("answers").isArray({ min: 1 }).withMessage("Answers must be a non-empty array."),
+    body("answers.*.survey_question_id").isInt().withMessage("Each answer must have a valid survey_question_id."),
+    body("answers.*.survey_question_option_id").optional({ checkFalsy: true }).isInt().withMessage("Option ID must be an integer."),
+    body("answers.*.answer_text").optional({ checkFalsy: true }).isString(),
+    body("answers.*.score").optional().isInt().withMessage("Score must be an integer.")
+  ],
+  validateRequest,
+  async (req, res, next) => {
+    const { survey_id, partner_id, survey_invitation_id, answers } = req.body;
+
+    // 1. Verify survey and partner exist
+    try {
+      const [[survey]] = await db.query("SELECT id FROM surveys WHERE id = ?", [survey_id]);
+      if (!survey) {
+        return res.status(404).json({ success: false, message: "Survey not found." });
+      }
+
+      const [[partner]] = await db.query("SELECT id FROM partners WHERE id = ?", [partner_id]);
+      if (!partner) {
+        return res.status(404).json({ success: false, message: "Partner not found." });
+      }
+    } catch (err) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+
+    const conn = await db.getConnection();
+    try {
+      await conn.beginTransaction();
+
+      // Compute total score and build inserts
+      let scoreTotal = 0;
+      const answersToInsert = [];
+
+      for (const ans of answers) {
+        const qId = ans.survey_question_id;
+
+        // Fetch question details
+        const [[q]] = await conn.query("SELECT type FROM survey_questions WHERE id = ? AND survey_id = ?", [qId, survey_id]);
+        if (!q) {
+          throw new Error(`Question ID ${qId} does not belong to survey ID ${survey_id}.`);
+        }
+
+        if (q.type === "essay") {
+          answersToInsert.push({
+            survey_question_id: qId,
+            survey_question_option_id: null,
+            answer_text: ans.answer_text || "",
+            score: 0
+          });
+        } else {
+          // multiple_choice or rating
+          const optionId = ans.survey_question_option_id;
+          if (!optionId) {
+            throw new Error(`survey_question_option_id is required for choice/rating question ID ${qId}.`);
+          }
+
+          const [[option]] = await conn.query(
+            "SELECT score FROM survey_question_options WHERE id = ? AND survey_question_id = ?",
+            [optionId, qId]
+          );
+
+          if (!option) {
+            throw new Error(`Option ID ${optionId} does not belong to question ID ${qId}.`);
+          }
+
+          const score = ans.score !== undefined ? parseInt(ans.score) : option.score;
+          scoreTotal += score;
+
+          answersToInsert.push({
+            survey_question_id: qId,
+            survey_question_option_id: optionId,
+            answer_text: null,
+            score
+          });
+        }
+      }
+
+      // 2. Insert response
+      const [responseResult] = await conn.query(
+        `INSERT INTO survey_responses (survey_id, partner_id, survey_invitation_id, status, score_total, submitted_at) 
+         VALUES (?, ?, ?, 'completed', ?, NOW())`,
+        [survey_id, partner_id, survey_invitation_id || null, scoreTotal]
+      );
+      const responseId = responseResult.insertId;
+
+      // 3. Insert individual answers
+      for (const ans of answersToInsert) {
+        await conn.query(
+          `INSERT INTO survey_answers (survey_response_id, survey_question_id, survey_question_option_id, answer_text, score) 
+           VALUES (?, ?, ?, ?, ?)`,
+          [responseId, ans.survey_question_id, ans.survey_question_option_id, ans.answer_text, ans.score]
+        );
+      }
+
+      // 4. Audit Log
+      const ipAddress = req.ip || req.connection.remoteAddress;
+      const userAgent = req.headers["user-agent"] || "";
+      await conn.query(
+        "INSERT INTO audit_logs (partner_id, activity, ip_address, user_agent) VALUES (?, 'SUBMIT_SURVEY_API', ?, ?)",
+        [partner_id, ipAddress, userAgent]
+      );
+
+      // 5. If survey_invitation_id was provided, mark it as used
+      if (survey_invitation_id) {
+        await conn.query(
+          "UPDATE survey_invitations SET is_used = 1, used_at = NOW() WHERE id = ?",
+          [survey_invitation_id]
+        );
+      }
+
+      await conn.commit();
+
+      res.status(201).json({
+        success: true,
+        message: "Survey response submitted successfully.",
+        data: {
+          response_id: responseId,
+          survey_id,
+          partner_id,
+          survey_invitation_id: survey_invitation_id || null,
+          score_total: scoreTotal,
+          status: "completed"
+        }
+      });
+    } catch (err) {
+      await conn.rollback();
+      res.status(400).json({ success: false, message: err.message });
+    } finally {
+      conn.release();
+    }
+  }
+);
+
 module.exports = router;

@@ -3,6 +3,7 @@ const router = express.Router();
 const dashboardController = require("../controllers/dashboardController");
 const questionController = require("../controllers/questionController");
 const partnerController = require("../controllers/partnerController");
+const recapController = require("../controllers/recapController");
 const { isAdmin } = require("../middlewares/auth");
 
 // Admin Dashboard - UI view page
@@ -36,5 +37,10 @@ router.delete("/partners/contacts/:contactId", isAdmin, partnerController.delete
 
 // Admin - Cetak PDF Detail Mitra
 router.get("/partners/:id/export-pdf", isAdmin, partnerController.exportPartnerPDF);
+
+// Admin - Rekap Jawaban Hasil Survey (Adinda)
+router.get("/recap-answers", isAdmin, recapController.showRecapPage);
+router.get("/recap-answers/export-excel", isAdmin, recapController.exportExcel);
+router.get("/recap-answers/:id/json", isAdmin, recapController.getResponseDetailJSON);
 
 module.exports = router;
