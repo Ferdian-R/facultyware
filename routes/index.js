@@ -12,6 +12,10 @@ router.get("/login", indexController.loginPage);
 
 router.post("/login", indexController.login);
 
+router.get("/login-mitra", indexController.loginPageMitra);
+
+router.post("/api/auth/mitra-login", indexController.loginMitra);
+
 router.get("/logout", indexController.logout);
 
 module.exports = router;

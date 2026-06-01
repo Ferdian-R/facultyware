@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Dashboard Admin SUKAFTI — Sistem Informasi Survey Kerja Sama FTI Universitas Andalas." />
+  <title><%= title %></title>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <!-- Basecoat UI -->
+  <link rel="stylesheet" href="https://unpkg.com/basecoat-css@latest/dist/basecoat.min.css" />
+  <!-- Dashboard CSS -->
+  <link rel="stylesheet" href="/css/dashboard.css" />
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ══════════════════════════════════
+       SIDEBAR
+       ══════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="admin-avatar" style="width:38px; height:38px; border-radius:10px; font-size:1.1rem;">FTI</div>
+      <div>
+        <div class="sidebar__wordmark">SUKAFTI</div>
+        <div class="sidebar__tagline">Survey Kerjasama FTI</div>
+      </div>
+    </div>
+
+    <div class="nav-section-label">Menu Utama</div>
+    <ul class="nav-list">
+      <li class="nav-item"><a href="/admin/dashboard" class="active" id="nav-dashboard"><i data-lucide="layout-dashboard"></i>Dashboard</a></li>
+      <li class="nav-item"><a href="#" id="nav-mitra" style="opacity: 0.6; cursor: not-allowed;"><i data-lucide="building-2"></i>Manajemen Mitra</a></li>
+      <li class="nav-item"><a href="#" id="nav-pin" style="opacity: 0.6; cursor: not-allowed;"><i data-lucide="key-round"></i>Kelola PIN Survey</a></li>
+      <li class="nav-item"><a href="#" id="nav-hasil" style="opacity: 0.6; cursor: not-allowed;"><i data-lucide="bar-chart-3"></i>Hasil Survey</a></li>
+    </ul>
+
+    <div class="nav-section-label" style="margin-top:.75rem;">Pengaturan</div>
+    <ul class="nav-list">
+      <li class="nav-item"><a href="#" id="nav-profile" style="opacity: 0.6; cursor: not-allowed;"><i data-lucide="user-cog"></i>Profil Admin</a></li>
+    </ul>
+
+    <div class="sidebar__footer">
+      <a href="/logout" id="btn-logout"><i data-lucide="log-out"></i>Keluar</a>
+    </div>
+  </aside>
+
+  <!-- ══════════════════════════════════
+       MAIN WRAPPER
+       ══════════════════════════════════ -->
+  <div class="main-wrapper">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar__left">
+        <h2>Dashboard Overview</h2>
+        <p id="topbar-date">Selamat datang kembali 👋</p>
+      </div>
+      <div class="topbar__search">
+        <i data-lucide="search"></i>
+        <input type="text" id="topbar-search" placeholder="Cari nama mitra (tekan enter)..." value="<%= search %>" autocomplete="off" />
+      </div>
+      <div class="topbar__right">
+        <button class="icon-btn" id="btn-notif" aria-label="Notifikasi">
+          <i data-lucide="bell"></i>
+        </button>
+        <div class="admin-chip" id="admin-chip" role="button" tabindex="0">
+          <div class="admin-avatar">AF</div>
+          <span class="admin-chip__name"><%= user %></span>
+          <i data-lucide="chevron-down"></i>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT AREA -->
+    <main class="content-area" id="main-content">
+
+      <!-- ① HERO BANNER -->
+      <div class="hero-banner">
+        <div class="hero-deco"></div>
+        <div class="hero-banner__text">
+          <h1>Selamat Datang, Admin FTI! 🚀</h1>
+          <p>Pantau aktivitas survey, kelola data mitra, dan generate PIN kerjasama industri dari satu tempat.</p>
+        </div>
+        <div class="hero-banner__badge">
+          <div class="big-num"><%= total_respons %></div>
+          <div class="big-label">Total Survey<br>Selesai</div>
+        </div>
+      </div>
+
+      <!-- ② STAT CARDS -->
+      <div class="stats-grid">
+
+        <!-- Card 1: Total Mitra -->
+        <div class="stat-card stat-card--a">
+          <div class="stat__icon icon-slate"><i data-lucide="building-2"></i></div>
+          <div style="flex:1;">
+            <div class="stat__label">Total Mitra</div>
+            <div class="stat__value" id="val-total-mitra"><%= total_mitra %></div>
+            <div class="stat__trend stat__trend--up">
+              <i data-lucide="trending-up" style="width:12px;height:12px;"></i>
+              Mitra Terdaftar
+            </div>
+            <div class="stat__bar-wrap">
+              <div class="stat__bar-label"><span>Target Capaian</span><span><%= total_mitra %> / 50</span></div>
+              <div class="stat__bar-track">
+                <div class="stat__bar-fill" style="width: <%= Math.min((total_mitra/50)*100, 100) %>%; background:linear-gradient(90deg,#1e293b,#64748b);"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: PIN Aktif -->
+        <div class="stat-card stat-card--a">
+          <div class="stat__icon icon-amber"><i data-lucide="key-round"></i></div>
+          <div style="flex:1;">
+            <div class="stat__label">PIN Aktif</div>
+            <div class="stat__value" id="val-pin-aktif"><%= total_pin_aktif %></div>
+            <div class="stat__sub">Siap digunakan mitra</div>
+            <div class="stat__bar-wrap">
+              <div class="stat__bar-label"><span>Rasio Aktif</span><span><%= total_pin_aktif %> / <%= total_pin_aktif + total_respons %></span></div>
+              <div class="stat__bar-track">
+                <% const ratio = (total_pin_aktif + total_respons) > 0 ? (total_pin_aktif / (total_pin_aktif + total_respons)) * 100 : 0; %>
+                <div class="stat__bar-fill" style="width: <%= ratio %>%; background:linear-gradient(90deg,#f59e0b,#fcd34d);"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Survey Selesai -->
+        <div class="stat-card stat-card--spark">
+          <div style="display:flex;align-items:flex-start;gap:1rem;">
+            <div class="stat__icon icon-emerald"><i data-lucide="check-circle-2"></i></div>
+            <div>
+              <div class="stat__label">Survey Selesai</div>
+              <div class="stat__value" id="val-survey-selesai"><%= total_respons %></div>
+              <div class="stat__trend stat__trend--up">
+                <i data-lucide="arrow-up-right" style="width:12px;height:12px;"></i>
+                Respon Masuk
+              </div>
+            </div>
+          </div>
+          <div class="stat__sparkline">
+            <svg viewBox="0 0 180 48" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="spkGrad" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stop-color="#10b981" stop-opacity=".25"/>
+                  <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,40 L20,35 L40,30 L60,32 L80,20 L100,15 L120,18 L140,10 L160,8 L180,4"
+                    fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M0,40 L20,35 L40,30 L60,32 L80,20 L100,15 L120,18 L140,10 L160,8 L180,4 L180,48 L0,48 Z"
+                    fill="url(#spkGrad)"/>
+            </svg>
+          </div>
+        </div>
+
+      </div><!-- /.stats-grid -->
+
+      <!-- ③ CHARTS ROW -->
+      <div class="charts-grid">
+
+        <!-- Bar Chart: Tren Survey per Bulan -->
+        <div class="chart-card">
+          <div class="chart-card__header">
+            <h3>Tren Survey per Bulan</h3>
+            <p>Jumlah kuesioner diselesaikan mitra — 6 bulan terakhir</p>
+          </div>
+          <div class="chart-wrap chart-wrap--bar">
+            <canvas id="chartSurveyBar"></canvas>
+          </div>
+        </div>
+
+        <!-- Donut Chart: Status PIN -->
+        <div class="chart-card">
+          <div class="chart-card__header">
+            <h3>Distribusi Status PIN</h3>
+            <p>Proporsi PIN aktif, terpakai, dan kadaluarsa</p>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div class="chart-wrap chart-wrap--donut" style="width:200px;">
+              <canvas id="chartPinDonut"></canvas>
+            </div>
+            <div class="donut-legend">
+              <div class="legend-item"><span class="legend-dot" style="background:#334155;"></span>Aktif (<span id="l-aktif">0</span>)</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#94a3b8;"></span>Terpakai (<span id="l-terpakai">0</span>)</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#e2e8f0;"></span>Kadaluarsa (<span id="l-kadaluarsa">0</span>)</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /.charts-grid -->
+
+      <!-- ④ DATA TABLE -->
+      <div class="table-card">
+        <div class="table-card__header">
+          <div>
+            <h2>Daftar PIN Survey &amp; Mitra</h2>
+            <p>Kelola token PIN kuesioner industri</p>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <a href="/admin/dashboard/export-pdf" class="btn" style="background-color: #0f172a; color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-size: 0.875rem; display: flex; align-items: center; gap: 0.5rem;">
+              <i data-lucide="printer"></i> Cetak Laporan PDF Dashboard
+            </a>
+            <button class="btn-generate" id="btn-generate-pin" type="button">
+              <i data-lucide="plus-circle"></i> Generate PIN Baru
+            </button>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Perusahaan Mitra</th>
+                <th>Kode PIN</th>
+                <th>Status</th>
+                <th>Dibuat Pada</th>
+                <th>Digunakan Pada</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (locals.perusahaan && perusahaan.length > 0) { %>
+                <% perusahaan.forEach(function(p) { 
+                     // Get initials for avatar
+                     const avatarStr = p.nama_perusahaan.substring(0, 2).toUpperCase();
+                     
+                     // Format Date
+                     let formattedDate = "—";
+                     if (p.created_at) {
+                         const dateObj = new Date(p.created_at);
+                         formattedDate = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+                     }
+
+                     let formattedUsedDate = "—";
+                     if (p.used_at) {
+                         const dateObj = new Date(p.used_at);
+                         formattedUsedDate = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' });
+                     }
+
+                     // Status Badge Logic
+                     let pillClass = '';
+                     let pinClass = '';
+                     let statusText = p.status_pin || 'active';
+                     
+                     if (statusText === 'used') {
+                         pillClass = 'pill--used';
+                         pinClass = 'pin-code--used';
+                         statusText = 'Terpakai';
+                     } else if (statusText === 'active') {
+                         pillClass = 'pill--active';
+                         statusText = 'Aktif';
+                     } else {
+                         pillClass = 'pill--pending';
+                         statusText = 'Expired';
+                     }
+                %>
+                <tr id="row-pin-<%= p.id %>">
+                  <td>
+                    <div class="company-cell">
+                      <div class="company-avatar" style="background:#f1f5f9;color:#1e293b;"><%= avatarStr %></div>
+                      <div>
+                        <div class="company-name"><%= p.nama_perusahaan %></div>
+                        <div class="company-id">#MITRA-<%= p.partner_id.toString().padStart(3, '0') %></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="pin-code <%= pinClass %>"><%= p.pin_code %></span></td>
+                  <td><span class="pill <%= pillClass %>" style="text-transform: capitalize;"><%= statusText %></span></td>
+                  <td><%= formattedDate %></td>
+                  <td><%= formattedUsedDate %></td>
+                  <td>
+                    <div class="action-group">
+                      <button class="action-btn btn-reset-pin" data-id="<%= p.id %>" data-used="<%= p.status_pin === 'used' ? 1 : 0 %>" title="Reset PIN Status"><i data-lucide="refresh-cw"></i></button>
+                      <button class="action-btn action-btn--del btn-delete-pin" data-id="<%= p.id %>" title="Hapus PIN"><i data-lucide="trash-2"></i></button>
+                    </div>
+                  </td>
+                </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="6" style="text-align:center; color:#94a3b8; padding:3rem;">Belum ada data PIN atau Perusahaan.</td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Footer -->
+        <% if (locals.totalPages && totalPages > 1) { %>
+          <div class="pagination-footer" style="display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-top:1px solid var(--dk-s100);">
+            <div style="font-size:0.75rem; color:var(--dk-s500);">
+              Menampilkan halaman <strong><%= page %></strong> dari <strong><%= totalPages %></strong> (Total: <%= totalItems %> data)
+            </div>
+            <div class="pagination-buttons" style="display:flex; gap:6px;">
+              <% if (page > 1) { %>
+                <a href="?search=<%= search %>&page=<%= page - 1 %>" class="action-btn" title="Sebelumnya"><i data-lucide="chevron-left"></i></a>
+              <% } else { %>
+                <span class="action-btn" style="opacity: 0.4; cursor: not-allowed;"><i data-lucide="chevron-left"></i></span>
+              <% } %>
+              
+              <% for(let i = 1; i <= totalPages; i++) { %>
+                <a href="?search=<%= search %>&page=<%= i %>" class="action-btn" style="<%= page === i ? 'background:var(--dk-s700); color:white;' : '' %>"><%= i %></a>
+              <% } %>
+              
+              <% if (page < totalPages) { %>
+                <a href="?search=<%= search %>&page=<%= page + 1 %>" class="action-btn" title="Selanjutnya"><i data-lucide="chevron-right"></i></a>
+              <% } else { %>
+                <span class="action-btn" style="opacity: 0.4; cursor: not-allowed;"><i data-lucide="chevron-right"></i></span>
+              <% } %>
+            </div>
+          </div>
+        <% } %>
+      </div><!-- /.table-card -->
+
+    </main><!-- /.content-area -->
+  </div><!-- /.main-wrapper -->
+</div><!-- /.app-shell -->
+
+<script>
+  // ── Lucide Icons ───────────────────────────────────────
+  lucide.createIcons();
+
+  // Set Current Date in Topbar
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  document.getElementById('topbar-date').innerText = new Date().toLocaleDateString('id-ID', options) + " — Selamat datang kembali 👋";
+
+  // Enter triggers Search
+  document.getElementById('topbar-search').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      window.location.href = '?search=' + encodeURIComponent(this.value);
+    }
+  });
+
+  // ── Animate progress bars ──────────────────────────────
+  window.addEventListener('load', () => {
+    document.querySelectorAll('.stat__bar-fill').forEach(bar => {
+      const w = bar.style.width;
+      bar.style.width = '0';
+      setTimeout(() => { bar.style.width = w; }, 300);
+    });
+  });
+
+  // ── Chart.js global defaults ───────────────────────────
+  Chart.defaults.font.family = "'Inter', sans-serif";
+  Chart.defaults.color = '#64748b';
+
+  // ── Bar Chart: Tren Survey per Bulan ──────────────────
+  const ctxBar = document.getElementById('chartSurveyBar').getContext('2d');
+  new Chart(ctxBar, {
+    type: 'bar',
+    data: {
+      labels: ['Des', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei'],
+      datasets: [{
+        label: 'Survey Selesai',
+        data: [3, 5, 4, 7, 6, <%= total_respons %>],
+        backgroundColor: 'rgba(30, 41, 59, 0.80)',
+        borderRadius: 6,
+        borderSkipped: false,
+      }, {
+        label: 'PIN Digenerate',
+        data: [4, 6, 5, 9, 8, <%= total_pin_aktif + total_respons %>],
+        backgroundColor: 'rgba(148, 163, 184, 0.40)',
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, font: { size: 12 } } },
+        tooltip: { mode: 'index', intersect: false }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 12 } } },
+        y: { grid: { color: '#f1f5f9' }, ticks: { stepSize: 2, font: { size: 12 } }, beginAtZero: true }
+      }
+    }
+  });
+
+  // ── Donut Chart: Status PIN ────────────────────────────
+  let pinDonutChart = null;
+
+  function renderDonutChart(active, used, expired) {
+    const ctxDonut = document.getElementById('chartPinDonut').getContext('2d');
+    if (pinDonutChart) pinDonutChart.destroy();
+    pinDonutChart = new Chart(ctxDonut, {
+      type: 'doughnut',
+      data: {
+        labels: ['Aktif', 'Terpakai', 'Kadaluarsa'],
+        datasets: [{
+          data: [active, used, expired],
+          backgroundColor: ['#334155', '#94a3b8', '#e2e8f0'],
+          borderWidth: 0,
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        cutout: '72%',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => ` ${ctx.label}: ${ctx.parsed} PIN`
+            }
+          }
+        }
+      }
+    });
+
+    // Update legend DOM
+    document.getElementById('l-aktif').innerText = active;
+    document.getElementById('l-terpakai').innerText = used;
+    document.getElementById('l-kadaluarsa').innerText = expired;
+  }
+
+  // ── Fetch Dashboard API Stats ───────────────────────────
+  function fetchDashboardStats() {
+    fetch('/api/dashboard-stats')
+      .then(res => res.json())
+      .then(data => {
+        if(data.success) {
+          const stats = data.data;
+          if(stats.pin_stats) {
+            renderDonutChart(stats.pin_stats.active || 0, stats.pin_stats.used || 0, stats.pin_stats.expired || 0);
+          } else {
+            renderDonutChart(0,0,0);
+          }
+        }
+      })
+      .catch(err => console.error('Error fetching dashboard stats:', err));
+  }
+
+  // Panggil saat page diload
+  fetchDashboardStats();
+
+  // ── Generate PIN placeholder ───────────────────────────
+  const pinDialogHTML = `
+    <style>
+      #pin-dialog::backdrop {
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(4px);
+      }
+      #pin-dialog {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        margin: 0;
+        padding: 2.5rem;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        min-width: 400px;
+        background: #ffffff;
+      }
+      .dialog-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+      }
+      .dialog-header i {
+        color: #10b981;
+      }
+    </style>
+    <dialog id="pin-dialog">
+      <div class="dialog-header">
+        <i data-lucide="key-round"></i>
+        <h3 style="margin:0; font-size: 1.25rem; color: #0f172a;">Generate PIN Baru</h3>
+      </div>
+      <p style="color:#64748b; margin-bottom:1.5rem; font-size:0.875rem; line-height:1.5;">Pilih mitra industri untuk membuat akses PIN baru. Satu PIN hanya berlaku untuk 1 kali pengisian survey.</p>
+      <form id="form-generate-pin">
+        <label style="display:block; font-size:0.875rem; font-weight:500; color:#334155; margin-bottom:0.5rem;">Pilih Mitra Industri</label>
+        <select name="partner_id" style="width:100%; padding:0.75rem; margin-bottom:1.25rem; border:1px solid #cbd5e1; border-radius:6px; background:#f8fafc; color:#0f172a; outline:none;" required>
+          <option value="" disabled selected>-- Silakan Pilih --</option>
+          <% if(locals.allPartners) { %>
+            <% allPartners.forEach(function(p) { %>
+              <option value="<%= p.id %>"><%= p.name %></option>
+            <% }) %>
+          <% } %>
+        </select>
+        <div id="pin-alert" style="color:#ef4444; font-size:0.875rem; margin-bottom:1rem; min-height: 1.25rem;"></div>
+        <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
+          <button type="button" id="btn-close-dialog" class="btn btn--ghost-muted" style="border:1px solid #cbd5e1;">Batal</button>
+          <button type="submit" class="btn btn--primary" style="background:#0f172a; color:white; border:none; border-radius:6px; padding:0.5rem 1rem;">
+            Generate PIN
+          </button>
+        </div>
+      </form>
+    </dialog>
+  `;
+  document.body.insertAdjacentHTML('beforeend', pinDialogHTML);
+  lucide.createIcons();
+
+  const pinDialog = document.getElementById('pin-dialog');
+  const btnCloseDialog = document.getElementById('btn-close-dialog');
+  const formGeneratePin = document.getElementById('form-generate-pin');
+  const pinAlert = document.getElementById('pin-alert');
+
+  document.getElementById('btn-generate-pin').addEventListener('click', () => {
+    pinDialog.showModal();
+    pinAlert.innerText = '';
+  });
+
+  btnCloseDialog.addEventListener('click', () => {
+    pinDialog.close();
+  });
+
+  formGeneratePin.addEventListener('submit', (e) => {
+    e.preventDefault();
+    pinAlert.innerText = '';
+    const partnerId = formGeneratePin.querySelector('select[name="partner_id"]').value;
+
+    fetch('/admin/generate-pin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ partner_id: partnerId })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if(data.success) {
+        alert('PIN Berhasil dibuat: ' + data.pin_code);
+        pinDialog.close();
+        window.location.reload(); 
+      } else {
+        pinAlert.innerText = data.message || 'Gagal generate PIN';
+      }
+    })
+    .catch(err => {
+      pinAlert.innerText = 'Terjadi kesalahan sistem.';
+    });
+  });
+
+  // REST API: Reset PIN Status Action
+  document.querySelectorAll('.btn-reset-pin').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const id = this.getAttribute('data-id');
+      const currentlyUsed = parseInt(this.getAttribute('data-used'));
+      const nextUsed = currentlyUsed === 1 ? 0 : 1; // Toggle status
+      
+      if (confirm(`Apakah Anda yakin ingin me-reset status PIN ini menjadi ${nextUsed === 1 ? 'Terpakai' : 'Aktif'}?`)) {
+        fetch(`/api/pin-logs/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ is_used: nextUsed })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            alert('Status PIN berhasil diperbarui!');
+            window.location.reload();
+          } else {
+            alert('Gagal memperbarui PIN: ' + data.message);
+          }
+        })
+        .catch(err => alert('Gagal memproses request.'));
+      }
+    });
+  });
+
+  // REST API: Delete PIN Action
+  document.querySelectorAll('.btn-delete-pin').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const id = this.getAttribute('data-id');
+      if (confirm('Apakah Anda yakin ingin menghapus PIN ini secara permanen dari database?')) {
+        fetch(`/api/pin-logs/${id}`, {
+          method: 'DELETE'
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            alert('PIN berhasil dihapus!');
+            document.getElementById(`row-pin-${id}`).remove();
+            fetchDashboardStats(); // refresh donut counts
+          } else {
+            alert('Gagal menghapus PIN: ' + data.message);
+          }
+        })
+        .catch(err => alert('Gagal memproses request.'));
+      }
+    });
+  });
+
+</script>
+</body>
+</html>

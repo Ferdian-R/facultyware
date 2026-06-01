@@ -1,33 +1,46 @@
 const bcrypt = require("bcryptjs");
-const db = require("../lib/db");
+const db = require("../config/db"); // Use the config/db.js file we created
 
 const index = (req, res) => {
-  res.render("index", { title: "Express" });
+  res.redirect("/login");
 };
 
 const home = (req, res) => {
   res.render("home", { title: "Home", user: req.session.username });
 };
 
+// Admin Login Page View
 const loginPage = (req, res) => {
   if (req.session.userId) {
-    return res.redirect("/home");
+    return res.redirect("/admin/dashboard");
   }
-  res.render("login", { title: "Login", error: null });
+  res.render("login", { title: "Login | SUKAFTI", activeTab: "admin", error: null });
 };
 
+// Mitra Login Page View
+const loginPageMitra = (req, res) => {
+  if (req.session.partnerId) {
+    return res.redirect("/survey-mitra"); // Redirect to client survey page
+  }
+  res.render("login", { title: "Login Mitra | SUKAFTI", activeTab: "mitra", error: null });
+};
+
+// Process Admin Authentication
 const login = async (req, res, next) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
+  const identifier = email || req.body.username; // Support both username or email inputs
 
   try {
-    const [rows] = await db.query("SELECT * FROM users WHERE username = ?", [
-      username,
-    ]);
+    const [rows] = await db.query(
+      "SELECT * FROM users WHERE username = ? OR email = ?",
+      [identifier, identifier]
+    );
 
     if (rows.length === 0) {
       return res.render("login", {
-        title: "Login",
-        error: "Invalid username or password",
+        title: "Login | SUKAFTI",
+        activeTab: "admin",
+        error: "Email/Username atau password salah.",
       });
     }
 
@@ -36,27 +49,103 @@ const login = async (req, res, next) => {
 
     if (!isMatch) {
       return res.render("login", {
-        title: "Login",
-        error: "Invalid username or password",
+        title: "Login | SUKAFTI",
+        activeTab: "admin",
+        error: "Email/Username atau password salah.",
       });
     }
 
     // Set session
     req.session.userId = user.id;
     req.session.username = user.username;
+    req.session.role = "admin";
 
-    res.redirect("/home");
+    res.redirect("/admin/dashboard");
   } catch (err) {
     next(err);
   }
 };
 
+// Process Mitra PIN Authentication & Burn Logic
+const loginMitra = async (req, res, next) => {
+  const { pin } = req.body;
+
+  if (!pin) {
+    return res.render("login", {
+      title: "Login Mitra | SUKAFTI",
+      activeTab: "mitra",
+      error: "PIN wajib diisi.",
+    });
+  }
+
+  try {
+    // 1. Fetch PIN details
+    const [results] = await db.query(
+      `SELECT si.id AS invitation_id, si.pin, si.is_used, si.used_at,
+              p.id AS partner_id, p.name AS nama_perusahaan
+       FROM survey_invitations si
+       JOIN partners p ON si.partner_id = p.id
+       WHERE si.pin = ?`,
+      [pin]
+    );
+
+    if (results.length === 0) {
+      return res.render("login", {
+        title: "Login Mitra | SUKAFTI",
+        activeTab: "mitra",
+        error: "PIN tidak valid. Hubungi administrator FTI.",
+      });
+    }
+
+    const pinData = results[0];
+
+    // 2. Validate PIN status (single-use check)
+    if (pinData.is_used === 1) {
+      return res.render("login", {
+        title: "Login Mitra | SUKAFTI",
+        activeTab: "mitra",
+        error: "PIN sudah digunakan. Satu PIN hanya berlaku untuk satu kali pengisian.",
+      });
+    }
+
+    // 3. Burn PIN (set is_used = 1 and used_at = NOW())
+    await db.query(
+      "UPDATE survey_invitations SET is_used = 1, used_at = NOW() WHERE id = ?",
+      [pinData.invitation_id]
+    );
+
+    // 4. Write to Audit Trail logs
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    const userAgent = req.headers["user-agent"] || "";
+    await db.query(
+      "INSERT INTO audit_logs (partner_id, activity, ip_address, user_agent) VALUES (?, 'LOGIN', ?, ?)",
+      [pinData.partner_id, ipAddress, userAgent]
+    );
+
+    // 5. Establish session
+    req.session.partnerId = pinData.partner_id;
+    req.session.partnerName = pinData.nama_perusahaan;
+    req.session.invitationId = pinData.invitation_id;
+    req.session.role = "mitra";
+
+    res.redirect("/survey-mitra");
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Logout Handler
 const logout = (req, res, next) => {
+  const wasMitra = req.session && req.session.partnerId;
   req.session.destroy((err) => {
     if (err) {
       return next(err);
     }
-    res.redirect("/login");
+    if (wasMitra) {
+      res.redirect("/login-mitra");
+    } else {
+      res.redirect("/login");
+    }
   });
 };
 
@@ -64,6 +153,8 @@ module.exports = {
   index,
   home,
   loginPage,
+  loginPageMitra,
   login,
+  loginMitra,
   logout
 };

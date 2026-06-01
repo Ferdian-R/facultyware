@@ -1,237 +1,346 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <script>
-      (() => {
-        try {
-          const stored = localStorage.getItem("themeMode");
-          if (
-            stored
-              ? stored === "dark"
-              : matchMedia("(prefers-color-scheme: dark)").matches
-          ) {
-            document.documentElement.classList.add("dark");
-          }
-        } catch (_) {}
+<!DOCTYPE html>
+<html lang="id">
 
-        const apply = (dark) => {
-          document.documentElement.classList.toggle("dark", dark);
-          try {
-            localStorage.setItem("themeMode", dark ? "dark" : "light");
-          } catch (_) {}
-        };
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Login ke SUKAFTI — Sistem Informasi Survey Kerja Sama FTI Universitas Andalas." />
+  <title><%= title %></title>
 
-        document.addEventListener("basecoat:theme", (event) => {
-          const mode = event.detail?.mode;
-          apply(
-            mode === "dark"
-              ? true
-              : mode === "light"
-                ? false
-                : !document.documentElement.classList.contains("dark"),
-          );
-        });
-      })();
-    </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-    <script>
-      (function () {
-        try {
-          const storedTheme = localStorage.getItem("themeVariant");
-          if (storedTheme)
-            document.documentElement.classList.add(`theme-${storedTheme}`);
-        } catch (event) {
-          console.error(
-            "Could not apply theme variant from localStorage",
-            event,
-          );
-        }
-      })();
-    </script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/basecoat-css@latest/dist/basecoat.min.css" />
+  <link rel="stylesheet" href="/css/login.css" />
+</head>
 
-    <meta charset="utf-8" />
-    <meta http-equiv="Content-Language" content="en" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+<body>
 
-    <title>Basecoat</title>
-    <meta
-      name="description"
-      content="A components library built with Tailwind CSS that works with any web stack."
-    />
-    <meta name="title" content="Basecoat" />
-    <meta
-      name="keywords"
-      content="components,component library,component system,UI,UI kit,shadcn,shadcn/ui,Tailwind CSS,Tailwind,CSS,HTML,Jinja,Nunjucks,JS,JavaScript,vanilla JS,vanilla JavaScript"
-    />
+  <div class="split-layout">
 
-    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="/assets/apple-touch-icon.png"
-    />
+    <aside class="panel-left" aria-hidden="true">
 
-    <link rel="stylesheet" href="/assets/styles.css" />
-
-    <script src="/assets/js/basecoat.js?v=0.3.11" defer></script>
-    <script src="/assets/js/command.js?v=0.3.11" defer></script>
-    <script src="/assets/js/dropdown-menu.js?v=0.3.11" defer></script>
-    <script src="/assets/js/popover.js?v=0.3.11" defer></script>
-    <script src="/assets/js/select.js?v=0.3.11" defer></script>
-    <script src="/assets/js/sidebar.js?v=0.3.11" defer></script>
-    <script src="/assets/js/tabs.js?v=0.3.11" defer></script>
-    <script src="/assets/js/toast.js?v=0.3.11" defer></script>
-
-    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/django.min.js"></script>
-    <script>
-      const highlight = () => {
-        if (!window.hljs) return;
-        document
-          .querySelectorAll(
-            "pre code:not([data-highlighted]), code.highlight:not([data-highlighted])",
-          )
-          .forEach((el) => hljs.highlightElement(el));
-      };
-
-      if (!window._hljsInit) {
-        window._hljsInit = true;
-        document.addEventListener("DOMContentLoaded", highlight);
-        document.addEventListener("htmx:afterSwap", highlight);
-      }
-    </script>
-    <script>
-      document.addEventListener("htmx:historyRestore", () => {
-        if (window.basecoat) window.basecoat.initAll();
-      });
-    </script>
-  </head>
-  <body
-    class="bg-background *:data-[slot=card]:has-[[data-slot=chart]]:shadow-none"
-  >
-    <div
-      class="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-10"
-    >
-      <div class="w-full max-w-sm md:max-w-4xl">
-        <div class="flex flex-col gap-6">
-          <div
-            data-slot="card"
-            class="flex flex-col gap-6 rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden p-0"
-          >
-            <div data-slot="card-content" class="grid p-0 md:grid-cols-2">
-              <form class="p-6 md:p-8" action="/login" method="POST">
-                <div
-                  data-slot="field-group"
-                  class="group/field-group @container/field-group flex w-full flex-col gap-7 data-[slot=checkbox-group]:gap-3 [&amp;&gt;[data-slot=field-group]]:gap-4"
-                >
-                  <div class="flex flex-col items-center gap-2 text-center">
-                    <h1 class="text-2xl font-bold">Welcome back</h1>
-                    <p class="text-balance text-muted-foreground">
-                      Login to your account
-                    </p>
-                  </div>
-                  
-                  <% if (error) { %>
-                    <div class="bg-destructive/15 text-destructive text-sm p-3 rounded-md border border-destructive/20 text-center">
-                      <%= error %>
-                    </div>
-                  <% } %>
-
-                  <div
-                    role="group"
-                    data-slot="field"
-                    data-orientation="vertical"
-                    class="group/field flex w-full gap-3 data-[invalid=true]:text-destructive flex-col [&amp;&gt;*]:w-full [&amp;&gt;.sr-only]:w-auto"
-                  >
-                    <label
-                      data-slot="field-label"
-                      class="items-center text-sm font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50 has-[&gt;[data-slot=field]]:w-full has-[&gt;[data-slot=field]]:flex-col has-[&gt;[data-slot=field]]:rounded-md has-[&gt;[data-slot=field]]:border [&amp;&gt;*]:data-[slot=field]:p-4 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5 dark:has-data-[state=checked]:bg-primary/10"
-                      for="username"
-                      >Username</label
-                    ><input
-                      type="text"
-                      name="username"
-                      data-slot="input"
-                      class="h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none selection:bg-primary selection:text-primary-foreground file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:bg-input/30 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40"
-                      id="username"
-                      placeholder="admin"
-                      required=""
-                    />
-                  </div>
-                  <div
-                    role="group"
-                    data-slot="field"
-                    data-orientation="vertical"
-                    class="group/field flex w-full gap-3 data-[invalid=true]:text-destructive flex-col [&amp;&gt;*]:w-full [&amp;&gt;.sr-only]:w-auto"
-                  >
-                    <div class="flex items-center">
-                      <label
-                        data-slot="field-label"
-                        class="items-center text-sm font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50 has-[&gt;[data-slot=field]]:w-full has-[&gt;[data-slot=field]]:flex-col has-[&gt;[data-slot=field]]:rounded-md has-[&gt;[data-slot=field]]:border [&amp;&gt;*]:data-[slot=field]:p-4 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5 dark:has-data-[state=checked]:bg-primary/10"
-                        for="password"
-                        >Password</label
-                      ><a
-                        href="#"
-                        class="ml-auto text-sm underline-offset-2 hover:underline"
-                        >Forgot your password?</a
-                      >
-                    </div>
-                    <input
-                      type="password"
-                      name="password"
-                      data-slot="input"
-                      class="h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none selection:bg-primary selection:text-primary-foreground file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:bg-input/30 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40"
-                      id="password"
-                      required=""
-                    />
-                  </div>
-                  <div
-                    role="group"
-                    data-slot="field"
-                    data-orientation="vertical"
-                    class="group/field flex w-full gap-3 data-[invalid=true]:text-destructive flex-col [&amp;&gt;*]:w-full [&amp;&gt;.sr-only]:w-auto"
-                  >
-                    <button
-                      data-slot="button"
-                      data-variant="default"
-                      data-size="default"
-                      class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[&gt;svg]:px-3"
-                      type="submit"
-                    >
-                      Login
-                    </button>
-                  </div>
-
-                  <p
-                    data-slot="field-description"
-                    class="text-sm leading-normal font-normal text-muted-foreground group-has-[[data-orientation=horizontal]]/field:text-balance last:mt-0 nth-last-2:-mt-1 [[data-variant=legend]+&amp;]:-mt-1.5 [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary text-center"
-                  >
-                    Don't have an account? <a href="#">Sign up</a>
-                  </p>
-                </div>
-              </form>
-              <div class="relative hidden bg-muted md:block">
-                <img
-                  src="/assets/images/placeholder.svg"
-                  alt="Image"
-                  class="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-                />
-              </div>
-            </div>
-          </div>
-          <p
-            data-slot="field-description"
-            class="text-sm leading-normal font-normal text-muted-foreground group-has-[[data-orientation=horizontal]]/field:text-balance last:mt-0 nth-last-2:-mt-1 [[data-variant=legend]+&amp;]:-mt-1.5 [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary px-6 text-center"
-          >
-            By clicking continue, you agree to our
-            <a href="#">Terms of Service</a>
-            <!-- -->and <a href="#">Privacy Policy</a>.
-          </p>
+      <div class="panel-left__logo">
+        <div class="admin-avatar" style="width:40px; height:40px; border-radius:10px; font-size:1.1rem; border:2px solid rgba(255,255,255,0.25);">FTI</div>
+        <div class="logo-text">
+          <span class="logo-wordmark">SUKAFTI</span>
+          <span class="logo-tagline">Survey Kerjasama FTI</span>
         </div>
       </div>
-    </div>
-    <div id="toaster" class="toaster"></div>
-  </body>
+
+      <div class="carousel" id="left-carousel" aria-label="Fitur SUKAFTI">
+
+        <% if (activeTab==='admin') { %>
+          <!-- ================= CAROUSEL ADMIN ================= -->
+          <div class="carousel__slide carousel__slide--active" data-index="0">
+            <div class="panel-left__illus">
+              <img src="/image/survey_illustration.png" alt="Ilustrasi Survey" class="illus-img" />
+            </div>
+            <div class="panel-left__copy">
+              <h2 class="panel-left__tagline">Kelola Survey Kerja Sama<br />Mitra Industri FTI</h2>
+              <p class="panel-left__desc">
+                Platform digital untuk mengelola data kerjasama dan survei mitra industri
+                Fakultas Teknologi Informasi, Universitas Andalas.
+              </p>
+            </div>
+          </div>
+
+          <div class="carousel__slide" data-index="1">
+            <div class="panel-left__illus">
+              <img src="/image/survey_slide2.png" alt="Ilustrasi Analitik Data" class="illus-img" />
+            </div>
+            <div class="panel-left__copy">
+              <h2 class="panel-left__tagline">Analitik Data<br />Berbasis Digital</h2>
+              <p class="panel-left__desc">
+                Visualisasi hasil survey secara real-time dengan laporan
+                yang mudah dibaca dan diunduh.
+              </p>
+            </div>
+          </div>
+
+          <div class="carousel__slide" data-index="2">
+            <div class="panel-left__illus">
+              <img src="/image/survey_slide3.png" alt="Ilustrasi Kerjasama" class="illus-img" />
+            </div>
+            <div class="panel-left__copy">
+              <h2 class="panel-left__tagline">Jalin Kerja Sama<br />yang Berkelanjutan</h2>
+              <p class="panel-left__desc">
+                Pantau perkembangan kemitraan dan rekam seluruh riwayat
+                kerja sama FTI Universitas Andalas.
+              </p>
+            </div>
+          </div>
+        <% } else { %>
+            <!-- ================= CAROUSEL MITRA ================= -->
+            <div class="carousel__slide carousel__slide--active" data-index="0">
+              <div class="panel-left__illus">
+                <img src="/image/survey_illustration.png" alt="Ilustrasi Mitra" class="illus-img" />
+              </div>
+              <div class="panel-left__copy">
+                <h2 class="panel-left__tagline">Selamat Datang,<br />Mitra Industri FTI</h2>
+                <p class="panel-left__desc">
+                  Partisipasi Anda sangat berarti untuk meningkatkan kualitas lulusan dan layanan Fakultas Teknologi
+                  Informasi Universitas Andalas.
+                </p>
+              </div>
+            </div>
+
+            <div class="carousel__slide" data-index="1">
+              <div class="panel-left__illus">
+                <img src="/image/survey_slide2.png" alt="Sinergi Akademik" class="illus-img" />
+              </div>
+              <div class="panel-left__copy">
+                <h2 class="panel-left__tagline">Sinergi Akademik<br />&amp; Industri</h2>
+                <p class="panel-left__desc">
+                  Masukan Anda membantu kami menyelaraskan kurikulum dengan kebutuhan industri saat ini dan di masa
+                  depan.
+                </p>
+              </div>
+            </div>
+
+            <div class="carousel__slide" data-index="2">
+              <div class="panel-left__illus">
+                <img src="/image/survey_slide3.png" alt="Terima Kasih" class="illus-img" />
+              </div>
+              <div class="panel-left__copy">
+                <h2 class="panel-left__tagline">Terima Kasih Atas<br />Kerjasama Anda</h2>
+                <p class="panel-left__desc">
+                  Kami sangat mengapresiasi waktu dan kontribusi berharga Anda dalam mengisi survey ini.
+                </p>
+              </div>
+            </div>
+        <% } %>
+
+      </div><!-- /.carousel -->
+
+      <div class="panel-left__dots" role="tablist" aria-label="Slide">
+        <button class="dot dot--active" data-slide="0" onclick="goToSlide(0)" aria-label="Slide 1"
+          aria-selected="true"></button>
+        <button class="dot" data-slide="1" onclick="goToSlide(1)" aria-label="Slide 2" aria-selected="false"></button>
+        <button class="dot" data-slide="2" onclick="goToSlide(2)" aria-label="Slide 3" aria-selected="false"></button>
+      </div>
+
+      <div class="deco deco--tl" aria-hidden="true"></div>
+      <div class="deco deco--br" aria-hidden="true"></div>
+    </aside>
+
+    <main class="panel-right" role="main">
+      <div class="form-container">
+
+        <div class="form-header">
+          <h1 class="form-title">Masuk ke Sistem</h1>
+          <p class="form-subtitle">
+            <% if (activeTab==='admin') { %>
+              Login sebagai Administrator SUKAFTI
+            <% } else { %>
+              Login sebagai Mitra Industri FTI
+            <% } %>
+          </p>
+        </div>
+
+        <% if (activeTab==='admin') { %>
+          <!-- ── PANEL ADMIN ──────────────────── -->
+          <section id="panel-admin" class="tab-panel">
+
+            <% if (locals.error && error) { %>
+              <div class="alert-error" role="alert">
+                <i data-lucide="alert-circle" class="alert-icon"></i>
+                <span><%= error %></span>
+              </div>
+            <% } %>
+
+            <form action="/login" method="POST" class="login-form" novalidate>
+              <div class="field">
+                <label for="admin-email" class="field__label">Email / Username</label>
+                <div class="field__wrap">
+                  <i data-lucide="mail" class="field__icon"></i>
+                  <input type="text" id="admin-email" name="email" class="field__input"
+                    placeholder="admin atau admin@sukafti.com" required />
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="admin-password" class="field__label">Password</label>
+                <div class="field__wrap">
+                  <i data-lucide="lock" class="field__icon"></i>
+                  <input type="password" id="admin-password" name="password" class="field__input"
+                    placeholder="Masukkan password" autocomplete="current-password" required />
+                  <button type="button" class="field__eye" onclick="togglePw('admin-password', this)"
+                    aria-label="Tampilkan password">
+                    <i data-lucide="eye"></i>
+                  </button>
+                </div>
+              </div>
+
+              <button type="submit" id="btn-admin-login" class="btn btn--primary">
+                <i data-lucide="log-in" class="btn__icon"></i>
+                Masuk sebagai Admin
+              </button>
+            </form>
+
+            <div class="divider"><span>atau</span></div>
+
+            <div class="alt-action">
+              <span class="alt-action__text">Bukan Admin?</span>
+              <a href="/login-mitra" class="btn btn--ghost-muted">
+                <i data-lucide="building-2" class="btn__icon"></i>
+                Masuk sebagai Mitra
+              </a>
+            </div>
+          </section>
+        <% } else { %>
+          <!-- ── PANEL MITRA ──────────────────── -->
+          <section id="panel-mitra" class="tab-panel">
+
+            <% if (locals.error && error) { %>
+              <div class="alert-error" role="alert">
+                <i data-lucide="alert-circle" class="alert-icon"></i>
+                <span><%= error %></span>
+              </div>
+            <% } %>
+
+            <p class="mitra-desc">
+              Masukkan PIN perusahaan Anda untuk mengakses survey kerjasama.
+            </p>
+
+            <form action="/api/auth/mitra-login" method="POST" class="login-form" novalidate>
+
+              <div class="field" style="align-items: center; margin-bottom: 1rem;">
+                <label class="field__label field__label--center">PIN Perusahaan</label>
+                <div class="pin-box-container">
+                  <input type="hidden" name="pin" id="mitra-pin-hidden" />
+                  <input type="text" class="pin-box" maxlength="1" autocomplete="off" required />
+                  <input type="text" class="pin-box" maxlength="1" autocomplete="off" />
+                  <input type="text" class="pin-box" maxlength="1" autocomplete="off" />
+                  <input type="text" class="pin-box" maxlength="1" autocomplete="off" />
+                  <input type="text" class="pin-box" maxlength="1" autocomplete="off" />
+                  <input type="text" class="pin-box" maxlength="1" autocomplete="off" />
+                </div>
+                <p class="field__hint" style="text-align: center; margin-top: 0.75rem;">PIN (6 Karakter)
+                  diberikan oleh administrator SUKAFTI kepada perusahaan Anda. 
+                  PIN hanya dapat digunakan satu kali untuk pengisian survey.</p>
+              </div>
+
+              <button type="submit" id="btn-mitra-login" class="btn btn--secondary" style="margin-top: 0.5rem;">
+                <i data-lucide="arrow-right-circle" class="btn__icon"></i>
+                Masuk ke Sistem
+              </button>
+            </form>
+
+            <div class="divider"><span>atau</span></div>
+
+            <div class="alt-action">
+              <span class="alt-action__text">Bukan Mitra?</span>
+              <a href="/login" class="btn btn--ghost-muted">
+                <i data-lucide="shield-check" class="btn__icon"></i>
+                Masuk sebagai Admin
+              </a>
+            </div>
+          </section>
+        <% } %>
+
+        <p class="form-footer">
+          &copy; <%= new Date().getFullYear() %> SUKAFTI &mdash; FTI Universitas Andalas
+        </p>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    function togglePw(id, btn) {
+      const inp = document.getElementById(id);
+      if (!inp) return;
+      const ico = btn.querySelector('i[data-lucide]');
+      const hidden = inp.type === 'password';
+      inp.type = hidden ? 'text' : 'password';
+      ico.setAttribute('data-lucide', hidden ? 'eye-off' : 'eye');
+      lucide.createIcons();
+    }
+
+    // OTP PIN Logic
+    const pinBoxes = document.querySelectorAll('.pin-box');
+    const hiddenPinInput = document.getElementById('mitra-pin-hidden');
+
+    if (pinBoxes.length > 0) {
+      pinBoxes[0].focus();
+      pinBoxes.forEach((box, index) => {
+        box.addEventListener('input', (e) => {
+          let val = e.target.value.toUpperCase();
+          e.target.value = val;
+          updateHiddenPin();
+
+          if (val && index < pinBoxes.length - 1) {
+            pinBoxes[index + 1].focus();
+          }
+        });
+
+        box.addEventListener('keydown', (e) => {
+          if (e.key === 'Backspace' && !e.target.value && index > 0) {
+            pinBoxes[index - 1].focus();
+            pinBoxes[index - 1].value = '';
+            updateHiddenPin();
+          }
+        });
+
+        box.addEventListener('paste', (e) => {
+          e.preventDefault();
+          let pasteData = (e.clipboardData || window.clipboardData).getData('text').toUpperCase().replace(/[^A-Z0-9]/g, '');
+          for (let i = 0; i < pasteData.length; i++) {
+            if (index + i < pinBoxes.length) {
+              pinBoxes[index + i].value = pasteData[i];
+            }
+          }
+          if (index + pasteData.length < pinBoxes.length) {
+            pinBoxes[index + pasteData.length].focus();
+          } else {
+            pinBoxes[pinBoxes.length - 1].focus();
+          }
+          updateHiddenPin();
+          if (hiddenPinInput.value.length === 6) {
+            document.querySelector('#btn-mitra-login').focus();
+          }
+        });
+      });
+
+      function updateHiddenPin() {
+        let fullPin = '';
+        pinBoxes.forEach(b => fullPin += b.value);
+        hiddenPinInput.value = fullPin;
+      }
+    }
+
+    let currentSlide = 0;
+    let autoTimer = null;
+    const TOTAL = 3;
+    const AUTO_MS = 4000;
+    const slides = document.querySelectorAll('.carousel__slide');
+    const dots = document.querySelectorAll('.panel-left__dots .dot');
+
+    function showSlide(idx) {
+      idx = (idx + TOTAL) % TOTAL;
+      slides.forEach((s, i) => {
+        s.classList.toggle('carousel__slide--active', i === idx);
+        s.classList.toggle('carousel__slide--prev', i === currentSlide && i !== idx);
+      });
+      dots.forEach((d, i) => {
+        const active = i === idx;
+        d.classList.toggle('dot--active', active);
+        d.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+      currentSlide = idx;
+    }
+
+    function goToSlide(idx) { showSlide(idx); resetTimer(); }
+    function nextSlide() { showSlide(currentSlide + 1); }
+    function resetTimer() { clearInterval(autoTimer); autoTimer = setInterval(nextSlide, AUTO_MS); }
+    resetTimer();
+  </script>
+</body>
+
 </html>
