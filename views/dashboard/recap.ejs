@@ -1,389 +1,475 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Rekap Jawaban Survei SUKAFTI — FTI Universitas Andalas." />
-  <title><%= title %></title>
 
-  <!-- Lucide Icons -->
+<head>
+  <script>
+    (() => {
+      try {
+        localStorage.removeItem("themeVariant");
+      } catch (_) {}
+      try {
+        const stored = localStorage.getItem("themeMode");
+        if (
+          stored
+            ? stored === "dark"
+            : matchMedia("(prefers-color-scheme: dark)").matches
+        ) {
+          document.documentElement.classList.add("dark");
+        }
+      } catch (_) { }
+
+      const apply = (dark) => {
+        document.documentElement.classList.toggle("dark", dark);
+        try {
+          localStorage.setItem("themeMode", dark ? "dark" : "light");
+        } catch (_) { }
+      };
+
+      document.addEventListener("basecoat:theme", (event) => {
+        const mode = event.detail?.mode;
+        apply(
+          mode === "dark"
+            ? true
+            : mode === "light"
+              ? false
+              : !document.documentElement.classList.contains("dark"),
+        );
+      });
+    })();
+  </script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>
+    <%= title %>
+  </title>
+
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+  <link rel="stylesheet" href="/assets/styles.css" />
+
+  <script src="/assets/js/basecoat.js?v=0.3.11" defer></script>
+  <script src="/assets/js/command.js?v=0.3.11" defer></script>
+  <script src="/assets/js/dropdown-menu.js?v=0.3.11" defer></script>
+  <script src="/assets/js/popover.js?v=0.3.11" defer></script>
+  <script src="/assets/js/select.js?v=0.3.11" defer></script>
+  <script src="/assets/js/sidebar.js?v=0.3.11" defer></script>
+  <script src="/assets/js/tabs.js?v=0.3.11" defer></script>
+  <script src="/assets/js/toast.js?v=0.3.11" defer></script>
+
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-  <!-- Basecoat UI -->
-  <link rel="stylesheet" href="https://unpkg.com/basecoat-css@latest/dist/basecoat.min.css" />
-  <!-- Dashboard CSS -->
-  <link rel="stylesheet" href="/css/dashboard.css" />
-  
   <style>
-    dialog::backdrop {
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(4px);
+    /* Basecard enhancements */
+    .premium-card {
+      border: 1px solid var(--border) !important;
+      background: var(--card) !important;
+      color: var(--card-foreground) !important;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03) !important;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
-    dialog {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      margin: 0;
-      padding: 2.5rem;
-      border: none;
-      border-radius: 12px;
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-      width: 650px;
-      max-width: 90%;
-      background: #ffffff;
-      max-height: 85vh;
-      overflow-y: auto;
+    .premium-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.06) !important;
     }
-    .dialog-header {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
-      border-bottom: 1px solid #f1f5f9;
-      padding-bottom: 0.75rem;
+    /* Select styling */
+    select {
+      background-color: var(--card) !important;
+      color: var(--foreground) !important;
     }
-    .dialog-header i {
-      color: #1e293b;
+    select option {
+      background-color: var(--card) !important;
+      color: var(--foreground) !important;
     }
-    
-    .answer-detail-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-      margin: 1.5rem 0;
+    .dark select option {
+      background-color: #1e293b !important;
+      color: #f8fafc !important;
     }
-    
-    .answer-detail-item {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 1.25rem;
-    }
-    
-    .answer-detail-q {
-      font-weight: 600;
-      font-size: 0.95rem;
-      color: #0f172a;
-      line-height: 1.4;
-      margin-bottom: 0.5rem;
-    }
-    
-    .answer-detail-ans {
-      font-size: 0.9rem;
-      color: #334155;
-      background: white;
-      border: 1px solid #cbd5e1;
-      padding: 0.5rem 0.75rem;
-      border-radius: 6px;
-      margin-top: 0.5rem;
-      line-height: 1.4;
-    }
-    
-    .answer-detail-score {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      background: #cbd5e1;
-      color: #0f172a;
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      margin-top: 0.5rem;
+    .dark {
+      color-scheme: dark;
     }
   </style>
 </head>
-<body>
 
-<div class="app-shell">
+<body class="bg-background">
+  <div class="relative flex min-h-screen">
 
-  <!-- ══════════════════════════════════
-       SIDEBAR
-       ══════════════════════════════════ -->
-  <aside class="sidebar">
-    <div class="sidebar__brand">
-      <div class="admin-avatar" style="width:38px; height:38px; border-radius:10px; font-size:1.1rem;">FTI</div>
-      <div>
-        <div class="sidebar__wordmark">SUKAFTI</div>
-        <div class="sidebar__tagline">Survey Kerjasama FTI</div>
-      </div>
-    </div>
-
-    <div class="nav-section-label">Menu Utama</div>
-    <ul class="nav-list">
-      <li class="nav-item"><a href="/admin/dashboard" id="nav-dashboard"><i data-lucide="layout-dashboard"></i>Dashboard</a></li>
-      <li class="nav-item"><a href="/admin/questions" id="nav-questions"><i data-lucide="help-circle"></i>Pertanyaan Survey</a></li>
-      <li class="nav-item"><a href="/admin/partners" id="nav-mitra"><i data-lucide="building-2"></i>Manajemen Mitra</a></li>
-      <li class="nav-item"><a href="#" id="nav-pin" style="opacity: 0.6; cursor: not-allowed;"><i data-lucide="key-round"></i>Kelola PIN Survey</a></li>
-      <li class="nav-item"><a href="/admin/recap-answers" class="active" id="nav-hasil"><i data-lucide="bar-chart-3"></i>Hasil Survey</a></li>
-    </ul>
-
-    <div class="nav-section-label" style="margin-top:.75rem;">Pengaturan</div>
-    <ul class="nav-list">
-      <li class="nav-item"><a href="#" id="nav-profile" style="opacity: 0.6; cursor: not-allowed;"><i data-lucide="user-cog"></i>Profil Admin</a></li>
-    </ul>
-
-    <div class="sidebar__footer">
-      <a href="/logout" id="btn-logout"><i data-lucide="log-out"></i>Keluar</a>
-    </div>
-  </aside>
-
-  <!-- ══════════════════════════════════
-       MAIN WRAPPER
-       ══════════════════════════════════ -->
-  <div class="main-wrapper">
-
-    <!-- TOPBAR -->
-    <header class="topbar">
-      <div class="topbar__left">
-        <h2>Rekap Jawaban Mitra</h2>
-        <p id="topbar-date">Kelola dan analisis hasil kuesioner evaluasi kerjasama</p>
-      </div>
-      <div class="topbar__search">
-        <i data-lucide="search"></i>
-        <input type="text" id="topbar-search" placeholder="Cari nama mitra atau survey (tekan enter)..." value="<%= search %>" autocomplete="off" />
-      </div>
-      <div class="topbar__right">
-        <div class="admin-chip" id="admin-chip">
-          <div class="admin-avatar">AF</div>
-          <span class="admin-chip__name"><%= user %></span>
-        </div>
-      </div>
-    </header>
-
-    <!-- CONTENT AREA -->
-    <main class="content-area" id="main-content">
-
-      <!-- ① DATA TABLE -->
-      <div class="table-card">
-        <div class="table-card__header">
-          <div>
-            <h2>Tabel Rekapitulasi Respon Kuesioner</h2>
-            <p>Jawaban mentah hasil pengisian survei dari seluruh mitra FTI</p>
-          </div>
-          <div>
-            <a href="/admin/recap-answers/export-excel" class="btn" style="background-color: #0f172a; color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600;">
-              <i data-lucide="file-spreadsheet"></i> Ekspor Excel (.xlsx)
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar border-r bg-card text-card-foreground shrink-0" data-side="left"
+      aria-hidden="false">
+      <nav aria-label="Sidebar navigation" class="flex flex-col h-full justify-between">
+        <div>
+          <header class="p-4 border-b">
+            <a href="/admin/dashboard" class="flex items-center gap-2">
+              <img src="/image/fti%20logo.jpg" alt="Logo FTI" class="h-8 w-8 rounded-lg object-contain bg-white p-0.5 border" />
+              <div class="grid flex-1 text-left text-sm leading-tight">
+                <span class="truncate font-semibold text-foreground">SUKAFTI</span>
+                <span class="truncate text-xs text-muted-foreground">Survey Kerjasama</span>
+              </div>
             </a>
-          </div>
+          </header>
+
+          <section class="p-4">
+            <div role="group" aria-labelledby="group-label">
+              <h3 id="group-label" class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                Menu Utama</h3>
+              <ul class="space-y-1">
+                <li>
+                  <a href="/admin/dashboard"
+                    class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                    <i data-lucide="layout-dashboard" class="size-4"></i>
+                    <span>Dashboard Overview</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/admin/questions"
+                    class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                    <i data-lucide="help-circle" class="size-4"></i>
+                    <span>Pertanyaan Survey</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/admin/partners"
+                    class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                    <i data-lucide="building-2" class="size-4"></i>
+                    <span>Manajemen Mitra</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/admin/recap-answers"
+                    class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-accent text-accent-foreground">
+                    <i data-lucide="bar-chart-3" class="size-4 text-foreground"></i>
+                    <span>Hasil Survey</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </section>
         </div>
 
-        <div style="overflow-x:auto;">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Nama Perusahaan Mitra</th>
-                <th>Judul Survei Kemitraan</th>
-                <th style="text-align: center;">Total Skor</th>
-                <th>Tanggal Pengisian</th>
-                <th style="width: 120px; text-align: center;">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% if (locals.responses && responses.length > 0) { %>
-                <% responses.forEach(function(r) { 
-                     const avatarStr = r.partner_name.substring(0, 2).toUpperCase();
-                     
-                     let formattedDate = "—";
-                     if (r.submitted_at) {
-                         const dateObj = new Date(r.submitted_at);
-                         formattedDate = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) + " " + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                     }
-                %>
-                <tr>
-                  <td>
-                    <div class="company-cell">
-                      <div class="company-avatar" style="background:#f1f5f9;color:#1e293b;"><%= avatarStr %></div>
-                      <div>
-                        <div class="company-name" style="font-weight: 600;"><%= r.partner_name %></div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div style="font-weight: 500; color: #334155;"><%= r.survey_title %></div>
-                  </td>
-                  <td style="text-align: center; font-weight: 700; color: #0f172a;">
-                    <span style="background: #f1f5f9; padding: 0.25rem 0.6rem; border-radius: 6px;"><%= r.score_total %> Poin</span>
-                  </td>
-                  <td style="color: #475569;"><%= formattedDate %></td>
-                  <td style="text-align: center;">
-                    <button class="btn btn--ghost btn-view-detail" data-id="<%= r.id %>" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
-                      <i data-lucide="eye" style="width:14px; height:14px;"></i> Detail
-                    </button>
-                  </td>
-                </tr>
-                <% }); %>
-              <% } else { %>
-                <tr>
-                  <td colspan="5" style="text-align:center; color:#94a3b8; padding:3rem;">
-                    Belum ada kuesioner yang diselesaikan oleh mitra.
-                  </td>
-                </tr>
-              <% } %>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Pagination Footer -->
-        <% if (locals.totalPages && totalPages > 1) { %>
-          <div class="pagination-footer" style="display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-top:1px solid #e2e8f0;">
-            <div style="font-size:0.75rem; color:#64748b;">
-              Menampilkan halaman <strong><%= page %></strong> dari <strong><%= totalPages %></strong> (Total: <%= totalItems %> data)
-            </div>
-            <div class="pagination-buttons" style="display:flex; gap:6px;">
-              <% if (page > 1) { %>
-                <a href="?search=<%= search %>&page=<%= page - 1 %>" class="action-btn" title="Sebelumnya"><i data-lucide="chevron-left"></i></a>
-              <% } else { %>
-                <span class="action-btn" style="opacity: 0.4; cursor: not-allowed;"><i data-lucide="chevron-left"></i></span>
-              <% } %>
-              
-              <% for(let i = 1; i <= totalPages; i++) { %>
-                <a href="?search=<%= search %>&page=<%= i %>" class="action-btn" style="<%= page === i ? 'background:#1e293b; color:white;' : '' %>"><%= i %></a>
-              <% } %>
-              
-              <% if (page < totalPages) { %>
-                <a href="?search=<%= search %>&page=<%= page + 1 %>" class="action-btn" title="Selanjutnya"><i data-lucide="chevron-right"></i></a>
-              <% } else { %>
-                <span class="action-btn" style="opacity: 0.4; cursor: not-allowed;"><i data-lucide="chevron-right"></i></span>
-              <% } %>
+        <footer class="p-4 border-t">
+          <div id="popover-profile" class="popover w-full">
+            <button id="popover-profile-trigger" type="button" aria-expanded="false"
+              aria-controls="popover-profile-popover"
+              class="flex w-full items-center gap-2 px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground justify-start text-left">
+              <div
+                class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xs shrink-0">
+                AF</div>
+              <div class="grid flex-1 text-xs leading-tight">
+                <span class="truncate font-semibold text-foreground">
+                  <%= user %>
+                </span>
+                <span class="truncate text-muted-foreground text-[10px]">Administrator</span>
+              </div>
+              <i data-lucide="chevrons-up-down" class="size-4 text-muted-foreground shrink-0 ml-auto"></i>
+            </button>
+            <div id="popover-profile-popover" data-popover aria-hidden="true" data-side="top" class="w-[200px]">
+              <div class="grid p-1 bg-popover text-popover-foreground border rounded-md shadow-md">
+                <a href="/logout"
+                  class="flex items-center gap-2 px-2 py-1.5 text-sm text-destructive hover:bg-destructive/10 rounded-sm">
+                  <i data-lucide="log-out" class="size-4"></i>
+                  <span>Keluar</span>
+                </a>
+              </div>
             </div>
           </div>
-        <% } %>
-      </div><!-- /.table-card -->
+        </footer>
+      </nav>
+    </aside>
 
-    </main><!-- /.content-area -->
-  </div><!-- /.main-wrapper -->
-</div><!-- /.app-shell -->
+    <!-- Main Content Area -->
+    <main id="content" class="flex-1 flex flex-col min-w-0 bg-muted/20">
 
-<!-- ══════════════════════════════════
-     MODAL DIALOG: DETAIL JAWABAN
-     ══════════════════════════════════ -->
-<dialog id="detail-dialog">
-  <div class="dialog-header">
-    <i data-lucide="file-text"></i>
-    <h3 style="margin:0; font-size: 1.25rem; color: #0f172a;">Rincian Jawaban Kuesioner</h3>
+      <!-- Topbar Header -->
+      <header
+        class="bg-background sticky inset-x-0 top-0 isolate flex shrink-0 items-center justify-between border-b z-10 h-14 px-4 gap-4">
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="document.dispatchEvent(new CustomEvent('basecoat:sidebar'))"
+            aria-label="Toggle sidebar"
+            class="h-8 w-8 inline-flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground md:hidden">
+            <i data-lucide="menu" class="size-4"></i>
+          </button>
+          <h1 class="text-sm font-semibold tracking-tight text-foreground">
+            Rekap Jawaban Mitra
+          </h1>
+        </div>
+
+        <div class="flex items-center gap-2">
+
+          <button type="button" aria-label="Toggle dark mode"
+            onclick="document.dispatchEvent(new CustomEvent('basecoat:theme'))"
+            class="h-8 w-8 inline-flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground">
+            <i data-lucide="sun" class="size-4 hidden dark:block"></i>
+            <i data-lucide="moon" class="size-4 block dark:hidden"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Inner Content -->
+      <div class="p-6 md:p-8 flex-1 space-y-6">
+
+        <!-- Data Table Card -->
+        <div data-slot="card" class="premium-card rounded-2xl overflow-hidden">
+          <div class="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b">
+            <div>
+              <h3 class="text-lg font-semibold leading-none tracking-tight">Tabel Rekapitulasi Respon Kuesioner</h3>
+              <p class="text-xs text-muted-foreground mt-1.5">Jawaban mentah hasil pengisian survei dari seluruh mitra
+                FTI</p>
+            </div>
+            <div class="flex flex-wrap gap-2 w-full md:w-auto">
+              <div class="relative flex-1 md:flex-initial">
+                <i data-lucide="search" class="absolute left-2.5 top-2.5 size-4 text-muted-foreground"></i>
+                <input type="text" id="topbar-search" placeholder="Cari nama mitra/survey..." value="<%= search %>"
+                  autocomplete="off"
+                  class="pl-8 h-9 rounded-md border text-sm w-full md:w-60 bg-transparent outline-none focus-visible:ring-1 focus-visible:ring-ring" />
+              </div>
+              <a href="/admin/recap-answers/export-excel"
+                class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3 py-2">
+                <i data-lucide="file-spreadsheet" class="size-4"></i>
+                <span>Ekspor Excel</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto w-full">
+            <table class="w-full text-sm">
+              <thead class="bg-muted/50 border-b">
+                <tr class="transition-colors hover:bg-muted/50">
+                  <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Nama Perusahaan Mitra
+                  </th>
+                  <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Judul Survei Kemitraan
+                  </th>
+                  <th class="h-10 px-4 text-center align-middle font-medium text-muted-foreground w-32">Total Skor</th>
+                  <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Tanggal Pengisian</th>
+                  <th class="h-10 px-4 text-center align-middle font-medium text-muted-foreground w-28">Aksi</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y">
+                <% if (locals.responses && responses.length> 0) { %>
+                  <% responses.forEach(function(r) { const avatarStr=r.partner_name.substring(0, 2).toUpperCase(); let
+                    formattedDate="—" ; if (r.submitted_at) { const dateObj=new Date(r.submitted_at);
+                    formattedDate=dateObj.toLocaleDateString('id-ID', { day: '2-digit' , month: 'short' ,
+                    year: 'numeric' }) + " " + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit' , minute: '2-digit'
+                    }); } %>
+                    <tr class="hover:bg-muted/30 transition-colors">
+                      <td class="p-4 align-middle font-medium">
+                        <div class="flex items-center gap-3">
+                          <div
+                            class="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-muted-foreground text-xs font-bold">
+                            <%= avatarStr %>
+                          </div>
+                          <div class="text-foreground">
+                            <%= r.partner_name %>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="p-4 align-middle text-muted-foreground font-semibold">
+                        <%= r.survey_title %>
+                      </td>
+                      <td class="p-4 align-middle text-center font-bold text-foreground">
+                        <span
+                          class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-muted border-input">
+                          <%= r.score_total %> Poin
+                        </span>
+                      </td>
+                      <td class="p-4 align-middle text-muted-foreground text-xs">
+                        <%= formattedDate %>
+                      </td>
+                      <td class="p-4 align-middle text-center">
+                        <button
+                          class="btn-view-detail inline-flex items-center justify-center gap-1 rounded-md text-xs font-semibold border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 py-1"
+                          data-id="<%= r.id %>">
+                          <i data-lucide="eye" class="size-3.5"></i>
+                          <span>Detail</span>
+                        </button>
+                      </td>
+                    </tr>
+                    <% }); %>
+                      <% } else { %>
+                        <tr>
+                          <td colspan="5" class="p-8 text-center text-muted-foreground">
+                            Belum ada kuesioner yang diselesaikan oleh mitra.
+                          </td>
+                        </tr>
+                        <% } %>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Footer -->
+          <% if (locals.totalPages && totalPages> 1) { %>
+            <div class="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 border-t bg-muted/20">
+              <div class="text-xs text-muted-foreground">
+                Menampilkan halaman <strong>
+                  <%= page %>
+                </strong> dari <strong>
+                  <%= totalPages %>
+                </strong> (Total: <%= totalItems %> data)
+              </div>
+              <div class="flex gap-1">
+                <% if (page> 1) { %>
+                  <a href="?search=<%= search %>&page=<%= page - 1 %>"
+                    class="h-8 w-8 inline-flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground text-muted-foreground"><i
+                      data-lucide="chevron-left" class="size-4"></i></a>
+                  <% } else { %>
+                    <span
+                      class="h-8 w-8 inline-flex items-center justify-center rounded-md border opacity-50 cursor-not-allowed text-muted-foreground"><i
+                        data-lucide="chevron-left" class="size-4"></i></span>
+                    <% } %>
+
+                      <% for(let i=1; i <=totalPages; i++) { %>
+                        <a href="?search=<%= search %>&page=<%= i %>"
+                          class="h-8 w-8 inline-flex items-center justify-center rounded-md border text-sm <%= page === i ? 'bg-primary text-primary-foreground font-semibold border-primary' : 'hover:bg-accent hover:text-accent-foreground text-muted-foreground' %>">
+                          <%= i %>
+                        </a>
+                        <% } %>
+
+                          <% if (page < totalPages) { %>
+                            <a href="?search=<%= search %>&page=<%= page + 1 %>"
+                              class="h-8 w-8 inline-flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground text-muted-foreground"><i
+                                data-lucide="chevron-right" class="size-4"></i></a>
+                            <% } else { %>
+                              <span
+                                class="h-8 w-8 inline-flex items-center justify-center rounded-md border opacity-50 cursor-not-allowed text-muted-foreground"><i
+                                  data-lucide="chevron-right" class="size-4"></i></span>
+                              <% } %>
+              </div>
+            </div>
+            <% } %>
+        </div>
+
+      </div>
+    </main>
   </div>
-  
-  <div style="font-size:0.875rem; color:#64748b; margin-bottom:1.5rem; line-height:1.5; border-bottom:1px solid #f1f5f9; padding-bottom:1rem;">
-    <div style="margin-bottom:4px;"><strong>Mitra Perusahaan:</strong> <span id="lbl-detail-partner">...</span></div>
-    <div style="margin-bottom:4px;"><strong>Judul Kuesioner:</strong> <span id="lbl-detail-survey">...</span></div>
-    <div style="margin-bottom:4px;"><strong>Tanggal Kirim:</strong> <span id="lbl-detail-date">...</span></div>
-    <div><strong>Total Nilai Evaluasi:</strong> <span id="lbl-detail-score" style="font-weight:700; color:#0f172a;">...</span></div>
-  </div>
-  
-  <div id="detail-loading" style="text-align:center; padding:2rem; color:#64748b;">
-    <p>Memuat rincian data...</p>
-  </div>
-  
-  <div class="answer-detail-list" id="detail-answers-list" style="display:none;">
-    <!-- Dihasilkan secara dinamis lewat AJAX -->
-  </div>
 
-  <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top: 1.5rem;">
-    <button type="button" id="btn-close-detail" class="btn btn--ghost-muted" style="border:1px solid #cbd5e1;">Tutup</button>
-  </div>
-</dialog>
+  <!-- Detail Jawaban Dialog Modal -->
+  <dialog id="detail-dialog" class="dialog">
+    <div class="!max-w-2xl w-full max-h-[85vh] overflow-y-auto pr-1">
+      <div class="flex items-center gap-2 border-b pb-3">
+        <div class="p-2 bg-primary/10 text-primary rounded-lg">
+          <i data-lucide="file-text" class="size-5"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold leading-none tracking-tight">Rincian Jawaban Kuesioner</h3>
+          <p class="text-xs text-muted-foreground mt-1">Jawaban mentah yang diserahkan oleh mitra perusahaan.</p>
+        </div>
+      </div>
 
-<script>
-  // ── Lucide Icons ───────────────────────────────────────
-  lucide.createIcons();
+      <div class="text-xs text-muted-foreground grid grid-cols-2 gap-2 border rounded-md p-4 bg-muted/20">
+        <div><strong>Mitra Perusahaan:</strong> <span id="lbl-detail-partner"
+            class="text-foreground font-medium">...</span></div>
+        <div><strong>Judul Kuesioner:</strong> <span id="lbl-detail-survey" class="text-foreground font-medium">...</span>
+        </div>
+        <div><strong>Tanggal Kirim:</strong> <span id="lbl-detail-date" class="text-foreground font-medium">...</span>
+        </div>
+        <div><strong>Total Nilai Evaluasi:</strong> <span id="lbl-detail-score"
+            class="text-foreground font-bold">...</span></div>
+      </div>
 
-  // Set Current Date in Topbar
-  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-  document.getElementById('topbar-date').innerText = new Date().toLocaleDateString('id-ID', options);
+      <div id="detail-loading" class="text-center py-8 text-muted-foreground text-sm">
+        <p>Memuat rincian data...</p>
+      </div>
 
-  // Enter triggers Search
-  document.getElementById('topbar-search').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-      window.location.href = '?search=' + encodeURIComponent(this.value);
-    }
-  });
+      <div class="flex flex-col gap-4" id="detail-answers-list" style="display:none;">
+        <!-- Filled via JS -->
+      </div>
 
-  // Modal Details Dialog Logic
-  const detailDialog = document.getElementById('detail-dialog');
-  const btnCloseDetail = document.getElementById('btn-close-detail');
-  
-  const lblPartner = document.getElementById('lbl-detail-partner');
-  const lblSurvey = document.getElementById('lbl-detail-survey');
-  const lblDate = document.getElementById('lbl-detail-date');
-  const lblScore = document.getElementById('lbl-detail-score');
-  
-  const loadingBlock = document.getElementById('detail-loading');
-  const answersList = document.getElementById('detail-answers-list');
+      <div class="flex justify-end gap-2 border-t pt-3 mt-2">
+        <button type="button" id="btn-close-detail"
+          class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </dialog>
 
-  document.querySelectorAll('.btn-view-detail').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const id = this.getAttribute('data-id');
-      
-      // Reset UI state
-      loadingBlock.style.display = 'block';
-      answersList.style.display = 'none';
-      answersList.innerHTML = '';
-      
-      // Open dialog
-      detailDialog.showModal();
-      
-      // Fetch answers JSON
-      fetch(`/admin/recap-answers/${id}/json`)
-        .then(res => res.json())
-        .then(res => {
-          if (res.success) {
-            const data = res.data;
-            
-            // Set metadata
-            lblPartner.innerText = data.response.partner_name;
-            lblSurvey.innerText = data.response.survey_title;
-            lblScore.innerText = data.response.score_total + ' Poin';
-            
-            const dateObj = new Date(data.response.submitted_at);
-            lblDate.innerText = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) + ' ' + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-            
-            // Build answers DOM
-            data.answers.forEach((ans, index) => {
-              const item = document.createElement('div');
-              item.className = 'answer-detail-item';
-              
-              const qText = document.createElement('div');
-              qText.className = 'answer-detail-q';
-              qText.innerText = `${index + 1}. ${ans.question_text}`;
-              item.appendChild(qText);
-              
-              const answerTextVal = ans.question_type === 'essay' 
-                ? (ans.answer_text || '— Tidak diisi —')
-                : `${ans.option_text || '—'} (Skor: ${ans.score})`;
-              
-              const ansDiv = document.createElement('div');
-              ansDiv.className = 'answer-detail-ans';
-              ansDiv.innerText = answerTextVal;
-              item.appendChild(ansDiv);
+  <script>
+    lucide.createIcons();
 
-              if (ans.question_type !== 'essay') {
-                const scoreBadge = document.createElement('span');
-                scoreBadge.className = 'answer-detail-score';
-                scoreBadge.innerHTML = `<i data-lucide="check" style="width:12px; height:12px;"></i> Skor Bobot: ${ans.score}`;
-                item.appendChild(scoreBadge);
-              }
-              
-              answersList.appendChild(item);
-            });
-            
-            // Toggle view
-            loadingBlock.style.display = 'none';
-            answersList.style.display = 'flex';
-            lucide.createIcons();
-          } else {
-            loadingBlock.innerHTML = `<p style="color:#ef4444;">Gagal memuat detail: ${res.message}</p>`;
-          }
-        })
-        .catch(err => {
-          loadingBlock.innerHTML = '<p style="color:#ef4444;">Terjadi kesalahan sistem saat memuat data.</p>';
-        });
+    document.getElementById('topbar-search').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        window.location.href = '?search=' + encodeURIComponent(this.value);
+      }
     });
-  });
 
-  btnCloseDetail.addEventListener('click', () => {
-    detailDialog.close();
-  });
-</script>
+    const detailDialog = document.getElementById('detail-dialog');
+    const btnCloseDetail = document.getElementById('btn-close-detail');
+
+    const lblPartner = document.getElementById('lbl-detail-partner');
+    const lblSurvey = document.getElementById('lbl-detail-survey');
+    const lblDate = document.getElementById('lbl-detail-date');
+    const lblScore = document.getElementById('lbl-detail-score');
+
+    const loadingBlock = document.getElementById('detail-loading');
+    const answersList = document.getElementById('detail-answers-list');
+
+    document.querySelectorAll('.btn-view-detail').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const id = this.getAttribute('data-id');
+
+        loadingBlock.style.display = 'block';
+        answersList.style.display = 'none';
+        answersList.innerHTML = '';
+
+        detailDialog.showModal();
+
+        fetch(`/admin/recap-answers/${id}/json`)
+          .then(res => res.json())
+          .then(res => {
+            if (res.success) {
+              const data = res.data;
+
+              lblPartner.innerText = data.response.partner_name;
+              lblSurvey.innerText = data.response.survey_title;
+              lblScore.innerText = data.response.score_total + ' Poin';
+
+              const dateObj = new Date(data.response.submitted_at);
+              lblDate.innerText = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) + ' ' + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+              data.answers.forEach((ans, index) => {
+                const item = document.createElement('div');
+                item.className = 'rounded-lg border bg-muted/30 p-4';
+
+                const qText = document.createElement('div');
+                qText.className = 'font-semibold text-foreground text-sm';
+                qText.innerText = `${index + 1}. ${ans.question_text}`;
+                item.appendChild(qText);
+
+                const answerTextVal = ans.question_type === 'essay'
+                  ? (ans.answer_text || '— Tidak diisi —')
+                  : `${ans.option_text || '—'} (Skor: ${ans.score})`;
+
+                const ansDiv = document.createElement('div');
+                ansDiv.className = 'text-xs text-muted-foreground bg-background border rounded-md p-2 mt-2 leading-relaxed';
+                ansDiv.innerText = answerTextVal;
+                item.appendChild(ansDiv);
+
+                if (ans.question_type !== 'essay') {
+                  const scoreBadge = document.createElement('span');
+                  scoreBadge.className = 'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-bold bg-emerald-500/10 text-emerald-500 border-emerald-500/20 mt-2';
+                  scoreBadge.innerHTML = '<i data-lucide="check" class="size-3"></i> Skor Bobot: ' + ans.score;
+                  item.appendChild(scoreBadge);
+                }
+
+                answersList.appendChild(item);
+              });
+
+              loadingBlock.style.display = 'none';
+              answersList.style.display = 'flex';
+              lucide.createIcons();
+            } else {
+              loadingBlock.innerHTML = `<p class="text-destructive">Gagal memuat detail: ${res.message}</p>`;
+            }
+          })
+          .catch(err => {
+            loadingBlock.innerHTML = '<p class="text-destructive">Terjadi kesalahan sistem saat memuat data.</p>';
+          });
+      });
+    });
+
+    btnCloseDetail.addEventListener('click', () => {
+      detailDialog.close();
+    });
+  </script>
 </body>
+
 </html>

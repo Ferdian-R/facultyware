@@ -1,53 +1,41 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <script>
-      (() => {
-        try {
-          const stored = localStorage.getItem("themeMode");
-          if (
-            stored
-              ? stored === "dark"
-              : matchMedia("(prefers-color-scheme: dark)").matches
-          ) {
-            document.documentElement.classList.add("dark");
-          }
-        } catch (_) {}
-
-        const apply = (dark) => {
-          document.documentElement.classList.toggle("dark", dark);
-          try {
-            localStorage.setItem("themeMode", dark ? "dark" : "light");
-          } catch (_) {}
-        };
-
-        document.addEventListener("basecoat:theme", (event) => {
-          const mode = event.detail?.mode;
-          apply(
-            mode === "dark"
-              ? true
-              : mode === "light"
-                ? false
-                : !document.documentElement.classList.contains("dark"),
-          );
-        });
-      })();
-    </script>
-
-    <script>
-      (function () {
-        try {
-          const storedTheme = localStorage.getItem("themeVariant");
-          if (storedTheme)
-            document.documentElement.classList.add(`theme-${storedTheme}`);
-        } catch (event) {
-          console.error(
-            "Could not apply theme variant from localStorage",
-            event,
-          );
+  <script>
+    (() => {
+      try {
+        localStorage.removeItem("themeVariant");
+      } catch (_) {}
+      try {
+        const stored = localStorage.getItem("themeMode");
+        if (
+          stored
+            ? stored === "dark"
+            : matchMedia("(prefers-color-scheme: dark)").matches
+        ) {
+          document.documentElement.classList.add("dark");
         }
-      })();
-    </script>
+      } catch (_) { }
+
+      const apply = (dark) => {
+        document.documentElement.classList.toggle("dark", dark);
+        try {
+          localStorage.setItem("themeMode", dark ? "dark" : "light");
+        } catch (_) { }
+      };
+
+      document.addEventListener("basecoat:theme", (event) => {
+        const mode = event.detail?.mode;
+        apply(
+          mode === "dark"
+            ? true
+            : mode === "light"
+              ? false
+              : !document.documentElement.classList.contains("dark"),
+        );
+      });
+    })();
+  </script>
 
     <meta charset="utf-8" />
     <meta http-equiv="Content-Language" content="en" />
@@ -902,32 +890,7 @@
               <path d="M9 3v18" />
             </svg>
           </button>
-          <select class="select h-8 leading-none" id="theme-select">
-            <option value="">Default</option>
-            <option value="claude">Claude</option>
-            <option value="doom-64">Doom 64</option>
-            <option value="supabase">Supabase</option>
-          </select>
-          <script>
-            (() => {
-              const themeSelect = document.getElementById("theme-select");
-              const storedTheme = localStorage.getItem("themeVariant");
-              if (themeSelect && storedTheme) themeSelect.value = storedTheme;
-              themeSelect.addEventListener("change", () => {
-                const newTheme = themeSelect.value;
-                document.documentElement.classList.forEach((c) => {
-                  if (c.startsWith("theme-"))
-                    document.documentElement.classList.remove(c);
-                });
-                if (newTheme) {
-                  document.documentElement.classList.add(`theme-${newTheme}`);
-                  localStorage.setItem("themeVariant", newTheme);
-                } else {
-                  localStorage.removeItem("themeVariant");
-                }
-              });
-            })();
-          </script>
+
 
           <button
             type="button"

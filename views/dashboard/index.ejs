@@ -1,597 +1,926 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Dashboard Admin SUKAFTI — Sistem Informasi Survey Kerja Sama FTI Universitas Andalas." />
-  <title><%= title %></title>
+  <script>
+    (() => {
+      try {
+        localStorage.removeItem("themeVariant");
+      } catch (_) {}
+      try {
+        const stored = localStorage.getItem("themeMode");
+        if (
+          stored
+            ? stored === "dark"
+            : matchMedia("(prefers-color-scheme: dark)").matches
+        ) {
+          document.documentElement.classList.add("dark");
+        }
+      } catch (_) { }
 
-  <!-- Chart.js -->
+      const apply = (dark) => {
+        document.documentElement.classList.toggle("dark", dark);
+        try {
+          localStorage.setItem("themeMode", dark ? "dark" : "light");
+        } catch (_) { }
+      };
+
+      document.addEventListener("basecoat:theme", (event) => {
+        const mode = event.detail?.mode;
+        apply(
+          mode === "dark"
+            ? true
+            : mode === "light"
+              ? false
+              : !document.documentElement.classList.contains("dark"),
+        );
+      });
+    })();
+  </script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>
+    <%= title %>
+  </title>
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+
+  <link rel="stylesheet" href="/assets/styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-  <!-- Lucide Icons -->
+
+  <script src="/assets/js/basecoat.js?v=0.3.11" defer></script>
+  <script src="/assets/js/command.js?v=0.3.11" defer></script>
+  <script src="/assets/js/dropdown-menu.js?v=0.3.11" defer></script>
+  <script src="/assets/js/popover.js?v=0.3.11" defer></script>
+  <script src="/assets/js/select.js?v=0.3.11" defer></script>
+  <script src="/assets/js/sidebar.js?v=0.3.11" defer></script>
+  <script src="/assets/js/tabs.js?v=0.3.11" defer></script>
+  <script src="/assets/js/toast.js?v=0.3.11" defer></script>
+
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-  <!-- Basecoat UI -->
-  <link rel="stylesheet" href="https://unpkg.com/basecoat-css@latest/dist/basecoat.min.css" />
-  <!-- Dashboard CSS -->
-  <link rel="stylesheet" href="/css/dashboard.css" />
+  <style>
+    /* Responsive grid layout matching standard Basecoat */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+    @media (min-width: 768px) {
+      .dashboard-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    @media (min-width: 768px) {
+      .charts-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    /* Premium welcome banner styling utilizing Basecoat variables */
+    .welcome-banner {
+      background: linear-gradient(135deg, #1e293b 0%, #111827 50%, #0f172a 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    }
+    .dark .welcome-banner {
+      background: linear-gradient(135deg, #0f172a 0%, #030712 100%) !important;
+      border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+    .welcome-title {
+      color: #ffffff !important;
+      font-weight: 700;
+    }
+    .welcome-desc {
+      color: #cbd5e1 !important;
+      opacity: 0.95;
+    }
+    .dark .welcome-desc {
+      color: #cbd5e1 !important;
+    }
+
+    /* Basecard enhancements */
+    .premium-card {
+      border: 1px solid var(--border) !important;
+      background: var(--card) !important;
+      color: var(--card-foreground) !important;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03) !important;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    .premium-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.06) !important;
+    }
+
+    /* Welcome Banner Custom Elements */
+    .welcome-banner-stats {
+      background: rgba(255, 255, 255, 0.1) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      border-radius: 1rem !important;
+      padding: 1rem !important;
+      width: 9rem !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+      backdrop-filter: blur(4px) !important;
+    }
+    .welcome-banner-stats .num {
+      font-size: 1.875rem !important;
+      font-weight: 900 !important;
+      color: #ffffff !important;
+      line-height: 1 !important;
+    }
+    .welcome-banner-stats .label {
+      font-size: 0.55rem !important;
+      font-weight: 700 !important;
+      color: #cbd5e1 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.05em !important;
+      margin-top: 0.5rem !important;
+      line-height: 1.2 !important;
+    }
+    
+    /* Mockup circle shapes for welcome banner background */
+    .welcome-circle-1 {
+      position: absolute;
+      right: -2.5rem;
+      top: -2.5rem;
+      width: 11rem;
+      height: 11rem;
+      border-radius: 9999px;
+      border: 2px solid rgba(255, 255, 255, 0.08);
+    }
+    .welcome-circle-2 {
+      position: absolute;
+      right: -1.25rem;
+      bottom: -1.25rem;
+      width: 13rem;
+      height: 13rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .welcome-circle-3 {
+      position: absolute;
+      right: 3rem;
+      top: 1.5rem;
+      width: 7rem;
+      height: 7rem;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    /* Custom classes to replace arbitrary tailwind classes not compiled in Basecoat */
+    .trend-badge {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 0.25rem !important;
+      font-size: 0.6875rem !important;
+      font-weight: 600 !important;
+      color: #10b981 !important;
+    }
+    .card-divider {
+      border-top: 1px solid #f1f5f9 !important;
+      padding-top: 0.75rem !important;
+      margin-top: 0.75rem !important;
+    }
+    .dark .card-divider {
+      border-top: 1px solid #334155 !important;
+    }
+    .custom-progress-track {
+      height: 0.375rem !important;
+      width: 100% !important;
+      background-color: #f1f5f9 !important;
+      border-radius: 9999px !important;
+      overflow: hidden !important;
+      margin-top: 0.5rem !important;
+    }
+    .dark .custom-progress-track {
+      background-color: #334155 !important;
+    }
+    .custom-progress-fill {
+      height: 100% !important;
+      border-radius: 9999px !important;
+      transition: width 0.5s ease-in-out !important;
+    }
+    .custom-progress-fill.indigo {
+      background-color: #4f46e5 !important;
+    }
+    .custom-progress-fill.amber {
+      background-color: #f59e0b !important;
+    }
+    .card-subtext {
+      font-size: 0.6875rem !important;
+      color: #64748b !important;
+    }
+    .dark .card-subtext {
+      color: #94a3b8 !important;
+    }
+    .card-title-small {
+      font-size: 0.625rem !important;
+      font-weight: 700 !important;
+      color: #64748b !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.05em !important;
+    }
+    .dark .card-title-small {
+      color: #94a3b8 !important;
+    }
+    
+    /* Donut layout flex column to row spacing */
+    .donut-row {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+    }
+    @media (min-width: 640px) {
+      .donut-row {
+        flex-direction: row;
+      }
+    }
+    /* Native select styling fix for white-on-white text */
+    select option {
+      background-color: var(--card) !important;
+      color: var(--foreground) !important;
+    }
+    .dark select option {
+      background-color: #1e293b !important;
+      color: #f8fafc !important;
+    }
+    .dark {
+      color-scheme: dark;
+    }
+  </style>
 </head>
-<body>
 
-<div class="app-shell">
+<body class="bg-background">
+  <div class="relative flex min-h-screen">
 
-  <!-- ══════════════════════════════════
-       SIDEBAR
-       ══════════════════════════════════ -->
-  <aside class="sidebar">
-    <div class="sidebar__brand">
-      <div class="admin-avatar" style="width:38px; height:38px; border-radius:10px; font-size:1.1rem;">FTI</div>
-      <div>
-        <div class="sidebar__wordmark">SUKAFTI</div>
-        <div class="sidebar__tagline">Survey Kerjasama FTI</div>
-      </div>
-    </div>
-
-    <div class="nav-section-label">Menu Utama</div>
-    <ul class="nav-list">
-      <li class="nav-item"><a href="/admin/dashboard" class="active" id="nav-dashboard"><i data-lucide="layout-dashboard"></i>Dashboard</a></li>
-      <li class="nav-item"><a href="/admin/questions" id="nav-questions"><i data-lucide="help-circle"></i>Pertanyaan Survey</a></li>
-      <li class="nav-item"><a href="/admin/partners" id="nav-mitra"><i data-lucide="building-2"></i>Manajemen Mitra</a></li>
-      <li class="nav-item"><a href="#" id="nav-pin" style="opacity: 0.6; cursor: not-allowed;"><i data-lucide="key-round"></i>Kelola PIN Survey</a></li>
-      <li class="nav-item"><a href="/admin/recap-answers" id="nav-hasil"><i data-lucide="bar-chart-3"></i>Hasil Survey</a></li>
-    </ul>
-
-    <div class="nav-section-label" style="margin-top:.75rem;">Pengaturan</div>
-    <ul class="nav-list">
-      <li class="nav-item"><a href="#" id="nav-profile" style="opacity: 0.6; cursor: not-allowed;"><i data-lucide="user-cog"></i>Profil Admin</a></li>
-    </ul>
-
-    <div class="sidebar__footer">
-      <a href="/logout" id="btn-logout"><i data-lucide="log-out"></i>Keluar</a>
-    </div>
-  </aside>
-
-  <!-- ══════════════════════════════════
-       MAIN WRAPPER
-       ══════════════════════════════════ -->
-  <div class="main-wrapper">
-
-    <!-- TOPBAR -->
-    <header class="topbar">
-      <div class="topbar__left">
-        <h2>Dashboard Overview</h2>
-        <p id="topbar-date">Selamat datang kembali 👋</p>
-      </div>
-      <div class="topbar__search">
-        <i data-lucide="search"></i>
-        <input type="text" id="topbar-search" placeholder="Cari nama mitra (tekan enter)..." value="<%= search %>" autocomplete="off" />
-      </div>
-      <div class="topbar__right">
-        <button class="icon-btn" id="btn-notif" aria-label="Notifikasi">
-          <i data-lucide="bell"></i>
-        </button>
-        <div class="admin-chip" id="admin-chip" role="button" tabindex="0">
-          <div class="admin-avatar">AF</div>
-          <span class="admin-chip__name"><%= user %></span>
-          <i data-lucide="chevron-down"></i>
-        </div>
-      </div>
-    </header>
-
-    <!-- CONTENT AREA -->
-    <main class="content-area" id="main-content">
-
-      <!-- ① HERO BANNER -->
-      <div class="hero-banner">
-        <div class="hero-deco"></div>
-        <div class="hero-banner__text">
-          <h1>Selamat Datang, Admin FTI! 🚀</h1>
-          <p>Pantau aktivitas survey, kelola data mitra, dan generate PIN kerjasama industri dari satu tempat.</p>
-        </div>
-        <div class="hero-banner__badge">
-          <div class="big-num"><%= total_respons %></div>
-          <div class="big-label">Total Survey<br>Selesai</div>
-        </div>
-      </div>
-
-      <!-- ② STAT CARDS -->
-      <div class="stats-grid">
-
-        <!-- Card 1: Total Mitra -->
-        <div class="stat-card stat-card--a">
-          <div class="stat__icon icon-slate"><i data-lucide="building-2"></i></div>
-          <div style="flex:1;">
-            <div class="stat__label">Total Mitra</div>
-            <div class="stat__value" id="val-total-mitra"><%= total_mitra %></div>
-            <div class="stat__trend stat__trend--up">
-              <i data-lucide="trending-up" style="width:12px;height:12px;"></i>
-              Mitra Terdaftar
-            </div>
-            <div class="stat__bar-wrap">
-              <div class="stat__bar-label"><span>Target Capaian</span><span><%= total_mitra %> / 50</span></div>
-              <div class="stat__bar-track">
-                <div class="stat__bar-fill" style="width: <%= Math.min((total_mitra/50)*100, 100) %>%; background:linear-gradient(90deg,#1e293b,#64748b);"></div>
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar border-r bg-card text-card-foreground shrink-0" data-side="left"
+      aria-hidden="false">
+      <nav aria-label="Sidebar navigation" class="flex flex-col h-full justify-between">
+        <div>
+          <header class="p-4 border-b">
+            <a href="/admin/dashboard" class="flex items-center gap-2">
+              <img src="/image/fti%20logo.jpg" alt="Logo FTI" class="h-8 w-8 rounded-lg object-contain bg-white p-0.5 border" />
+              <div class="grid flex-1 text-left text-sm leading-tight">
+                <span class="truncate font-semibold text-foreground">SUKAFTI</span>
+                <span class="truncate text-xs text-muted-foreground">Survey Kerjasama</span>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 2: PIN Aktif -->
-        <div class="stat-card stat-card--a">
-          <div class="stat__icon icon-amber"><i data-lucide="key-round"></i></div>
-          <div style="flex:1;">
-            <div class="stat__label">PIN Aktif</div>
-            <div class="stat__value" id="val-pin-aktif"><%= total_pin_aktif %></div>
-            <div class="stat__sub">Siap digunakan mitra</div>
-            <div class="stat__bar-wrap">
-              <div class="stat__bar-label"><span>Rasio Aktif</span><span><%= total_pin_aktif %> / <%= total_pin_aktif + total_respons %></span></div>
-              <div class="stat__bar-track">
-                <% const ratio = (total_pin_aktif + total_respons) > 0 ? (total_pin_aktif / (total_pin_aktif + total_respons)) * 100 : 0; %>
-                <div class="stat__bar-fill" style="width: <%= ratio %>%; background:linear-gradient(90deg,#f59e0b,#fcd34d);"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 3: Survey Selesai -->
-        <div class="stat-card stat-card--spark">
-          <div style="display:flex;align-items:flex-start;gap:1rem;">
-            <div class="stat__icon icon-emerald"><i data-lucide="check-circle-2"></i></div>
-            <div>
-              <div class="stat__label">Survey Selesai</div>
-              <div class="stat__value" id="val-survey-selesai"><%= total_respons %></div>
-              <div class="stat__trend stat__trend--up">
-                <i data-lucide="arrow-up-right" style="width:12px;height:12px;"></i>
-                Respon Masuk
-              </div>
-            </div>
-          </div>
-          <div class="stat__sparkline">
-            <svg viewBox="0 0 180 48" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="spkGrad" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stop-color="#10b981" stop-opacity=".25"/>
-                  <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
-                </linearGradient>
-              </defs>
-              <path d="M0,40 L20,35 L40,30 L60,32 L80,20 L100,15 L120,18 L140,10 L160,8 L180,4"
-                    fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M0,40 L20,35 L40,30 L60,32 L80,20 L100,15 L120,18 L140,10 L160,8 L180,4 L180,48 L0,48 Z"
-                    fill="url(#spkGrad)"/>
-            </svg>
-          </div>
-        </div>
-
-      </div><!-- /.stats-grid -->
-
-      <!-- ③ CHARTS ROW -->
-      <div class="charts-grid">
-
-        <!-- Bar Chart: Tren Survey per Bulan -->
-        <div class="chart-card">
-          <div class="chart-card__header">
-            <h3>Tren Survey per Bulan</h3>
-            <p>Jumlah kuesioner diselesaikan mitra — 6 bulan terakhir</p>
-          </div>
-          <div class="chart-wrap chart-wrap--bar">
-            <canvas id="chartSurveyBar"></canvas>
-          </div>
-        </div>
-
-        <!-- Donut Chart: Status PIN -->
-        <div class="chart-card">
-          <div class="chart-card__header">
-            <h3>Distribusi Status PIN</h3>
-            <p>Proporsi PIN aktif, terpakai, dan kadaluarsa</p>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:center;">
-            <div class="chart-wrap chart-wrap--donut" style="width:200px;">
-              <canvas id="chartPinDonut"></canvas>
-            </div>
-            <div class="donut-legend">
-              <div class="legend-item"><span class="legend-dot" style="background:#334155;"></span>Aktif (<span id="l-aktif">0</span>)</div>
-              <div class="legend-item"><span class="legend-dot" style="background:#94a3b8;"></span>Terpakai (<span id="l-terpakai">0</span>)</div>
-              <div class="legend-item"><span class="legend-dot" style="background:#e2e8f0;"></span>Kadaluarsa (<span id="l-kadaluarsa">0</span>)</div>
-            </div>
-          </div>
-        </div>
-
-      </div><!-- /.charts-grid -->
-
-      <!-- ④ DATA TABLE -->
-      <div class="table-card">
-        <div class="table-card__header">
-          <div>
-            <h2>Daftar PIN Survey &amp; Mitra</h2>
-            <p>Kelola token PIN kuesioner industri</p>
-          </div>
-          <div style="display:flex; gap:10px;">
-            <a href="/admin/dashboard/export-pdf" class="btn" style="background-color: #0f172a; color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-size: 0.875rem; display: flex; align-items: center; gap: 0.5rem;">
-              <i data-lucide="printer"></i> Cetak Laporan PDF Dashboard
             </a>
-            <button class="btn-generate" id="btn-generate-pin" type="button">
-              <i data-lucide="plus-circle"></i> Generate PIN Baru
+          </header>
+
+          <section class="p-4">
+            <div role="group" aria-labelledby="group-label">
+              <h3 id="group-label" class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                Menu Utama</h3>
+              <ul class="space-y-1">
+                <li>
+                  <a href="/admin/dashboard"
+                    class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-accent text-accent-foreground">
+                    <i data-lucide="layout-dashboard" class="size-4 text-foreground"></i>
+                    <span>Dashboard Overview</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/admin/questions"
+                    class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                    <i data-lucide="help-circle" class="size-4"></i>
+                    <span>Pertanyaan Survey</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/admin/partners"
+                    class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                    <i data-lucide="building-2" class="size-4"></i>
+                    <span>Manajemen Mitra</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/admin/recap-answers"
+                    class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                    <i data-lucide="bar-chart-3" class="size-4"></i>
+                    <span>Hasil Survey</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </div>
+
+        <footer class="p-4 border-t">
+          <div id="popover-profile" class="popover w-full">
+            <button id="popover-profile-trigger" type="button" aria-expanded="false"
+              aria-controls="popover-profile-popover"
+              class="flex w-full items-center gap-2 px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground justify-start text-left">
+              <div
+                class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xs shrink-0">
+                AF</div>
+              <div class="grid flex-1 text-xs leading-tight">
+                <span class="truncate font-semibold text-foreground">
+                  <%= user %>
+                </span>
+                <span class="truncate text-muted-foreground text-[10px]">Administrator</span>
+              </div>
+              <i data-lucide="chevrons-up-down" class="size-4 text-muted-foreground shrink-0 ml-auto"></i>
             </button>
+            <div id="popover-profile-popover" data-popover aria-hidden="true" data-side="top" class="w-[200px]">
+              <div class="grid p-1 bg-popover text-popover-foreground border rounded-md shadow-md">
+                <a href="/logout"
+                  class="flex items-center gap-2 px-2 py-1.5 text-sm text-destructive hover:bg-destructive/10 rounded-sm">
+                  <i data-lucide="log-out" class="size-4"></i>
+                  <span>Keluar</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </footer>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main id="content" class="flex-1 flex flex-col min-w-0 bg-muted/20">
+
+      <!-- Topbar Header -->
+      <header
+        class="bg-background sticky inset-x-0 top-0 isolate flex shrink-0 items-center justify-between border-b z-10 h-14 px-4 gap-4">
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="document.dispatchEvent(new CustomEvent('basecoat:sidebar'))"
+            aria-label="Toggle sidebar"
+            class="h-8 w-8 inline-flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground md:hidden">
+            <i data-lucide="menu" class="size-4"></i>
+          </button>
+          <h1 class="text-sm font-semibold tracking-tight text-foreground">
+            Dashboard Overview
+          </h1>
+        </div>
+
+        <div class="flex items-center gap-2">
+
+          <button type="button" aria-label="Toggle dark mode"
+            onclick="document.dispatchEvent(new CustomEvent('basecoat:theme'))"
+            class="h-8 w-8 inline-flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground">
+            <i data-lucide="sun" class="size-4 hidden dark:block"></i>
+            <i data-lucide="moon" class="size-4 block dark:hidden"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Inner Content -->
+      <div class="p-6 md:p-8 flex-1 space-y-6">
+
+        <!-- Welcome Hero Card (Stunning Gradient) -->
+        <div data-slot="card" class="welcome-banner rounded-2xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <!-- Abstract Background shapes (Mockup circles) -->
+          <div class="absolute right-0 top-0 bottom-0 w-1/3 opacity-30 pointer-events-none hidden md:block">
+            <div class="welcome-circle-1"></div>
+            <div class="welcome-circle-2"></div>
+            <div class="welcome-circle-3"></div>
+          </div>
+          <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(99,102,241,0.15),transparent_50%)] pointer-events-none"></div>
+          
+          <div class="relative z-10 max-w-2xl space-y-2">
+            <h2 class="text-2xl font-bold tracking-tight mb-2 welcome-title flex items-center gap-2">Selamat Datang, Admin FTI! <span class="animate-bounce">🚀</span></h2>
+            <p class="text-slate-300 text-xs md:text-sm leading-relaxed welcome-desc">
+              Pantau aktivitas survey, kelola data mitra, dan generate PIN kerjasama industri dari satu tempat.
+            </p>
+          </div>
+          <div class="welcome-banner-stats relative z-10 shrink-0 self-start md:self-auto">
+            <span class="num"><%= total_respons %></span>
+            <span class="label">Total Aktivitas Bulan Ini</span>
           </div>
         </div>
 
-        <div style="overflow-x:auto;">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Perusahaan Mitra</th>
-                <th>Kode PIN</th>
-                <th>Status</th>
-                <th>Dibuat Pada</th>
-                <th>Digunakan Pada</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% if (locals.perusahaan && perusahaan.length > 0) { %>
-                <% perusahaan.forEach(function(p) { 
-                     // Get initials for avatar
-                     const avatarStr = p.nama_perusahaan.substring(0, 2).toUpperCase();
-                     
-                     // Format Date
-                     let formattedDate = "—";
-                     if (p.created_at) {
-                         const dateObj = new Date(p.created_at);
-                         formattedDate = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
-                     }
-
-                     let formattedUsedDate = "—";
-                     if (p.used_at) {
-                         const dateObj = new Date(p.used_at);
-                         formattedUsedDate = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' });
-                     }
-
-                     // Status Badge Logic
-                     let pillClass = '';
-                     let pinClass = '';
-                     let statusText = p.status_pin || 'active';
-                     
-                     if (statusText === 'used') {
-                         pillClass = 'pill--used';
-                         pinClass = 'pin-code--used';
-                         statusText = 'Terpakai';
-                     } else if (statusText === 'active') {
-                         pillClass = 'pill--active';
-                         statusText = 'Aktif';
-                     } else {
-                         pillClass = 'pill--pending';
-                         statusText = 'Expired';
-                     }
-                %>
-                <tr id="row-pin-<%= p.id %>">
-                  <td>
-                    <div class="company-cell">
-                      <div class="company-avatar" style="background:#f1f5f9;color:#1e293b;"><%= avatarStr %></div>
-                      <div>
-                        <div class="company-name"><%= p.nama_perusahaan %></div>
-                        <div class="company-id">#MITRA-<%= p.partner_id.toString().padStart(3, '0') %></div>
-                      </div>
-                    </div>
-                  </td>
-                  <td><span class="pin-code <%= pinClass %>"><%= p.pin_code %></span></td>
-                  <td><span class="pill <%= pillClass %>" style="text-transform: capitalize;"><%= statusText %></span></td>
-                  <td><%= formattedDate %></td>
-                  <td><%= formattedUsedDate %></td>
-                  <td>
-                    <div class="action-group">
-                      <button class="action-btn btn-reset-pin" data-id="<%= p.id %>" data-used="<%= p.status_pin === 'used' ? 1 : 0 %>" title="Reset PIN Status"><i data-lucide="refresh-cw"></i></button>
-                      <button class="action-btn action-btn--del btn-delete-pin" data-id="<%= p.id %>" title="Hapus PIN"><i data-lucide="trash-2"></i></button>
-                    </div>
-                  </td>
-                </tr>
-                <% }); %>
-              <% } else { %>
-                <tr>
-                  <td colspan="6" style="text-align:center; color:#94a3b8; padding:3rem;">Belum ada data PIN atau Perusahaan.</td>
-                </tr>
-              <% } %>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Pagination Footer -->
-        <% if (locals.totalPages && totalPages > 1) { %>
-          <div class="pagination-footer" style="display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-top:1px solid var(--dk-s100);">
-            <div style="font-size:0.75rem; color:var(--dk-s500);">
-              Menampilkan halaman <strong><%= page %></strong> dari <strong><%= totalPages %></strong> (Total: <%= totalItems %> data)
+        <!-- Stats Grid -->
+        <div class="dashboard-grid gap-4">
+          
+          <!-- Card 1: Total Mitra -->
+          <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col justify-between gap-5">
+            <div class="flex items-start gap-4">
+              <div class="p-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-slate-600 dark:text-slate-300 border border-slate-200/50 dark:border-slate-700/50 shrink-0">
+                <i data-lucide="building-2" class="size-5"></i>
+              </div>
+              <div class="space-y-1">
+                <p class="card-title-small">Total Mitra</p>
+                <h3 class="text-3xl font-extrabold tracking-tight text-foreground"><%= total_mitra %></h3>
+                <span class="trend-badge">
+                  <i data-lucide="trending-up" class="size-3.5"></i> +3 bulan ini
+                </span>
+              </div>
             </div>
-            <div class="pagination-buttons" style="display:flex; gap:6px;">
-              <% if (page > 1) { %>
-                <a href="?search=<%= search %>&page=<%= page - 1 %>" class="action-btn" title="Sebelumnya"><i data-lucide="chevron-left"></i></a>
-              <% } else { %>
-                <span class="action-btn" style="opacity: 0.4; cursor: not-allowed;"><i data-lucide="chevron-left"></i></span>
-              <% } %>
-              
-              <% for(let i = 1; i <= totalPages; i++) { %>
-                <a href="?search=<%= search %>&page=<%= i %>" class="action-btn" style="<%= page === i ? 'background:var(--dk-s700); color:white;' : '' %>"><%= i %></a>
-              <% } %>
-              
-              <% if (page < totalPages) { %>
-                <a href="?search=<%= search %>&page=<%= page + 1 %>" class="action-btn" title="Selanjutnya"><i data-lucide="chevron-right"></i></a>
-              <% } else { %>
-                <span class="action-btn" style="opacity: 0.4; cursor: not-allowed;"><i data-lucide="chevron-right"></i></span>
-              <% } %>
+            <div class="card-divider">
+              <div class="flex justify-between items-center text-[10px] font-bold text-muted-foreground">
+                <span>Target Tahunan</span>
+                <span class="text-foreground"><%= total_mitra %> / 30</span>
+              </div>
+              <div class="custom-progress-track">
+                <div class="custom-progress-fill indigo" style="width: <%= Math.min(100, Math.round((total_mitra / 30) * 100)) %>%"></div>
+              </div>
             </div>
           </div>
-        <% } %>
-      </div><!-- /.table-card -->
 
-    </main><!-- /.content-area -->
-  </div><!-- /.main-wrapper -->
-</div><!-- /.app-shell -->
+          <!-- Card 2: PIN Aktif -->
+          <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col justify-between gap-5">
+            <div class="flex items-start gap-4">
+              <div class="p-3 bg-amber-500/10 rounded-2xl text-amber-600 dark:text-amber-400 border border-amber-500/15 shrink-0">
+                <i data-lucide="key-round" class="size-5"></i>
+              </div>
+              <div class="space-y-1">
+                <p class="card-title-small">PIN Aktif</p>
+                <h3 class="text-3xl font-extrabold tracking-tight text-foreground"><%= total_pin_aktif %></h3>
+                <span class="card-subtext block mt-0.5">
+                  Belum digunakan mitra
+                </span>
+              </div>
+            </div>
+            <div class="card-divider">
+              <div class="flex justify-between items-center text-[10px] font-bold text-muted-foreground">
+                <span>Dari total PIN</span>
+                <span class="text-foreground"><%= total_pin_aktif %> / <%= total_pin %></span>
+              </div>
+              <div class="custom-progress-track">
+                <div class="custom-progress-fill amber" style="width: <%= total_pin > 0 ? Math.min(100, Math.round((total_pin_aktif / total_pin) * 100)) : 0 %>%"></div>
+              </div>
+            </div>
+          </div>
 
-<script>
-  // ── Lucide Icons ───────────────────────────────────────
-  lucide.createIcons();
+          <!-- Card 3: Survey Selesai -->
+          <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col justify-between gap-3">
+            <div class="flex items-start gap-4">
+              <div class="p-3 bg-emerald-500/10 rounded-2xl text-emerald-600 dark:text-emerald-400 border border-emerald-500/15 shrink-0">
+                <i data-lucide="check-circle-2" class="size-5"></i>
+              </div>
+              <div class="space-y-1">
+                <p class="card-title-small">Survey Selesai</p>
+                <h3 class="text-3xl font-extrabold tracking-tight text-foreground"><%= total_respons %></h3>
+                <span class="trend-badge">
+                  <i data-lucide="trending-up" class="size-3.5"></i> 75% completion rate
+                </span>
+              </div>
+            </div>
+            <div class="h-9 w-full mt-1 overflow-hidden shrink-0">
+              <svg class="w-full h-full text-emerald-500 dark:text-emerald-400" viewBox="0 0 100 30" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="sparkline-grad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="rgb(16, 185, 129)" stop-opacity="0.2"/>
+                    <stop offset="100%" stop-color="rgb(16, 185, 129)" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0 25 C 20 23, 30 15, 50 18 C 70 21, 80 5, 100 8 L 100 30 L 0 30 Z" fill="url(#sparkline-grad)" />
+                <path d="M0 25 C 20 23, 30 15, 50 18 C 70 21, 80 5, 100 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+          </div>
 
-  // Set Current Date in Topbar
-  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-  document.getElementById('topbar-date').innerText = new Date().toLocaleDateString('id-ID', options) + " — Selamat datang kembali 👋";
+        </div>
 
-  // Enter triggers Search
-  document.getElementById('topbar-search').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-      window.location.href = '?search=' + encodeURIComponent(this.value);
-    }
-  });
+        <!-- Charts Row -->
+        <div class="charts-grid gap-6">
+          
+          <!-- Chart Bar -->
+          <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col gap-4">
+            <div>
+              <h3 class="font-bold text-foreground leading-none tracking-tight text-sm">Tren Survey per Bulan</h3>
+              <p class="text-[11px] text-muted-foreground mt-1">Jumlah kuesioner diselesaikan mitra — 6 bulan terakhir</p>
+            </div>
+            <div class="h-64 relative w-full mt-2">
+              <canvas id="chartSurveyBar"></canvas>
+            </div>
+          </div>
 
-  // ── Animate progress bars ──────────────────────────────
-  window.addEventListener('load', () => {
-    document.querySelectorAll('.stat__bar-fill').forEach(bar => {
-      const w = bar.style.width;
-      bar.style.width = '0';
-      setTimeout(() => { bar.style.width = w; }, 300);
-    });
-  });
+          <!-- Chart Donut -->
+          <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col gap-4">
+            <div>
+              <h3 class="font-bold text-foreground leading-none tracking-tight text-sm">Distribusi Status PIN</h3>
+              <p class="text-[11px] text-muted-foreground mt-1">Proporsi PIN aktif, terpakai, dan kadaluarsa</p>
+            </div>
+            <div class="donut-row h-64 mt-2">
+              <div class="h-44 w-44 relative shrink-0">
+                <canvas id="chartPinDonut"></canvas>
+              </div>
+              <div class="space-y-2.5 text-xs text-muted-foreground">
+                <div class="flex items-center gap-2.5">
+                  <span class="size-3.5 rounded-full bg-slate-700 block border border-white/10 shadow-xs"></span>
+                  <span class="font-medium">Aktif: <strong id="l-aktif" class="text-foreground font-bold">0</strong></span>
+                </div>
+                <div class="flex items-center gap-2.5">
+                  <span class="size-3.5 rounded-full bg-slate-400 block border border-white/10 shadow-xs"></span>
+                  <span class="font-medium">Terpakai: <strong id="l-terpakai" class="text-foreground font-bold">0</strong></span>
+                </div>
+                <div class="flex items-center gap-2.5">
+                  <span class="size-3.5 rounded-full bg-slate-200 block border border-white/10 shadow-xs"></span>
+                  <span class="font-medium">Kadaluarsa: <strong id="l-kadaluarsa" class="text-foreground font-bold">0</strong></span>
+                </div>
+              </div>
+            </div>
+          </div>
 
-  // ── Chart.js global defaults ───────────────────────────
-  Chart.defaults.font.family = "'Inter', sans-serif";
-  Chart.defaults.color = '#64748b';
+        </div>
 
-  // ── Bar Chart: Tren Survey per Bulan ──────────────────
-  const ctxBar = document.getElementById('chartSurveyBar').getContext('2d');
-  new Chart(ctxBar, {
-    type: 'bar',
-    data: {
-      labels: ['Des', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei'],
-      datasets: [{
-        label: 'Survey Selesai',
-        data: [3, 5, 4, 7, 6, <%= total_respons %>],
-        backgroundColor: 'rgba(30, 41, 59, 0.80)',
-        borderRadius: 6,
-        borderSkipped: false,
-      }, {
-        label: 'PIN Digenerate',
-        data: [4, 6, 5, 9, 8, <%= total_pin_aktif + total_respons %>],
-        backgroundColor: 'rgba(148, 163, 184, 0.40)',
-        borderRadius: 6,
-        borderSkipped: false,
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, font: { size: 12 } } },
-        tooltip: { mode: 'index', intersect: false }
-      },
-      scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 12 } } },
-        y: { grid: { color: '#f1f5f9' }, ticks: { stepSize: 2, font: { size: 12 } }, beginAtZero: true }
-      }
-    }
-  });
+        <!-- Data Table Card -->
+        <div data-slot="card" class="premium-card rounded-2xl overflow-hidden">
+          <div class="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b">
+            <div>
+              <h3 class="text-lg font-semibold leading-none tracking-tight">Daftar PIN Survey &amp; Mitra</h3>
+              <p class="text-xs text-muted-foreground mt-1.5">Kelola token PIN kuesioner industri</p>
+            </div>
+            <div class="flex flex-wrap gap-2 w-full md:w-auto">
+              <div class="relative flex-1 md:flex-initial">
+                <i data-lucide="search" class="absolute left-2.5 top-2.5 size-4 text-muted-foreground"></i>
+                <input type="text" id="topbar-search" placeholder="Cari nama mitra..." value="<%= search %>"
+                  autocomplete="off"
+                  class="pl-8 h-9 rounded-md border text-sm w-full md:w-60 bg-transparent outline-none focus-visible:ring-1 focus-visible:ring-ring" />
+              </div>
+              <a href="/admin/dashboard/export-pdf"
+                class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 py-2">
+                <i data-lucide="printer" class="size-4"></i>
+                <span>Laporan PDF</span>
+              </a>
+              <button id="btn-generate-pin"
+                class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3 py-2">
+                <i data-lucide="plus-circle" class="size-4"></i>
+                <span>Generate PIN</span>
+              </button>
+            </div>
+          </div>
 
-  // ── Donut Chart: Status PIN ────────────────────────────
-  let pinDonutChart = null;
+          <div class="overflow-x-auto w-full">
+            <table class="w-full text-sm">
+              <thead class="bg-muted/50 border-b">
+                <tr class="transition-colors hover:bg-muted/50">
+                  <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Perusahaan Mitra</th>
+                  <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Kode PIN</th>
+                  <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
+                  <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Dibuat Pada</th>
+                  <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Digunakan Pada</th>
+                  <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Aksi</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y">
+                <% if (locals.perusahaan && perusahaan.length> 0) { %>
+                  <% perusahaan.forEach(function(p) { const avatarStr=p.nama_perusahaan.substring(0, 2).toUpperCase();
+                    let formattedDate="—" ; if (p.created_at) { const dateObj=new Date(p.created_at);
+                    formattedDate=dateObj.toLocaleDateString('id-ID', { day: '2-digit' , month: 'short' ,
+                    year: 'numeric' }); } let formattedUsedDate="—" ; if (p.used_at) { const dateObj=new
+                    Date(p.used_at); formattedUsedDate=dateObj.toLocaleDateString('id-ID', { day: '2-digit' ,
+                    month: 'short' , year: 'numeric' , hour: '2-digit' , minute:'2-digit' }); } let pillClass='' ; let
+                    pinClass='' ; let statusText=p.status_pin || 'active' ; if (statusText==='used' ) {
+                    pillClass='bg-slate-500/10 text-slate-500 border-slate-500/20' ;
+                    pinClass='line-through text-muted-foreground' ; statusText='Terpakai' ; } else if
+                    (statusText==='active' ) { pillClass='bg-emerald-500/10 text-emerald-500 border-emerald-500/20' ;
+                    statusText='Aktif' ; } else { pillClass='bg-red-500/10 text-red-500 border-red-500/20' ;
+                    statusText='Expired' ; } %>
+                    <tr id="row-pin-<%= p.id %>" class="hover:bg-muted/30 transition-colors">
+                      <td class="p-4 align-middle font-medium">
+                        <div class="flex items-center gap-3">
+                          <div
+                            class="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-muted-foreground text-xs font-bold">
+                            <%= avatarStr %>
+                          </div>
+                          <div>
+                            <div class="text-foreground">
+                              <%= p.nama_perusahaan %>
+                            </div>
+                            <div class="text-xs text-muted-foreground font-normal">#MITRA-<%=
+                                p.partner_id.toString().padStart(3, '0' ) %>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="p-4 align-middle font-mono font-semibold"><span class="<%= pinClass %>">
+                          <%= p.pin_code %>
+                        </span></td>
+                      <td class="p-4 align-middle">
+                        <span
+                          class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold <%= pillClass %>">
+                          <%= statusText %>
+                        </span>
+                      </td>
+                      <td class="p-4 align-middle text-muted-foreground">
+                        <%= formattedDate %>
+                      </td>
+                      <td class="p-4 align-middle text-muted-foreground">
+                        <%= formattedUsedDate %>
+                      </td>
+                      <td class="p-4 align-middle">
+                        <div class="flex items-center gap-2">
+                          <button
+                            class="btn-reset-pin h-8 w-8 inline-flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+                            data-id="<%= p.id %>" data-used="<%= p.status_pin === 'used' ? 1 : 0 %>"
+                            title="Reset PIN Status">
+                            <i data-lucide="refresh-cw" class="size-3.5"></i>
+                          </button>
+                          <button
+                            class="btn-delete-pin h-8 w-8 inline-flex items-center justify-center rounded-md border border-destructive/20 hover:bg-destructive/10 text-destructive"
+                            data-id="<%= p.id %>" title="Hapus PIN">
+                            <i data-lucide="trash-2" class="size-3.5"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    <% }); %>
+                      <% } else { %>
+                        <tr>
+                          <td colspan="6" class="p-8 text-center text-muted-foreground">Belum ada data PIN atau
+                            Perusahaan.</td>
+                        </tr>
+                        <% } %>
+              </tbody>
+            </table>
+          </div>
 
-  function renderDonutChart(active, used, expired) {
-    const ctxDonut = document.getElementById('chartPinDonut').getContext('2d');
-    if (pinDonutChart) pinDonutChart.destroy();
-    pinDonutChart = new Chart(ctxDonut, {
-      type: 'doughnut',
-      data: {
-        labels: ['Aktif', 'Terpakai', 'Kadaluarsa'],
-        datasets: [{
-          data: [active, used, expired],
-          backgroundColor: ['#334155', '#94a3b8', '#e2e8f0'],
-          borderWidth: 0,
-          hoverOffset: 6
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        cutout: '72%',
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: ctx => ` ${ctx.label}: ${ctx.parsed} PIN`
-            }
-          }
-        }
-      }
-    });
+          <!-- Pagination Footer -->
+          <% if (locals.totalPages && totalPages> 1) { %>
+            <div class="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 border-t bg-muted/20">
+              <div class="text-xs text-muted-foreground">
+                Menampilkan halaman <strong>
+                  <%= page %>
+                </strong> dari <strong>
+                  <%= totalPages %>
+                </strong> (Total: <%= totalItems %> data)
+              </div>
+              <div class="flex gap-1">
+                <% if (page> 1) { %>
+                  <a href="?search=<%= search %>&page=<%= page - 1 %>"
+                    class="h-8 w-8 inline-flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground text-muted-foreground"><i
+                      data-lucide="chevron-left" class="size-4"></i></a>
+                  <% } else { %>
+                    <span
+                      class="h-8 w-8 inline-flex items-center justify-center rounded-md border opacity-50 cursor-not-allowed text-muted-foreground"><i
+                        data-lucide="chevron-left" class="size-4"></i></span>
+                    <% } %>
 
-    // Update legend DOM
-    document.getElementById('l-aktif').innerText = active;
-    document.getElementById('l-terpakai').innerText = used;
-    document.getElementById('l-kadaluarsa').innerText = expired;
-  }
+                      <% for(let i=1; i <=totalPages; i++) { %>
+                        <a href="?search=<%= search %>&page=<%= i %>"
+                          class="h-8 w-8 inline-flex items-center justify-center rounded-md border text-sm <%= page === i ? 'bg-primary text-primary-foreground font-semibold border-primary' : 'hover:bg-accent hover:text-accent-foreground text-muted-foreground' %>">
+                          <%= i %>
+                        </a>
+                        <% } %>
 
-  // ── Fetch Dashboard API Stats ───────────────────────────
-  function fetchDashboardStats() {
-    fetch('/api/dashboard-stats')
-      .then(res => res.json())
-      .then(data => {
-        if(data.success) {
-          const stats = data.data;
-          if(stats.pin_stats) {
-            renderDonutChart(stats.pin_stats.active || 0, stats.pin_stats.used || 0, stats.pin_stats.expired || 0);
-          } else {
-            renderDonutChart(0,0,0);
-          }
-        }
-      })
-      .catch(err => console.error('Error fetching dashboard stats:', err));
-  }
+                          <% if (page < totalPages) { %>
+                            <a href="?search=<%= search %>&page=<%= page + 1 %>"
+                              class="h-8 w-8 inline-flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground text-muted-foreground"><i
+                                data-lucide="chevron-right" class="size-4"></i></a>
+                            <% } else { %>
+                              <span
+                                class="h-8 w-8 inline-flex items-center justify-center rounded-md border opacity-50 cursor-not-allowed text-muted-foreground"><i
+                                  data-lucide="chevron-right" class="size-4"></i></span>
+                              <% } %>
+              </div>
+            </div>
+            <% } %>
+        </div>
 
-  // Panggil saat page diload
-  fetchDashboardStats();
-
-  // ── Generate PIN placeholder ───────────────────────────
-  const pinDialogHTML = `
-    <style>
-      #pin-dialog::backdrop {
-        background: rgba(15, 23, 42, 0.6);
-        backdrop-filter: blur(4px);
-      }
-      #pin-dialog {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        margin: 0;
-        padding: 2.5rem;
-        border: none;
-        border-radius: 12px;
-        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-        min-width: 400px;
-        background: #ffffff;
-      }
-      .dialog-header {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 0.5rem;
-      }
-      .dialog-header i {
-        color: #10b981;
-      }
-    </style>
-    <dialog id="pin-dialog">
-      <div class="dialog-header">
-        <i data-lucide="key-round"></i>
-        <h3 style="margin:0; font-size: 1.25rem; color: #0f172a;">Generate PIN Baru</h3>
       </div>
-      <p style="color:#64748b; margin-bottom:1.5rem; font-size:0.875rem; line-height:1.5;">Pilih mitra industri untuk membuat akses PIN baru. Satu PIN hanya berlaku untuk 1 kali pengisian survey.</p>
-      <form id="form-generate-pin">
-        <label style="display:block; font-size:0.875rem; font-weight:500; color:#334155; margin-bottom:0.5rem;">Pilih Mitra Industri</label>
-        <select name="partner_id" style="width:100%; padding:0.75rem; margin-bottom:1.25rem; border:1px solid #cbd5e1; border-radius:6px; background:#f8fafc; color:#0f172a; outline:none;" required>
-          <option value="" disabled selected>-- Silakan Pilih --</option>
-          <% if(locals.allPartners) { %>
-            <% allPartners.forEach(function(p) { %>
-              <option value="<%= p.id %>"><%= p.name %></option>
-            <% }) %>
-          <% } %>
-        </select>
-        <div id="pin-alert" style="color:#ef4444; font-size:0.875rem; margin-bottom:1rem; min-height: 1.25rem;"></div>
-        <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
-          <button type="button" id="btn-close-dialog" class="btn btn--ghost-muted" style="border:1px solid #cbd5e1;">Batal</button>
-          <button type="submit" class="btn btn--primary" style="background:#0f172a; color:white; border:none; border-radius:6px; padding:0.5rem 1rem;">
+    </main>
+  </div>
+
+  <!-- Generate PIN Dialog Modal -->
+  <dialog id="pin-dialog" class="dialog">
+    <div class="!max-w-md w-full">
+      <div class="flex items-center gap-2 border-b pb-3">
+        <div class="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg">
+          <i data-lucide="key-round" class="size-5"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold leading-none tracking-tight">Generate PIN Baru</h3>
+          <p class="text-xs text-muted-foreground mt-1">Buat token akses PIN baru untuk mitra industri.</p>
+        </div>
+      </div>
+
+      <form id="form-generate-pin" class="flex flex-col gap-4">
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium leading-none" for="partner-select">Pilih Mitra Industri</label>
+          <select id="partner-select" name="partner_id"
+            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            required>
+            <option value="" disabled selected>-- Silakan Pilih --</option>
+            <% if(locals.allPartners) { %>
+              <% allPartners.forEach(function(p) { %>
+                <option value="<%= p.id %>">
+                  <%= p.name %>
+                </option>
+                <% }) %>
+                  <% } %>
+          </select>
+        </div>
+
+        <div id="pin-alert" class="text-xs text-destructive min-h-[1rem]"></div>
+
+        <div class="flex justify-end gap-2 border-t pt-3">
+          <button type="button" id="btn-close-dialog"
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
+            Batal
+          </button>
+          <button type="submit"
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
             Generate PIN
           </button>
         </div>
       </form>
-    </dialog>
-  `;
-  document.body.insertAdjacentHTML('beforeend', pinDialogHTML);
-  lucide.createIcons();
+    </div>
+  </dialog>
 
-  const pinDialog = document.getElementById('pin-dialog');
-  const btnCloseDialog = document.getElementById('btn-close-dialog');
-  const formGeneratePin = document.getElementById('form-generate-pin');
-  const pinAlert = document.getElementById('pin-alert');
+  <script>
+    lucide.createIcons();
 
-  document.getElementById('btn-generate-pin').addEventListener('click', () => {
-    pinDialog.showModal();
-    pinAlert.innerText = '';
-  });
-
-  btnCloseDialog.addEventListener('click', () => {
-    pinDialog.close();
-  });
-
-  formGeneratePin.addEventListener('submit', (e) => {
-    e.preventDefault();
-    pinAlert.innerText = '';
-    const partnerId = formGeneratePin.querySelector('select[name="partner_id"]').value;
-
-    fetch('/admin/generate-pin', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ partner_id: partnerId })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if(data.success) {
-        alert('PIN Berhasil dibuat: ' + data.pin_code);
-        pinDialog.close();
-        window.location.reload(); 
-      } else {
-        pinAlert.innerText = data.message || 'Gagal generate PIN';
+    // Search field handler
+    document.getElementById('topbar-search').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        window.location.href = '?search=' + encodeURIComponent(this.value);
       }
-    })
-    .catch(err => {
-      pinAlert.innerText = 'Terjadi kesalahan sistem.';
     });
-  });
 
-  // REST API: Reset PIN Status Action
-  document.querySelectorAll('.btn-reset-pin').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const id = this.getAttribute('data-id');
-      const currentlyUsed = parseInt(this.getAttribute('data-used'));
-      const nextUsed = currentlyUsed === 1 ? 0 : 1; // Toggle status
-      
-      if (confirm(`Apakah Anda yakin ingin me-reset status PIN ini menjadi ${nextUsed === 1 ? 'Terpakai' : 'Aktif'}?`)) {
-        fetch(`/api/pin-logs/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ is_used: nextUsed })
-        })
+    // Chart.js Configuration
+    Chart.defaults.font.family = "system-ui, -apple-system, sans-serif";
+
+    // Bar Chart: Tren Survey per Bulan
+    const ctxBar = document.getElementById('chartSurveyBar').getContext('2d');
+    const isDark = document.documentElement.classList.contains('dark');
+    const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)';
+    const textColor = isDark ? '#a1a1aa' : '#64748b';
+
+    new Chart(ctxBar, {
+      type: 'bar',
+      data: {
+        labels: ['Des', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei'],
+        datasets: [{
+          label: 'Survey Selesai',
+          data: [3, 5, 4, 7, 6, <%= total_respons %>],
+          backgroundColor: '#0f172a',
+          borderRadius: 6,
+        }, {
+          label: 'PIN Digenerate',
+          data: [4, 6, 5, 9, 8, <%= total_pin_aktif + total_respons %>],
+          backgroundColor: '#94a3b8',
+          borderRadius: 6,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top', labels: { boxWidth: 12, usePointStyle: true, font: { size: 11 }, color: textColor } }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: textColor, font: { size: 11 } } },
+          y: { grid: { color: gridColor }, ticks: { stepSize: 2, color: textColor, font: { size: 11 } }, beginAtZero: true }
+        }
+      }
+    });
+
+    // Donut Chart: Status PIN
+    let pinDonutChart = null;
+
+    function renderDonutChart(active, used, expired) {
+      const ctxDonut = document.getElementById('chartPinDonut').getContext('2d');
+      if (pinDonutChart) pinDonutChart.destroy();
+
+      const isDark = document.documentElement.classList.contains('dark');
+
+      pinDonutChart = new Chart(ctxDonut, {
+        type: 'doughnut',
+        data: {
+          labels: ['Aktif', 'Terpakai', 'Kadaluarsa'],
+          datasets: [{
+            data: [active, used, expired],
+            backgroundColor: ['#334155', '#94a3b8', isDark ? '#27272a' : '#f1f5f9'],
+            borderWidth: 0,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '75%',
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
+
+      document.getElementById('l-aktif').innerText = active;
+      document.getElementById('l-terpakai').innerText = used;
+      document.getElementById('l-kadaluarsa').innerText = expired;
+    }
+
+    function fetchDashboardStats() {
+      fetch('/api/dashboard-stats')
         .then(res => res.json())
         .then(data => {
           if (data.success) {
-            alert('Status PIN berhasil diperbarui!');
+            const stats = data.data;
+            if (stats.pin_stats) {
+              renderDonutChart(stats.pin_stats.active || 0, stats.pin_stats.used || 0, stats.pin_stats.expired || 0);
+            } else {
+              renderDonutChart(0, 0, 0);
+            }
+          }
+        })
+        .catch(err => console.error('Error fetching dashboard stats:', err));
+    }
+
+    fetchDashboardStats();
+
+    // Dialog controls
+    const pinDialog = document.getElementById('pin-dialog');
+    const btnGeneratePin = document.getElementById('btn-generate-pin');
+    const btnCloseDialog = document.getElementById('btn-close-dialog');
+    const formGeneratePin = document.getElementById('form-generate-pin');
+    const pinAlert = document.getElementById('pin-alert');
+
+    btnGeneratePin.addEventListener('click', () => {
+      pinDialog.showModal();
+      pinAlert.innerText = '';
+    });
+
+    btnCloseDialog.addEventListener('click', () => {
+      pinDialog.close();
+    });
+
+    formGeneratePin.addEventListener('submit', (e) => {
+      e.preventDefault();
+      pinAlert.innerText = '';
+      const partnerId = document.getElementById('partner-select').value;
+
+      fetch('/admin/generate-pin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ partner_id: partnerId })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            alert('PIN Berhasil dibuat: ' + data.pin_code);
+            pinDialog.close();
             window.location.reload();
           } else {
-            alert('Gagal memperbarui PIN: ' + data.message);
+            pinAlert.innerText = data.message || 'Gagal generate PIN';
           }
         })
-        .catch(err => alert('Gagal memproses request.'));
-      }
+        .catch(err => {
+          pinAlert.innerText = 'Terjadi kesalahan sistem.';
+        });
     });
-  });
 
-  // REST API: Delete PIN Action
-  document.querySelectorAll('.btn-delete-pin').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const id = this.getAttribute('data-id');
-      if (confirm('Apakah Anda yakin ingin menghapus PIN ini secara permanen dari database?')) {
-        fetch(`/api/pin-logs/${id}`, {
-          method: 'DELETE'
-        })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            alert('PIN berhasil dihapus!');
-            document.getElementById(`row-pin-${id}`).remove();
-            fetchDashboardStats(); // refresh donut counts
-          } else {
-            alert('Gagal menghapus PIN: ' + data.message);
-          }
-        })
-        .catch(err => alert('Gagal memproses request.'));
-      }
+    // Actions
+    document.querySelectorAll('.btn-reset-pin').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const id = this.getAttribute('data-id');
+        const currentlyUsed = parseInt(this.getAttribute('data-used'));
+        const nextUsed = currentlyUsed === 1 ? 0 : 1;
+
+        if (confirm(`Apakah Anda yakin ingin me-reset status PIN ini menjadi ${nextUsed === 1 ? 'Terpakai' : 'Aktif'}?`)) {
+          fetch(`/api/pin-logs/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ is_used: nextUsed })
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) {
+                alert('Status PIN berhasil diperbarui!');
+                window.location.reload();
+              } else {
+                alert('Gagal memperbarui PIN: ' + data.message);
+              }
+            })
+            .catch(err => alert('Gagal memproses request.'));
+        }
+      });
     });
-  });
 
-</script>
+    document.querySelectorAll('.btn-delete-pin').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const id = this.getAttribute('data-id');
+        if (confirm('Apakah Anda yakin ingin menghapus PIN ini secara permanen dari database?')) {
+          fetch(`/api/pin-logs/${id}`, {
+            method: 'DELETE'
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) {
+                alert('PIN berhasil dihapus!');
+                document.getElementById(`row-pin-${id}`).remove();
+                fetchDashboardStats();
+              } else {
+                alert('Gagal menghapus PIN: ' + data.message);
+              }
+            })
+            .catch(err => alert('Gagal memproses request.'));
+        }
+      });
+    });
+  </script>
 </body>
+
 </html>

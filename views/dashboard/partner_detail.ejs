@@ -1,656 +1,665 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Detail Kemitraan SUKAFTI — FTI Universitas Andalas." />
-  <title><%= title %></title>
+  <script>
+    (() => {
+      try {
+        localStorage.removeItem("themeVariant");
+      } catch (_) {}
+      try {
+        const stored = localStorage.getItem("themeMode");
+        if (
+          stored
+            ? stored === "dark"
+            : matchMedia("(prefers-color-scheme: dark)").matches
+        ) {
+          document.documentElement.classList.add("dark");
+        }
+      } catch (_) { }
 
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-  <!-- Basecoat UI -->
-  <link rel="stylesheet" href="https://unpkg.com/basecoat-css@latest/dist/basecoat.min.css" />
-  <!-- Dashboard CSS -->
-  <link rel="stylesheet" href="/css/dashboard.css" />
-  <!-- HTMX -->
+      const apply = (dark) => {
+        document.documentElement.classList.toggle("dark", dark);
+        try {
+          localStorage.setItem("themeMode", dark ? "dark" : "light");
+        } catch (_) { }
+      };
+
+      document.addEventListener("basecoat:theme", (event) => {
+        const mode = event.detail?.mode;
+        apply(
+          mode === "dark"
+            ? true
+            : mode === "light"
+              ? false
+              : !document.documentElement.classList.contains("dark"),
+        );
+      });
+    })();
+  </script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>
+    <%= title %>
+  </title>
+
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+  <link rel="stylesheet" href="/assets/styles.css" />
+
+  <script src="/assets/js/basecoat.js?v=0.3.11" defer></script>
+  <script src="/assets/js/command.js?v=0.3.11" defer></script>
+  <script src="/assets/js/dropdown-menu.js?v=0.3.11" defer></script>
+  <script src="/assets/js/popover.js?v=0.3.11" defer></script>
+  <script src="/assets/js/select.js?v=0.3.11" defer></script>
+  <script src="/assets/js/sidebar.js?v=0.3.11" defer></script>
+  <script src="/assets/js/tabs.js?v=0.3.11" defer></script>
+  <script src="/assets/js/toast.js?v=0.3.11" defer></script>
+
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
-  
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
-    /* Dialog Overlay styling */
-    dialog::backdrop {
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(4px);
-    }
-    dialog {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      margin: 0;
-      padding: 2.25rem;
-      border: none;
-      border-radius: 12px;
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-      width: 500px;
-      max-width: 90%;
-      background: #ffffff;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-    .dialog-header {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 0.5rem;
-    }
-    .dialog-header i {
-      color: var(--dk-primary);
-    }
-    .form-group {
-      margin-bottom: 1.15rem;
-    }
-    .form-group label {
-      display: block;
-      font-size: 0.825rem;
-      font-weight: 600;
-      color: #334155;
-      margin-bottom: 0.4rem;
-    }
-    .form-control {
-      width: 100%;
-      padding: 0.65rem 0.75rem;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      background: #f8fafc;
-      color: #0f172a;
-      outline: none;
-      font-family: inherit;
-      font-size: 0.85rem;
-      transition: all 0.2s;
-    }
-    .form-control:focus {
-      border-color: var(--dk-primary);
-      background: #fff;
-    }
-
-    /* Badging */
-    .badge-type {
-      display: inline-block;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.725rem;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-    .badge-type--univ { background: #dbeafe; color: #1e40af; }
-    .badge-type--company { background: #e0f2fe; color: #0369a1; }
-    .badge-type--gov { background: #fef3c7; color: #92400e; }
-    .badge-type--ngo { background: #dcfce7; color: #166534; }
-    .badge-type--other { background: #f1f5f9; color: #475569; }
-    
-    .alert-banner {
-      padding: 0.75rem 1.25rem;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      margin-bottom: 1.5rem;
-    }
-    .alert-banner--success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-    .alert-banner--error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-
-    /* Profile Panel Styling */
-    .detail-grid {
+    /* Responsive layout split grid */
+    .detail-split-grid {
       display: grid;
-      grid-template-columns: 1fr 2fr;
+      grid-template-columns: 1fr;
       gap: 1.5rem;
-      align-items: start;
     }
-    @media (max-width: 992px) {
-      .detail-grid {
-        grid-template-columns: 1fr;
+    @media (min-width: 768px) {
+      .detail-split-grid {
+        grid-template-columns: 1fr 2fr;
       }
     }
-
-    .profile-card {
-      background: #ffffff;
-      border: 1px solid var(--dk-s200);
-      border-radius: 12px;
-      padding: 2rem 1.5rem;
-      text-align: center;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    /* Basecard enhancements */
+    .premium-card {
+      border: 1px solid var(--border) !important;
+      background: var(--card) !important;
+      color: var(--card-foreground) !important;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03) !important;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
-    .profile-avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 20px;
-      background: #f1f5f9;
-      color: #0f172a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.25rem;
-      font-weight: 800;
-      margin: 0 auto 1.25rem auto;
-      border: 2px solid var(--dk-s200);
+    .premium-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.06) !important;
     }
-    .profile-name {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #0f172a;
-      margin-bottom: 0.5rem;
-      line-height: 1.3;
+    /* Select styling */
+    select {
+      background-color: var(--card) !important;
+      color: var(--foreground) !important;
     }
-    .profile-meta-list {
-      text-align: left;
-      margin-top: 1.75rem;
-      border-top: 1px solid var(--dk-s200);
-      padding-top: 1.25rem;
+    select option {
+      background-color: var(--card) !important;
+      color: var(--foreground) !important;
     }
-    .profile-meta-item {
-      margin-bottom: 1rem;
+    .dark select option {
+      background-color: #1e293b !important;
+      color: #f8fafc !important;
     }
-    .profile-meta-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.25rem;
-    }
-    .profile-meta-val {
-      font-size: 0.875rem;
-      color: #1e293b;
-      line-height: 1.4;
-    }
-
-    /* Contacts and Surveys Listing */
-    .section-card {
-      background: #ffffff;
-      border: 1px solid var(--dk-s200);
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    .section-card__header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.25rem;
-      border-bottom: 1px solid var(--dk-s100);
-      padding-bottom: 0.75rem;
-    }
-    .section-card__header h3 {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: #0f172a;
-      margin: 0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .contact-item {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      padding: 0.85rem;
-      border: 1px solid var(--dk-s200);
-      border-radius: 8px;
-      margin-bottom: 10px;
-      transition: all 0.2s;
-    }
-    .contact-item:hover {
-      border-color: var(--dk-s400);
-      background: #fafafa;
-    }
-    .contact-info {
-      display: flex;
-      gap: 12px;
-    }
-    .contact-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 6px;
-      background: #f1f5f9;
-      color: #475569;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 2px;
-    }
-    .contact-name {
-      font-weight: 600;
-      font-size: 0.875rem;
-      color: #0f172a;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .badge-primary-contact {
-      background: #dcfce7;
-      color: #15803d;
-      font-size: 0.65rem;
-      font-weight: 700;
-      padding: 1px 5px;
-      border-radius: 3px;
-      text-transform: uppercase;
+    .dark {
+      color-scheme: dark;
     }
   </style>
 </head>
-<body>
 
-<div class="app-shell">
+<body class="bg-background">
+  <div class="relative flex min-h-screen">
 
-  <!-- ══════════════════════════════════
-       SIDEBAR
-       ══════════════════════════════════ -->
-  <aside class="sidebar">
-    <div class="sidebar__brand">
-      <div class="admin-avatar" style="width:38px; height:38px; border-radius:10px; font-size:1.1rem;">FTI</div>
-      <div>
-        <div class="sidebar__wordmark">SUKAFTI</div>
-        <div class="sidebar__tagline">Survey Kerjasama FTI</div>
-      </div>
-    </div>
-
-    <div class="nav-section-label">Menu Utama</div>
-    <ul class="nav-list">
-      <li class="nav-item"><a href="/admin/dashboard" id="nav-dashboard"><i data-lucide="layout-dashboard"></i>Dashboard</a></li>
-      <li class="nav-item"><a href="/admin/questions" id="nav-questions"><i data-lucide="help-circle"></i>Pertanyaan Survey</a></li>
-      <li class="nav-item"><a href="/admin/partners" class="active" id="nav-mitra"><i data-lucide="building-2"></i>Manajemen Mitra</a></li>
-      <li class="nav-item"><a href="#" id="nav-pin" style="opacity: 0.6; cursor: not-allowed;"><i data-lucide="key-round"></i>Kelola PIN Survey</a></li>
-      <li class="nav-item"><a href="/admin/recap-answers" id="nav-hasil"><i data-lucide="bar-chart-3"></i>Hasil Survey</a></li>
-    </ul>
-
-    <div class="nav-section-label" style="margin-top:.75rem;">Pengaturan</div>
-    <ul class="nav-list">
-      <li class="nav-item"><a href="#" id="nav-profile" style="opacity: 0.6; cursor: not-allowed;"><i data-lucide="user-cog"></i>Profil Admin</a></li>
-    </ul>
-
-    <div class="sidebar__footer">
-      <a href="/logout" id="btn-logout"><i data-lucide="log-out"></i>Keluar</a>
-    </div>
-  </aside>
-
-  <!-- ══════════════════════════════════
-       MAIN WRAPPER
-       ══════════════════════════════════ -->
-  <div class="main-wrapper">
-
-    <!-- TOPBAR -->
-    <header class="topbar">
-      <div class="topbar__left" style="display:flex; align-items:center; gap:12px;">
-        <a href="/admin/partners" class="action-btn" title="Kembali ke daftar mitra" style="height:36px; width:36px; display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--dk-s200); border-radius:8px;"><i data-lucide="chevron-left"></i></a>
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar border-r bg-card text-card-foreground shrink-0" data-side="left"
+      aria-hidden="false">
+      <nav aria-label="Sidebar navigation" class="flex flex-col h-full justify-between">
         <div>
-          <h2>Detail Profil Kemitraan</h2>
-          <p id="topbar-date">Rincian profil, kontak person, dan riwayat survey</p>
-        </div>
-      </div>
-      <div class="topbar__right">
-        <div class="admin-chip" id="admin-chip">
-          <div class="admin-avatar">AF</div>
-          <span class="admin-chip__name"><%= user %></span>
-        </div>
-      </div>
-    </header>
+          <header class="p-4 border-b">
+            <a href="/admin/dashboard" class="flex items-center gap-2">
+              <img src="/image/fti%20logo.jpg" alt="Logo FTI" class="h-8 w-8 rounded-lg object-contain bg-white p-0.5 border" />
+              <div class="grid flex-1 text-left text-sm leading-tight">
+                <span class="truncate font-semibold text-foreground">SUKAFTI</span>
+                <span class="truncate text-xs text-muted-foreground">Survey Kerjasama</span>
+              </div>
+            </a>
+          </header>
 
-    <!-- CONTENT AREA -->
-    <main class="content-area" id="main-content">
-
-      <!-- Alerts -->
-      <% if (error) { %>
-        <div class="alert-banner alert-banner--error"><%= error %></div>
-      <% } %>
-      <% if (success) { %>
-        <div class="alert-banner alert-banner--success"><%= success %></div>
-      <% } %>
-
-      <div class="detail-grid">
-        
-        <!-- LEFT COLUMN: Profile Card -->
-        <div>
-          <div class="profile-card">
-            <% const avatarStr = partner.name.substring(0, 2).toUpperCase(); %>
-            <div class="profile-avatar"><%= avatarStr %></div>
-            <div class="profile-name"><%= partner.name %></div>
-            
-            <!-- Type badge -->
-            <% 
-               let typeBadgeClass = 'badge-type--other';
-               let typeText = 'Lainnya';
-               if (partner.type === 'university') { typeBadgeClass = 'badge-type--univ'; typeText = 'Perguruan Tinggi'; }
-               else if (partner.type === 'company') { typeBadgeClass = 'badge-type--company'; typeText = 'Swasta / Bisnis'; }
-               else if (partner.type === 'government') { typeBadgeClass = 'badge-type--gov'; typeText = 'Pemerintah / BUMN'; }
-               else if (partner.type === 'ngo') { typeBadgeClass = 'badge-type--ngo'; typeText = 'NGO / LSM'; }
-            %>
-            <div style="margin-bottom: 0.5rem;"><span class="badge-type <%= typeBadgeClass %>"><%= typeText %></span></div>
-            
-            <!-- Status Badge -->
-            <div>
-              <span class="pill <%= partner.status === 'active' ? 'pill--active' : 'pill--pending' %>" style="font-size:0.75rem;">
-                <%= partner.status === 'active' ? 'Akun Aktif' : 'Akun Ditangguhkan' %>
-              </span>
+          <section class="p-4">
+            <div role="group" aria-labelledby="group-label">
+              <h3 id="group-label" class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                Menu Utama</h3>
+              <ul class="space-y-1">
+                <li>
+                  <a href="/admin/dashboard"
+                    class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                    <i data-lucide="layout-dashboard" class="size-4"></i>
+                    <span>Dashboard Overview</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/admin/questions"
+                    class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                    <i data-lucide="help-circle" class="size-4"></i>
+                    <span>Pertanyaan Survey</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/admin/partners"
+                    class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-accent text-accent-foreground">
+                    <i data-lucide="building-2" class="size-4 text-foreground"></i>
+                    <span>Manajemen Mitra</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/admin/recap-answers"
+                    class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+                    <i data-lucide="bar-chart-3" class="size-4"></i>
+                    <span>Hasil Survey</span>
+                  </a>
+                </li>
+              </ul>
             </div>
+          </section>
+        </div>
 
-            <div class="profile-meta-list">
-              
-              <div class="profile-meta-item">
-                <div class="profile-meta-label">Email Instansi Resmi</div>
-                <div class="profile-meta-val"><%= partner.email || '—' %></div>
+        <footer class="p-4 border-t">
+          <div id="popover-profile" class="popover w-full">
+            <button id="popover-profile-trigger" type="button" aria-expanded="false"
+              aria-controls="popover-profile-popover"
+              class="flex w-full items-center gap-2 px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground justify-start text-left">
+              <div
+                class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xs shrink-0">
+                AF</div>
+              <div class="grid flex-1 text-xs leading-tight">
+                <span class="truncate font-semibold text-foreground">
+                  <%= user %>
+                </span>
+                <span class="truncate text-muted-foreground text-[10px]">Administrator</span>
               </div>
-
-              <div class="profile-meta-item">
-                <div class="profile-meta-label">Nomor Telepon</div>
-                <div class="profile-meta-val"><%= partner.phone || '—' %></div>
-              </div>
-
-              <div class="profile-meta-item">
-                <div class="profile-meta-label">Alamat Kantor</div>
-                <div class="profile-meta-val" style="white-space: pre-line;"><%= partner.address || '—' %></div>
-              </div>
-
-              <div class="profile-meta-item" style="margin-bottom: 0px;">
-                <div class="profile-meta-label">Fokus Deskripsi Kerjasama</div>
-                <div class="profile-meta-val" style="font-style: italic;"><%= partner.description || 'Tidak ada catatan deskripsi.' %></div>
-              </div>
-
-            </div>
-
-            <button class="btn btn--ghost-muted" id="btn-edit-profile" style="width:100%; border:1px solid var(--dk-s200); border-radius:6px; margin-top:1.5rem; display:flex; align-items:center; justify-content:center; gap:8px;">
-              <i data-lucide="edit-3" style="width:14px; height:14px;"></i> Ubah Profil
+              <i data-lucide="chevrons-up-down" class="size-4 text-muted-foreground shrink-0 ml-auto"></i>
             </button>
+            <div id="popover-profile-popover" data-popover aria-hidden="true" data-side="top" class="w-[200px]">
+              <div class="grid p-1 bg-popover text-popover-foreground border rounded-md shadow-md">
+                <a href="/logout"
+                  class="flex items-center gap-2 px-2 py-1.5 text-sm text-destructive hover:bg-destructive/10 rounded-sm">
+                  <i data-lucide="log-out" class="size-4"></i>
+                  <span>Keluar</span>
+                </a>
+              </div>
+            </div>
           </div>
+        </footer>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main id="content" class="flex-1 flex flex-col min-w-0 bg-muted/20">
+
+      <!-- Topbar Header -->
+      <header
+        class="bg-background sticky inset-x-0 top-0 isolate flex shrink-0 items-center justify-between border-b z-10 h-14 px-4 gap-4">
+        <div class="flex items-center gap-2">
+          <a href="/admin/partners"
+            class="h-8 w-8 inline-flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground text-muted-foreground mr-1"
+            title="Kembali ke Daftar Mitra">
+            <i data-lucide="chevron-left" class="size-4"></i>
+          </a>
+          <h1 class="text-sm font-semibold tracking-tight text-foreground">
+            Detail Profil Kemitraan
+          </h1>
         </div>
 
-        <!-- RIGHT COLUMN: Contacts and Surveys -->
-        <div>
-          
-          <!-- Section Card 1: Narahubung / Contact Persons -->
-          <div class="section-card">
-            <div class="section-card__header">
-              <h3><i data-lucide="contact"></i> Kontak Hubung &amp; Perwakilan</h3>
-              <button class="btn-generate" id="btn-add-contact" style="padding: 0.35rem 0.75rem; font-size:0.75rem;" type="button">
-                <i data-lucide="plus-circle" style="width:13px; height:13px;"></i> Tambah Kontak
-              </button>
-            </div>
+        <div class="flex items-center gap-2">
 
-            <div id="contacts-list">
-              <% if (locals.contacts && contacts.length > 0) { %>
-                <% contacts.forEach(function(c) { %>
-                  <div class="contact-item" id="contact-row-<%= c.id %>">
-                    <div class="contact-info">
-                      <div class="contact-icon"><i data-lucide="user"></i></div>
-                      <div>
-                        <div class="contact-name">
-                          <%= c.name %> 
-                          <% if (c.is_primary === 1) { %>
-                            <span class="badge-primary-contact">Utama</span>
-                          <% } %>
+          <button type="button" aria-label="Toggle dark mode"
+            onclick="document.dispatchEvent(new CustomEvent('basecoat:theme'))"
+            class="h-8 w-8 inline-flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground">
+            <i data-lucide="sun" class="size-4 hidden dark:block"></i>
+            <i data-lucide="moon" class="size-4 block dark:hidden"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Inner Content -->
+      <div class="p-6 md:p-8 flex-1 space-y-6">
+
+        <!-- Alerts -->
+        <% if (error) { %>
+          <div
+            class="bg-destructive/15 text-destructive text-sm p-4 rounded-md border border-destructive/20 flex items-center gap-2">
+            <i data-lucide="alert-circle" class="size-4 shrink-0"></i>
+            <span>
+              <%= error %>
+            </span>
+          </div>
+          <% } %>
+            <% if (success) { %>
+              <div
+                class="bg-emerald-500/10 text-emerald-500 text-sm p-4 rounded-md border border-emerald-500/20 flex items-center gap-2">
+                <i data-lucide="check-circle-2" class="size-4 shrink-0"></i>
+                <span>
+                  <%= success %>
+                </span>
+              </div>
+              <% } %>
+
+                <div class="detail-split-grid items-start">
+
+                  <!-- Left Panel: Profile Info Card -->
+                  <div data-slot="card"
+                    class="premium-card rounded-2xl p-6 flex flex-col items-center text-center">
+                    <% const avatarStr=partner.name.substring(0, 2).toUpperCase(); %>
+                      <div
+                        class="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10 text-primary text-3xl font-extrabold border mb-4">
+                        <%= avatarStr %>
+                      </div>
+                      <h2 class="text-xl font-bold text-foreground leading-tight">
+                        <%= partner.name %>
+                      </h2>
+
+                      <% let typeBadgeClass='bg-slate-500/10 text-slate-500 border-slate-500/20' ; let
+                        typeText='Lainnya' ; if (partner.type==='university' ) {
+                        typeBadgeClass='bg-blue-500/10 text-blue-500 border-blue-500/20' ; typeText='Perguruan Tinggi' ;
+                        } else if (partner.type==='company' ) {
+                        typeBadgeClass='bg-sky-500/10 text-sky-500 border-sky-500/20' ; typeText='Swasta / Bisnis' ; }
+                        else if (partner.type==='government' ) {
+                        typeBadgeClass='bg-amber-500/10 text-amber-500 border-amber-500/20' ;
+                        typeText='Pemerintah / BUMN' ; } else if (partner.type==='ngo' ) {
+                        typeBadgeClass='bg-emerald-500/10 text-emerald-500 border-emerald-500/20' ; typeText='NGO / LSM'
+                        ; } %>
+                        <div class="mt-3 flex flex-col gap-1.5 items-center">
+                          <span
+                            class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold <%= typeBadgeClass %>">
+                            <%= typeText %>
+                          </span>
+                          <span
+                            class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold <%= partner.status === 'active' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20' %>">
+                            <%= partner.status==='active' ? 'Akun Aktif' : 'Ditangguhkan' %>
+                          </span>
                         </div>
-                        <div style="font-size:0.75rem; color:#64748b; margin-top:2px;"><%= c.position %></div>
-                        <div style="font-size:0.75rem; color:#334155; margin-top:4px; display:flex; gap:12px;">
-                          <span><i data-lucide="mail" style="width:10px; height:10px; display:inline-block; margin-right:4px;"></i><%= c.email || '—' %></span>
-                          <span><i data-lucide="phone" style="width:10px; height:10px; display:inline-block; margin-right:4px;"></i><%= c.phone || '—' %></span>
+
+                        <!-- Metadata List -->
+                        <div class="w-full border-t text-left mt-6 pt-4 space-y-4">
+                          <div>
+                            <div class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Email
+                              Instansi Resmi</div>
+                            <div class="text-sm text-foreground mt-0.5">
+                              <%= partner.email || '—' %>
+                            </div>
+                          </div>
+
+                          <div>
+                            <div class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Nomor
+                              Telepon</div>
+                            <div class="text-sm text-foreground mt-0.5">
+                              <%= partner.phone || '—' %>
+                            </div>
+                          </div>
+
+                          <div>
+                            <div class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Alamat
+                              Kantor</div>
+                            <div class="text-sm text-foreground mt-0.5 whitespace-pre-line">
+                              <%= partner.address || '—' %>
+                            </div>
+                          </div>
+
+                          <div>
+                            <div class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Fokus
+                              Deskripsi Kerjasama</div>
+                            <div class="text-sm text-foreground mt-0.5 italic">
+                              <%= partner.description || 'Tidak ada catatan deskripsi.' %>
+                            </div>
+                          </div>
                         </div>
+
+                        <button id="btn-edit-profile"
+                          class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 w-full mt-6">
+                          <i data-lucide="edit-3" class="size-4"></i>
+                          <span>Ubah Profil</span>
+                        </button>
+                  </div>
+
+                  <!-- Right Panel: Contacts & Logs (colspan=2) -->
+                  <div class="md:col-span-2 space-y-6">
+
+                    <!-- Narahubung Card -->
+                    <div data-slot="card" class="premium-card rounded-2xl">
+                      <div class="p-6 flex justify-between items-center border-b pb-4">
+                        <h3 class="font-semibold leading-none tracking-tight flex items-center gap-2 text-foreground">
+                          <i data-lucide="contact" class="size-4 text-primary"></i>
+                          <span>Kontak Hubung &amp; Perwakilan</span>
+                        </h3>
+                        <button id="btn-add-contact"
+                          class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-semibold transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3 py-1">
+                          <i data-lucide="plus-circle" class="size-3.5"></i>
+                          <span>Tambah Kontak</span>
+                        </button>
+                      </div>
+
+                      <div class="p-6 divide-y space-y-4">
+                        <% if (locals.contacts && contacts.length> 0) { %>
+                          <% contacts.forEach(function(c) { %>
+                            <div class="flex items-start justify-between pt-4 first:pt-0" id="contact-row-<%= c.id %>">
+                              <div class="flex gap-3">
+                                <div
+                                  class="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground text-xs">
+                                  <i data-lucide="user" class="size-4"></i></div>
+                                <div>
+                                  <div class="text-sm font-semibold text-foreground flex items-center gap-2">
+                                    <span>
+                                      <%= c.name %>
+                                    </span>
+                                    <% if (c.is_primary===1) { %>
+                                      <span
+                                        class="inline-flex items-center rounded-full border px-1.5 py-0.5 text-[9px] font-bold bg-emerald-500/10 text-emerald-500 border-emerald-500/20 uppercase">Utama</span>
+                                      <% } %>
+                                  </div>
+                                  <div class="text-xs text-muted-foreground mt-0.5">
+                                    <%= c.position %>
+                                  </div>
+                                  <div class="text-xs text-muted-foreground mt-2 flex flex-wrap gap-4">
+                                    <span class="flex items-center gap-1"><i data-lucide="mail" class="size-3"></i>
+                                      <%= c.email || '—' %>
+                                    </span>
+                                    <span class="flex items-center gap-1"><i data-lucide="phone" class="size-3"></i>
+                                      <%= c.phone || '—' %>
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <% if (c.is_primary !==1) { %>
+                                <button
+                                  class="h-8 w-8 inline-flex items-center justify-center rounded-md border border-destructive/20 hover:bg-destructive/10 text-destructive"
+                                  hx-delete="/admin/partners/contacts/<%= c.id %>"
+                                  hx-confirm="Apakah Anda yakin ingin menghapus perwakilan kontak ini dari database?"
+                                  hx-target="#contact-row-<%= c.id %>" hx-swap="outerHTML" title="Hapus Kontak">
+                                  <i data-lucide="trash-2" class="size-3.5"></i>
+                                </button>
+                                <% } %>
+                            </div>
+                            <% }) %>
+                              <% } else { %>
+                                <div class="text-center text-muted-foreground text-sm py-4">
+                                  Belum ada perwakilan kontak terdaftar.
+                                </div>
+                                <% } %>
                       </div>
                     </div>
-                    
-                    <% if (c.is_primary !== 1) { %>
-                      <button class="action-btn action-btn--del"
-                              hx-delete="/admin/partners/contacts/<%= c.id %>"
-                              hx-confirm="Apakah Anda yakin ingin menghapus perwakilan kontak ini dari database?"
-                              hx-target="#contact-row-<%= c.id %>"
-                              hx-swap="outerHTML"
-                              title="Hapus Kontak">
-                        <i data-lucide="trash-2" style="width:14px; height:14px;"></i>
-                      </button>
-                    <% } %>
+
+                    <!-- Riwayat Survei Card -->
+                    <div data-slot="card"
+                      class="premium-card rounded-2xl overflow-hidden">
+                      <div class="p-6 flex justify-between items-center border-b pb-4">
+                        <h3 class="font-semibold leading-none tracking-tight flex items-center gap-2 text-foreground">
+                          <i data-lucide="history" class="size-4 text-primary"></i>
+                          <span>Riwayat Survei &amp; Aktivitas</span>
+                        </h3>
+
+                        <a href="/admin/partners/<%= partner.id %>/export-pdf"
+                          class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-semibold transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3 py-1">
+                          <i data-lucide="printer" class="size-3.5"></i>
+                          <span>Cetak PDF Laporan</span>
+                        </a>
+                      </div>
+
+                      <div class="overflow-x-auto w-full">
+                        <table class="w-full text-sm">
+                          <thead class="bg-muted/50 border-b">
+                            <tr class="transition-colors hover:bg-muted/50">
+                              <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Judul
+                                Survei</th>
+                              <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">PIN Akses
+                              </th>
+                              <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Status PIN
+                              </th>
+                              <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Selesai
+                                Pada</th>
+                              <th class="h-10 px-4 text-center align-middle font-medium text-muted-foreground">Skor</th>
+                            </tr>
+                          </thead>
+                          <tbody class="divide-y">
+                            <% if (locals.surveys && surveys.length> 0) { %>
+                              <% surveys.forEach(function(s) { %>
+                                <tr class="hover:bg-muted/30 transition-colors">
+                                  <td class="p-4 align-middle font-semibold text-foreground">
+                                    <%= s.survey_title %>
+                                  </td>
+                                  <td class="p-4 align-middle font-mono text-xs">
+                                    <%= s.pin %>
+                                  </td>
+                                  <td class="p-4 align-middle">
+                                    <span
+                                      class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold <%= s.is_used === 1 ? 'bg-slate-500/10 text-slate-500 border-slate-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' %>">
+                                      <%= s.is_used===1 ? 'Terpakai' : 'Aktif' %>
+                                    </span>
+                                  </td>
+                                  <td class="p-4 align-middle text-muted-foreground text-xs">
+                                    <% if (s.used_at) { const d=new Date(s.used_at); %>
+                                      <%= d.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'})
+                                        %>
+                                        <% } else { %>
+                                          —
+                                          <% } %>
+                                  </td>
+                                  <td class="p-4 align-middle text-center font-bold text-foreground">
+                                    <%= s.is_used===1 ? `${s.score_total} Poin` : '—' %>
+                                  </td>
+                                </tr>
+                                <% }) %>
+                                  <% } else { %>
+                                    <tr>
+                                      <td colspan="5" class="p-6 text-center text-muted-foreground text-xs">
+                                        Mitra belum diundang untuk mengikuti survei kerja sama mana pun.
+                                      </td>
+                                    </tr>
+                                    <% } %>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
                   </div>
-                <% }) %>
-              <% } else { %>
-                <div style="text-align:center; color:#94a3b8; font-size:0.875rem; padding: 2rem 0;">
-                  Belum ada perwakilan kontak terdaftar.
+
                 </div>
-              <% } %>
-            </div>
-          </div>
-
-          <!-- Section Card 2: Riwayat Survei & Token PIN -->
-          <div class="section-card">
-            <div class="section-card__header">
-              <h3><i data-lucide="history"></i> Riwayat Survei &amp; Aktivitas</h3>
-              
-              <!-- PDF Report Download Button -->
-              <a href="/admin/partners/<%= partner.id %>/export-pdf" class="btn" style="background-color: #0f172a; color: white; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 600;">
-                <i data-lucide="printer" style="width:12px; height:12px;"></i> Cetak PDF Laporan
-              </a>
-            </div>
-
-            <div style="overflow-x:auto;">
-              <table class="data-table" style="box-shadow:none; border: 1px solid var(--dk-s200);">
-                <thead>
-                  <tr>
-                    <th>Judul Survei</th>
-                    <th>PIN Akses</th>
-                    <th>Status PIN</th>
-                    <th>Selesai Pada</th>
-                    <th style="text-align:center;">Skor</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% if (locals.surveys && surveys.length > 0) { %>
-                    <% surveys.forEach(function(s) { %>
-                      <tr>
-                        <td style="font-weight: 600; color: #1e293b; font-size:0.825rem;"><%= s.survey_title %></td>
-                        <td><span class="pin-code" style="font-size:0.775rem;"><%= s.pin %></span></td>
-                        <td>
-                          <span class="pill <%= s.is_used === 1 ? 'pill--used' : 'pill--active' %>" style="font-size:0.7rem; text-transform: uppercase;">
-                            <%= s.is_used === 1 ? 'Terpakai' : 'Aktif' %>
-                          </span>
-                        </td>
-                        <td style="font-size:0.8rem; color:#64748b;">
-                          <% if (s.used_at) { 
-                               const d = new Date(s.used_at);
-                          %>
-                            <%= d.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'}) %>
-                          <% } else { %>
-                            —
-                          <% } %>
-                        </td>
-                        <td style="text-align:center; font-weight:700; color:#0f172a; font-size:0.825rem;">
-                          <%= s.is_used === 1 ? `${s.score_total} Poin` : '—' %>
-                        </td>
-                      </tr>
-                    <% }) %>
-                  <% } else { %>
-                    <tr>
-                      <td colspan="5" style="text-align:center; color:#94a3b8; padding: 2rem 0; font-size:0.825rem;">
-                        Mitra belum diundang untuk mengikuti survei kerja sama mana pun.
-                      </td>
-                    </tr>
-                  <% } %>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-        </div>
 
       </div>
-
     </main>
   </div>
-</div>
 
-<!-- ══════════════════════════════════
-     MODAL DIALOG: TAMBAH KONTAK BARU
-     ══════════════════════════════════ -->
-<dialog id="contact-dialog">
-  <div class="dialog-header">
-    <i data-lucide="contact"></i>
-    <h3 style="margin:0; font-size: 1.25rem; color: #0f172a;">Tambah Perwakilan Kontak Baru</h3>
-  </div>
-  <p style="color:#64748b; margin-bottom:1.5rem; font-size:0.825rem; line-height:1.4;">Tambahkan data staf/perwakilan penghubung dari instansi <%= partner.name %>.</p>
-  
-  <form action="/admin/partners/<%= partner.id %>/contacts" method="POST" id="form-add-contact">
-    
-    <div class="form-group">
-      <label for="contact-name-input">Nama Lengkap Narahubung</label>
-      <input type="text" id="contact-name-input" name="name" class="form-control" placeholder="Nama lengkap beserta gelar..." required />
-    </div>
-
-    <div class="form-group">
-      <label for="contact-position-input">Jabatan Narahubung</label>
-      <input type="text" id="contact-position-input" name="position" class="form-control" placeholder="Misal: Staff Hubungan Kerja Sama" required />
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label for="contact-email-input">Email Kontak</label>
-        <input type="email" id="contact-email-input" name="email" class="form-control" placeholder="kontak@perusahaan.com" />
+  <!-- Tambah Narahubung Dialog Modal -->
+  <dialog id="contact-dialog"
+    class="rounded-xl border bg-card text-card-foreground shadow-lg max-w-md w-full p-6 backdrop:bg-black/50 backdrop:backdrop-blur-sm">
+    <div class="flex flex-col gap-4 max-h-[80vh] overflow-y-auto pr-1">
+    <div class="flex items-center gap-2 border-b pb-3">
+      <div class="p-2 bg-primary/10 text-primary rounded-lg">
+        <i data-lucide="contact" class="size-5"></i>
       </div>
-
-      <div class="form-group">
-        <label for="contact-phone-input">No Telepon / WhatsApp</label>
-        <input type="text" id="contact-phone-input" name="phone" class="form-control" placeholder="08xxxxxxxxxx" />
+      <div>
+        <h3 class="text-lg font-semibold leading-none tracking-tight">Tambah Narahubung</h3>
+        <p class="text-xs text-muted-foreground mt-1">Tambahkan data perwakilan staf baru dari instansi <%= partner.name
+            %>.</p>
       </div>
     </div>
 
-    <div class="form-group">
-      <label for="contact-primary-input">Jadikan Kontak Utama?</label>
-      <select id="contact-primary-input" name="is_primary" class="form-control">
-        <option value="0" selected>Tidak (Kontak Pendukung)</option>
-        <option value="1">Ya (Gantikan Kontak Utama Saat Ini)</option>
-      </select>
-    </div>
-
-    <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top: 1.75rem;">
-      <button type="button" id="btn-close-contact-modal" class="btn btn--ghost-muted" style="border:1px solid #cbd5e1;">Batal</button>
-      <button type="submit" class="btn btn--primary" style="background:#0f172a; color:white; border:none; border-radius:6px; padding:0.6rem 1.25rem;">
-        Simpan Kontak
-      </button>
-    </div>
-  </form>
-</dialog>
-
-<!-- ══════════════════════════════════
-     MODAL DIALOG: UBAH PROFIL MITRA
-     ══════════════════════════════════ -->
-<dialog id="edit-dialog">
-  <div class="dialog-header">
-    <i data-lucide="edit-3"></i>
-    <h3 style="margin:0; font-size: 1.25rem; color: #0f172a;">Ubah Profil Kemitraan</h3>
-  </div>
-  <p style="color:#64748b; margin-bottom:1.5rem; font-size:0.825rem; line-height:1.4;">Perbarui rincian informasi dan legalitas perusahaan mitra terdaftar.</p>
-  
-  <form action="/admin/partners/<%= partner.id %>/update" method="POST" id="form-edit-partner">
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-      
-      <div class="form-group" style="grid-column: span 2;">
-        <label for="edit-name">Nama Instansi / Perusahaan</label>
-        <input type="text" id="edit-name" name="name" value="<%= partner.name %>" class="form-control" required />
+    <form action="/admin/partners/<%= partner.id %>/contacts" method="POST" id="form-add-contact"
+      class="flex flex-col gap-4">
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-medium leading-none" for="contact-name-input">Nama Lengkap Narahubung</label>
+        <input type="text" id="contact-name-input" name="name"
+          class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          placeholder="Nama lengkap beserta gelar..." required />
       </div>
 
-      <div class="form-group">
-        <label for="edit-type">Tipe Kemitraan</label>
-        <select id="edit-type" name="type" class="form-control" required>
-          <option value="university" <%= partner.type === 'university' ? 'selected' : '' %>>Perguruan Tinggi</option>
-          <option value="company" <%= partner.type === 'company' ? 'selected' : '' %>>Swasta / Perusahaan</option>
-          <option value="government" <%= partner.type === 'government' ? 'selected' : '' %>>Instansi Pemerintah</option>
-          <option value="ngo" <%= partner.type === 'ngo' ? 'selected' : '' %>>NGO / LSM</option>
-          <option value="other" <%= partner.type === 'other' ? 'selected' : '' %>>Lainnya</option>
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-medium leading-none" for="contact-position-input">Jabatan Narahubung</label>
+        <input type="text" id="contact-position-input" name="position"
+          class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          placeholder="Misal: HRD Manager" required />
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium leading-none" for="contact-email-input">Email Kontak</label>
+          <input type="email" id="contact-email-input" name="email"
+            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            placeholder="kontak@perusahaan.com" />
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium leading-none" for="contact-phone-input">No HP / WhatsApp</label>
+          <input type="text" id="contact-phone-input" name="phone"
+            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            placeholder="08xxxxxxxxxx" />
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-medium leading-none" for="contact-primary-input">Jadikan Kontak Utama?</label>
+        <select id="contact-primary-input" name="is_primary"
+          class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring">
+          <option value="0" selected>Tidak (Kontak Pendukung)</option>
+          <option value="1">Ya (Gantikan Kontak Utama Saat Ini)</option>
         </select>
       </div>
 
-      <div class="form-group">
-        <label for="edit-status">Status Akun</label>
-        <select id="edit-status" name="status" class="form-control" required>
-          <option value="active" <%= partner.status === 'active' ? 'selected' : '' %>>Aktif</option>
-          <option value="inactive" <%= partner.status === 'inactive' ? 'selected' : '' %>>Non-Aktif</option>
-        </select>
+      <div class="flex justify-end gap-2 border-t pt-3 mt-2">
+        <button type="button" id="btn-close-contact-modal"
+          class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
+          Batal
+        </button>
+        <button type="submit"
+          class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
+          Simpan Kontak
+        </button>
       </div>
-
-      <div class="form-group">
-        <label for="edit-email">Email Resmi</label>
-        <input type="email" id="edit-email" name="email" value="<%= partner.email || '' %>" class="form-control" />
-      </div>
-
-      <div class="form-group">
-        <label for="edit-phone">Nomor Telepon</label>
-        <input type="text" id="edit-phone" name="phone" value="<%= partner.phone || '' %>" class="form-control" />
-      </div>
-
-      <div class="form-group" style="grid-column: span 2;">
-        <label for="edit-address">Alamat Lengkap</label>
-        <textarea id="edit-address" name="address" class="form-control" rows="2"><%= partner.address || '' %></textarea>
-      </div>
-
-      <div class="form-group" style="grid-column: span 2; margin-bottom:0.5rem;">
-        <label for="edit-description">Deskripsi Singkat Kerja Sama</label>
-        <textarea id="edit-description" name="description" class="form-control" rows="2"><%= partner.description || '' %></textarea>
-      </div>
-
-    </div>
-
-    <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top: 1.5rem;">
-      <button type="button" id="btn-close-edit-modal" class="btn btn--ghost-muted" style="border:1px solid #cbd5e1;">Batal</button>
-      <button type="submit" class="btn btn--primary" style="background:#0f172a; color:white; border:none; border-radius:6px; padding:0.6rem 1.25rem;">
-        Simpan Rincian
-      </button>
-    </div>
-  </form>
+    </form>
+  </div>
 </dialog>
 
-<script>
-  // ── Lucide Icons ───────────────────────────────────────
-  lucide.createIcons();
+  <!-- Ubah Profil Dialog Modal -->
+  <dialog id="edit-dialog"
+    class="rounded-xl border bg-card text-card-foreground shadow-lg max-w-lg w-full p-6 backdrop:bg-black/50 backdrop:backdrop-blur-sm">
+    <div class="flex flex-col gap-4 max-h-[80vh] overflow-y-auto pr-1">
+    <div class="flex items-center gap-2 border-b pb-3">
+      <div class="p-2 bg-primary/10 text-primary rounded-lg">
+        <i data-lucide="edit-3" class="size-5"></i>
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold leading-none tracking-tight">Ubah Profil Kemitraan</h3>
+        <p class="text-xs text-muted-foreground mt-1">Perbarui rincian informasi dan legalitas perusahaan mitra
+          terdaftar.</p>
+      </div>
+    </div>
 
-  // Set Current Date in Header
-  const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-  document.getElementById('topbar-date').innerText = new Date().toLocaleDateString('id-ID', dateOptions) + " — Informasi Detail";
+    <form action="/admin/partners/<%= partner.id %>/update" method="POST" id="form-edit-partner"
+      class="flex flex-col gap-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-2 col-span-2">
+          <label class="text-sm font-medium leading-none" for="edit-name">Nama Instansi / Perusahaan</label>
+          <input type="text" id="edit-name" name="name" value="<%= partner.name %>"
+            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            required />
+        </div>
 
-  // ── Modal Dialogue Forms Logic ─────────────────────────
-  const contactModal = document.getElementById('contact-dialog');
-  const editProfileModal = document.getElementById('edit-dialog');
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium leading-none" for="edit-type">Tipe Kemitraan</label>
+          <select id="edit-type" name="type"
+            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            required>
+            <option value="university" <%=partner.type==='university' ? 'selected' : '' %>>Perguruan Tinggi</option>
+            <option value="company" <%=partner.type==='company' ? 'selected' : '' %>>Swasta / Perusahaan</option>
+            <option value="government" <%=partner.type==='government' ? 'selected' : '' %>>Instansi Pemerintah</option>
+            <option value="ngo" <%=partner.type==='ngo' ? 'selected' : '' %>>NGO / LSM</option>
+            <option value="other" <%=partner.type==='other' ? 'selected' : '' %>>Lainnya</option>
+          </select>
+        </div>
 
-  const btnAddContact = document.getElementById('btn-add-contact');
-  const btnCloseContactModal = document.getElementById('btn-close-contact-modal');
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium leading-none" for="edit-status">Status Akun</label>
+          <select id="edit-status" name="status"
+            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            required>
+            <option value="active" <%=partner.status==='active' ? 'selected' : '' %>>Aktif</option>
+            <option value="inactive" <%=partner.status==='inactive' ? 'selected' : '' %>>Non-Aktif</option>
+          </select>
+        </div>
 
-  const btnEditProfile = document.getElementById('btn-edit-profile');
-  const btnCloseEditModal = document.getElementById('btn-close-edit-modal');
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium leading-none" for="edit-email">Email Resmi</label>
+          <input type="email" id="edit-email" name="email" value="<%= partner.email || '' %>"
+            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring" />
+        </div>
 
-  // Trigger Narahubung Modal
-  if (btnAddContact) {
-    btnAddContact.addEventListener('click', () => {
-      contactModal.showModal();
-    });
-  }
-  btnCloseContactModal.addEventListener('click', () => {
-    contactModal.close();
-  });
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium leading-none" for="edit-phone">Nomor Telepon</label>
+          <input type="text" id="edit-phone" name="phone" value="<%= partner.phone || '' %>"
+            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring" />
+        </div>
 
-  // Trigger Profile Edit Modal
-  if (btnEditProfile) {
-    btnEditProfile.addEventListener('click', () => {
-      editProfileModal.showModal();
-    });
-  }
-  btnCloseEditModal.addEventListener('click', () => {
-    editProfileModal.close();
-  });
+        <div class="flex flex-col gap-2 col-span-2">
+          <label class="text-sm font-medium leading-none" for="edit-address">Alamat Lengkap</label>
+          <textarea id="edit-address" name="address"
+            class="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"><%= partner.address || '' %></textarea>
+        </div>
 
-  // Listening to custom HTMX triggers for alerts
-  document.body.addEventListener('showAlert', function(evt) {
-    alert(evt.detail.value);
-  });
+        <div class="flex flex-col gap-2 col-span-2">
+          <label class="text-sm font-medium leading-none" for="edit-description">Deskripsi Singkat Kerja Sama</label>
+          <textarea id="edit-description" name="description"
+            class="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"><%= partner.description || '' %></textarea>
+        </div>
+      </div>
 
-  // Resequence or refresh view if HTMX deletes a contact dynamically
-  document.body.addEventListener('htmx:afterOnLoad', function(evt) {
-    if (evt.detail.requestConfig.method === 'DELETE' && evt.detail.requestConfig.path.includes('/admin/partners/contacts/')) {
-      alert('Kontak perwakilan berhasil dihapus secara permanen!');
+      <div class="flex justify-end gap-2 border-t pt-3 mt-2">
+        <button type="button" id="btn-close-edit-modal"
+          class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
+          Batal
+        </button>
+        <button type="submit"
+          class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
+          Simpan Rincian
+        </button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+  <script>
+    lucide.createIcons();
+
+    const contactModal = document.getElementById('contact-dialog');
+    const editProfileModal = document.getElementById('edit-dialog');
+
+    const btnAddContact = document.getElementById('btn-add-contact');
+    const btnCloseContactModal = document.getElementById('btn-close-contact-modal');
+
+    const btnEditProfile = document.getElementById('btn-edit-profile');
+    const btnCloseEditModal = document.getElementById('btn-close-edit-modal');
+
+    if (btnAddContact) {
+      btnAddContact.addEventListener('click', () => {
+        contactModal.showModal();
+      });
     }
-  });
+    btnCloseContactModal.addEventListener('click', () => {
+      contactModal.close();
+    });
 
-</script>
+    if (btnEditProfile) {
+      btnEditProfile.addEventListener('click', () => {
+        editProfileModal.showModal();
+      });
+    }
+    btnCloseEditModal.addEventListener('click', () => {
+      editProfileModal.close();
+    });
+
+    document.body.addEventListener('showAlert', function (evt) {
+      alert(evt.detail.value);
+    });
+
+    document.body.addEventListener('htmx:afterOnLoad', function (evt) {
+      if (evt.detail.requestConfig.method === 'DELETE' && evt.detail.requestConfig.path.includes('/admin/partners/contacts/')) {
+        alert('Kontak perwakilan berhasil dihapus secara permanen!');
+      }
+    });
+  </script>
 </body>
+
 </html>

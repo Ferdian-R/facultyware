@@ -244,9 +244,27 @@ const showSuccessPage = async (req, res, next) => {
       return res.redirect("/login-mitra?error=Detail+respon+tidak+ditemukan.");
     }
 
+    // Fetch questions and the partner's answers
+    const [answers] = await db.query(
+      `SELECT 
+        sq.question_text, 
+        sq.type AS question_type,
+        sq.order_number,
+        sa.answer_text, 
+        sa.score AS answer_score,
+        sqo.option_text AS selected_option
+       FROM survey_answers sa
+       JOIN survey_questions sq ON sa.survey_question_id = sq.id
+       LEFT JOIN survey_question_options sqo ON sa.survey_question_option_id = sqo.id
+       WHERE sa.survey_response_id = ?
+       ORDER BY sq.order_number ASC, sq.id ASC`,
+      [responseId]
+    );
+
     res.render("survey/success", {
       title: "Survei Berhasil Dikirim | SUKAFTI",
-      response: responseDetail
+      response: responseDetail,
+      answers: answers
     });
   } catch (err) {
     next(err);

@@ -1,269 +1,347 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Survei Kerja Sama Berhasil Dikirim — SUKAFTI FTI Universitas Andalas." />
-  <title><%= title %></title>
+  <head>
+    <script>
+      (() => {
+        try {
+          localStorage.removeItem("themeVariant");
+        } catch (_) {}
+        try {
+          const stored = localStorage.getItem("themeMode");
+          if (
+            stored
+              ? stored === "dark"
+              : matchMedia("(prefers-color-scheme: dark)").matches
+          ) {
+            document.documentElement.classList.add("dark");
+          }
+        } catch (_) {}
 
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-  <!-- Basecoat UI -->
-  <link rel="stylesheet" href="https://unpkg.com/basecoat-css@latest/dist/basecoat.min.css" />
+        const apply = (dark) => {
+          document.documentElement.classList.toggle("dark", dark);
+          try {
+            localStorage.setItem("themeMode", dark ? "dark" : "light");
+          } catch (_) {}
+        };
 
-  <style>
-    :root {
-      --slate-50: #f8fafc;
-      --slate-100: #f1f5f9;
-      --slate-200: #e2e8f0;
-      --slate-300: #cbd5e1;
-      --slate-400: #94a3b8;
-      --slate-600: #475569;
-      --slate-700: #334155;
-      --slate-800: #1e293b;
-      --slate-900: #0f172a;
-    }
+        document.addEventListener("basecoat:theme", (event) => {
+          const mode = event.detail?.mode;
+          apply(
+            mode === "dark"
+              ? true
+              : mode === "light"
+                ? false
+                : !document.documentElement.classList.contains("dark"),
+          );
+        });
+      })();
+    </script>
 
-    body {
-      background-color: var(--slate-50);
-      color: var(--slate-900);
-      font-family: 'Inter', sans-serif;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-    }
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= title %></title>
+    <meta name="description" content="Survei Kerja Sama Berhasil Dikirim — SUKAFTI FTI Universitas Andalas." />
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
 
-    .success-container {
-      width: 100%;
-      max-width: 520px;
-      padding: 1.5rem;
-      text-align: center;
-    }
+    <link rel="stylesheet" href="/assets/styles.css" />
 
-    .success-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: #d1fae5;
-      color: #065f46;
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.1);
-      border: 4px solid #a7f3d0;
-    }
-
-    .success-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--slate-900);
-      margin: 0 0 0.5rem 0;
-    }
-
-    .success-desc {
-      font-size: 0.95rem;
-      color: var(--slate-600);
-      line-height: 1.6;
-      margin: 0 0 2rem 0;
-    }
-
-    /* Receipt Card */
-    .receipt-card {
-      background: white;
-      border: 1px dashed var(--slate-300);
-      border-radius: 12px;
-      padding: 2rem;
-      text-align: left;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
-      margin-bottom: 2rem;
-      position: relative;
-    }
-
-    /* Receipt jagged details at top/bottom (decoration) */
-    .receipt-card::before, .receipt-card::after {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background-size: 8px 4px;
-      pointer-events: none;
-    }
+    <script src="/assets/js/basecoat.js?v=0.3.11" defer></script>
+    <script src="/assets/js/command.js?v=0.3.11" defer></script>
+    <script src="/assets/js/dropdown-menu.js?v=0.3.11" defer></script>
+    <script src="/assets/js/popover.js?v=0.3.11" defer></script>
+    <script src="/assets/js/select.js?v=0.3.11" defer></script>
+    <script src="/assets/js/sidebar.js?v=0.3.11" defer></script>
+    <script src="/assets/js/tabs.js?v=0.3.11" defer></script>
+    <script src="/assets/js/toast.js?v=0.3.11" defer></script>
     
-    .receipt-card::before {
-      top: -4px;
-      background-image: linear-gradient(135deg, white 25%, transparent 25%), linear-gradient(225deg, white 25%, transparent 25%);
-    }
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <style>
+      /* Basecard enhancements */
+      .premium-card {
+        border: 1px solid var(--border) !important;
+        background: var(--card) !important;
+        color: var(--card-foreground) !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      }
+      .premium-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.06) !important;
+      }
+      
+      /* Print styles */
+      @media print {
+        body {
+          background: white !important;
+          color: black !important;
+          font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+          margin: 1.5cm !important;
+          padding: 0 !important;
+        }
+        
+        .no-print {
+          display: none !important;
+        }
+        
+        /* Force display overrides on print helpers to defeat the .hidden display:none !important override */
+        .print\:flex {
+          display: flex !important;
+        }
+        .print\:block {
+          display: block !important;
+        }
+        .print\:table {
+          display: table !important;
+        }
+        .print\:grid {
+          display: grid !important;
+        }
+        
+        /* Force outer containers to be block display instead of flex/grid to prevent layout collapse */
+        div.flex.min-h-screen, div.min-h-screen, .min-h-screen {
+          display: block !important;
+          min-height: auto !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+        div.w-full.max-w-3xl, .max-w-3xl, .max-w-md, .max-w-4xl {
+          max-width: 100% !important;
+          width: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          display: block !important;
+          box-shadow: none !important;
+          border: none !important;
+        }
+        
+        /* Reset print-card overlay defaults */
+        .print-card {
+          border: none !important;
+          box-shadow: none !important;
+          background: white !important;
+          color: black !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          display: block !important;
+        }
+        
+        /* Force all printed text and borders to solid black (crucial for dark mode printing) */
+        body, p, span, h1, h2, h3, h4, th, td, strong, a, div {
+          color: black !important;
+          border-color: black !important;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        
+        /* Print-specific tables formatting */
+        .print-table {
+          border-collapse: collapse !important;
+          width: 100% !important;
+          margin-top: 10px !important;
+        }
+        .print-table th, .print-table td {
+          border: 1px solid #000 !important;
+          padding: 8px !important;
+          text-align: left !important;
+          color: black !important;
+          background: transparent !important;
+        }
+        .print-table th {
+          background-color: #f2f2f2 !important;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-muted/30 text-foreground">
+    <div class="flex min-h-screen items-center justify-center p-6">
+      <div class="w-full max-w-3xl flex flex-col gap-6 text-center">
+        
+        <!-- Header status (Screens only) -->
+        <div class="flex flex-col items-center gap-4 no-print mt-6">
+          <div class="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 shadow-sm">
+            <i data-lucide="check-circle-2" class="size-8"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold tracking-tight text-foreground">Terima Kasih!</h1>
+            <p class="text-sm text-muted-foreground mt-1.5 leading-relaxed">
+              Kuesioner evaluasi survei kerja sama Anda telah berhasil disimpan di server SUKAFTI.
+            </p>
+          </div>
+        </div>
 
-    .receipt-card__header {
-      border-bottom: 1px solid var(--slate-200);
-      padding-bottom: 1rem;
-      margin-bottom: 1.25rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+        <!-- Receipt & Review Card -->
+        <div data-slot="card" class="premium-card print-card rounded-2xl p-6 md:p-8 text-left flex flex-col gap-6">
+          
+          <div class="hidden print:block text-center mb-6">
+            <h1 class="text-lg font-extrabold text-black uppercase tracking-wider">REKAPITULASI JAWABAN SURVEI EVALUASI KERJA SAMA</h1>
+            <p class="text-xs text-slate-700 mt-1 font-mono">ID Respon: #RSP-<%= response.id.toString().padStart(5, '0') %></p>
+          </div>
 
-    .receipt-card__brand {
-      font-size: 0.8rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      color: var(--slate-900);
-    }
+          <!-- Top Section (Screen Only Header) -->
+          <div class="flex justify-between items-center border-b pb-3 no-print">
+            <span class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Rincian Hasil Pengisian Survei</span>
+            <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-bold bg-emerald-500/10 text-emerald-500 border-emerald-500/20 uppercase">Selesai</span>
+          </div>
 
-    .receipt-card__status {
-      font-size: 0.7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      background: #e2e8f0;
-      color: var(--slate-800);
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-    }
+          <!-- Screen Metadata Details -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs no-print">
+            <div class="flex justify-between md:justify-start gap-4 border-b border-border/40 pb-2 md:border-b-0 md:pb-0">
+              <span class="text-muted-foreground w-28 shrink-0">ID Respon:</span>
+              <span class="font-mono font-semibold text-foreground">#RSP-<%= response.id.toString().padStart(5, '0') %></span>
+            </div>
 
-    .receipt-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 0.85rem;
-      font-size: 0.875rem;
-      line-height: 1.5;
-    }
+            <div class="flex justify-between md:justify-start gap-4 border-b border-border/40 pb-2 md:border-b-0 md:pb-0">
+              <span class="text-muted-foreground w-28 shrink-0">Mitra Industri:</span>
+              <span class="font-semibold text-foreground"><%= response.partner_name %></span>
+            </div>
 
-    .receipt-label {
-      color: var(--slate-400);
-      font-weight: 500;
-    }
+            <div class="flex justify-between md:justify-start gap-4 border-b border-border/40 pb-2 md:border-b-0 md:pb-0">
+              <span class="text-muted-foreground w-28 shrink-0">Judul Survei:</span>
+              <span class="font-semibold text-foreground"><%= response.survey_title %></span>
+            </div>
 
-    .receipt-val {
-      color: var(--slate-800);
-      font-weight: 600;
-      text-align: right;
-      max-width: 250px;
-    }
+            <div class="flex justify-between md:justify-start gap-4 border-b border-border/40 pb-2 md:border-b-0 md:pb-0">
+              <span class="text-muted-foreground w-28 shrink-0">Tanggal Submit:</span>
+              <span class="font-semibold text-foreground">
+                <% const dateObj = new Date(response.submitted_at); %>
+                <%= dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) %> 
+                <%= dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) %> WIB
+              </span>
+            </div>
+            
+            <div class="flex justify-between md:justify-start gap-4 col-span-1 md:col-span-2 bg-muted/30 p-2.5 rounded-lg border">
+              <span class="text-muted-foreground w-28 shrink-0 flex items-center">Total Skor Evaluasi:</span>
+              <span class="font-extrabold text-foreground text-sm flex items-center"><%= response.score_total %> Poin</span>
+            </div>
+          </div>
 
-    .receipt-val--highlight {
-      color: var(--slate-900);
-      font-size: 1.15rem;
-      font-weight: 700;
-    }
+          <!-- Print-Only Metadata Table -->
+          <table class="hidden print:table w-full text-xs mb-6 border-collapse print-table">
+            <tbody>
+              <tr>
+                <td class="p-2 font-bold bg-neutral-100 w-44">Nama Instansi / Mitra</td>
+                <td class="p-2 font-semibold"><%= response.partner_name %></td>
+              </tr>
+              <tr>
+                <td class="p-2 font-bold bg-neutral-100">Kategori / Judul Survei</td>
+                <td class="p-2 font-semibold"><%= response.survey_title %></td>
+              </tr>
+              <tr>
+                <td class="p-2 font-bold bg-neutral-100">Tanggal &amp; Waktu Pengisian</td>
+                <td class="p-2 font-semibold">
+                  <%= dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) %> 
+                  - Pukul <%= dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) %> WIB
+                </td>
+              </tr>
+              <tr>
+                <td class="p-2 font-bold bg-neutral-100">Total Skor Evaluasi</td>
+                <td class="p-2 font-extrabold text-black"><%= response.score_total %> Poin</td>
+              </tr>
+            </tbody>
+          </table>
 
-    .receipt-footer {
-      border-top: 1px dashed var(--slate-200);
-      margin-top: 1.25rem;
-      padding-top: 1.25rem;
-      font-size: 0.75rem;
-      color: var(--slate-400);
-      text-align: center;
-      line-height: 1.4;
-    }
+          <!-- Answers Review Section (Screens Only) -->
+          <div class="border-t border-border/80 pt-5 no-print">
+            <h3 class="text-base font-bold text-foreground mb-5 flex items-center gap-2">
+              <i data-lucide="list-checks" class="size-5 text-primary"></i>
+              <span>Hasil Jawaban Kuesioner Anda</span>
+            </h3>
+            
+            <div class="space-y-6">
+              <% answers.forEach(function(ans) { %>
+                <div class="border border-border/80 rounded-xl p-6 bg-card/50 hover:shadow-xs transition-all duration-300 border-l-4 border-l-primary/70 space-y-4">
+                  <div class="flex items-center justify-between gap-4 border-b border-border/40 pb-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Pertanyaan <%= ans.order_number %></span>
+                    <% if (ans.question_type !== 'essay') { %>
+                      <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-extrabold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        Skor: <%= ans.answer_score %>
+                      </span>
+                    <% } else { %>
+                      <span class="inline-flex items-center rounded-full bg-indigo-500/10 px-2.5 py-0.5 text-xs font-extrabold text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                        Essay
+                      </span>
+                    <% } %>
+                  </div>
+                  
+                  <p class="text-sm font-semibold text-foreground leading-relaxed"><%= ans.question_text %></p>
+                  
+                  <div class="pt-3 border-t border-border/40 text-xs">
+                    <span class="text-muted-foreground font-semibold">Jawaban Anda:</span>
+                    <% if (ans.question_type !== 'essay') { %>
+                      <p class="text-foreground font-bold mt-1.5 flex items-center gap-2 text-sm">
+                        <i data-lucide="check-circle-2" class="size-4 text-emerald-500 shrink-0"></i>
+                        <span><%= ans.selected_option %></span>
+                      </p>
+                    <% } else { %>
+                      <p class="text-foreground italic mt-1.5 bg-muted/40 p-3.5 rounded-lg leading-relaxed whitespace-pre-wrap"><%= ans.answer_text %></p>
+                    <% } %>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+          </div>
 
-    .btn-action {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      padding: 0.85rem;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.95rem;
-      text-decoration: none;
-      transition: all 0.2s;
-      cursor: pointer;
-    }
+          <!-- Print-Only Table of Answers -->
+          <div class="hidden print:block mt-6">
+            <h3 class="text-xs font-extrabold text-black uppercase mb-3 border-b pb-1">Lampiran Rekapitulasi Jawaban</h3>
+            <table class="w-full text-xs print-table border-collapse">
+              <thead>
+                <tr>
+                  <th class="p-2 text-center w-10 font-bold bg-neutral-100">No</th>
+                  <th class="p-2 text-left font-bold bg-neutral-100">Butir Pertanyaan Evaluasi</th>
+                  <th class="p-2 text-left font-bold bg-neutral-100">Jawaban Pilihan / Uraian</th>
+                  <th class="p-2 text-center w-16 font-bold bg-neutral-100">Skor</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% answers.forEach(function(ans) { %>
+                  <tr>
+                    <td class="p-2 text-center font-bold"><%= ans.order_number %></td>
+                    <td class="p-2 leading-relaxed"><%= ans.question_text %></td>
+                    <td class="p-2">
+                      <% if (ans.question_type !== 'essay') { %>
+                        <strong><%= ans.selected_option %></strong>
+                      <% } else { %>
+                        <span class="italic"><%= ans.answer_text %></span>
+                      <% } %>
+                    </td>
+                    <td class="p-2 text-center font-bold">
+                      <%= ans.question_type !== 'essay' ? ans.answer_score : '—' %>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
 
-    .btn-primary-action {
-      background: var(--slate-900);
-      color: white;
-      border: none;
-      box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.1);
-      margin-bottom: 0.75rem;
-    }
 
-    .btn-primary-action:hover {
-      background: var(--slate-800);
-      transform: translateY(-1px);
-    }
 
-    .btn-secondary-action {
-      background: white;
-      border: 1px solid var(--slate-300);
-      color: var(--slate-700);
-    }
+          <!-- Screen Only Warning Footer -->
+          <div class="border-t border-border/40 pt-4 text-[10px] text-muted-foreground text-center leading-relaxed no-print">
+            Bukti pengisian digital ini sah dihasilkan secara otomatis oleh sistem informasi SUKAFTI FTI Universitas Andalas.
+          </div>
+        </div>
 
-    .btn-secondary-action:hover {
-      background: var(--slate-50);
-      color: var(--slate-900);
-    }
-  </style>
-</head>
-<body>
+        <!-- Action buttons (Screens Only) -->
+        <div class="flex flex-col sm:flex-row gap-2 justify-center no-print mb-8">
+          <button onclick="window.print()" class="inline-flex items-center justify-center gap-1.5 rounded-md text-sm font-semibold transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 flex-1 sm:flex-initial">
+            <i data-lucide="printer" class="size-4"></i>
+            <span>Cetak Bukti &amp; Jawaban (PDF)</span>
+          </button>
+          <a href="/logout" class="inline-flex items-center justify-center gap-1.5 rounded-md text-sm font-semibold transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 flex-1 sm:flex-initial">
+            <i data-lucide="log-out" class="size-4"></i>
+            <span>Keluar dari Sistem</span>
+          </a>
+        </div>
 
-  <div class="success-container">
-    
-    <!-- ① SUCCESS INDICATOR -->
-    <div class="success-badge">
-      <i data-lucide="check-circle-2" style="width:32px; height:32px;"></i>
+      </div>
     </div>
-    
-    <h1 class="success-title">Terima Kasih!</h1>
-    <p class="success-desc">Kuesioner evaluasi survei kerja sama Anda telah berhasil disimpan di server SUKAFTI.</p>
 
-    <!-- ② RECEIPT CARD -->
-    <article class="receipt-card">
-      <div class="receipt-card__header">
-        <span class="receipt-card__brand">BUKTI PENGISIAN SURVEI</span>
-        <span class="receipt-card__status">SELESAI</span>
-      </div>
-
-      <div class="receipt-row">
-        <span class="receipt-label">ID Respon</span>
-        <span class="receipt-val">#RSP-<%= response.id.toString().padStart(5, '0') %></span>
-      </div>
-
-      <div class="receipt-row">
-        <span class="receipt-label">Mitra Industri</span>
-        <span class="receipt-val"><%= response.partner_name %></span>
-      </div>
-
-      <div class="receipt-row">
-        <span class="receipt-label">Judul Survei</span>
-        <span class="receipt-val"><%= response.survey_title %></span>
-      </div>
-
-      <div class="receipt-row">
-        <span class="receipt-label">Tanggal Submit</span>
-        <span class="receipt-val">
-          <% const dateObj = new Date(response.submitted_at); %>
-          <%= dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) %> 
-          <%= dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) %>
-        </span>
-      </div>
-
-      <div class="receipt-footer">
-        Bukti digital ini dihasilkan secara otomatis oleh sistem informasi kerja sama FTI Universitas Andalas sebagai tanda terima resmi.
-      </div>
-    </article>
-
-    <!-- ③ ACTION BUTTONS -->
-    <div style="display:flex; flex-direction:column;">
-      <a href="/logout" class="btn-action btn-primary-action">
-        <i data-lucide="log-out"></i> Keluar dari Sistem
-      </a>
-      <button onclick="window.print()" class="btn-action btn-secondary-action">
-        <i data-lucide="printer"></i> Cetak Bukti Pengisian (PDF)
-      </button>
-    </div>
-
-  </div>
-
-  <script>
-    // ── Lucide Icons ───────────────────────────────────────
-    lucide.createIcons();
-  </script>
-</body>
+    <script>
+      lucide.createIcons();
+    </script>
+  </body>
 </html>

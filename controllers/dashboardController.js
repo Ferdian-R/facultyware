@@ -29,6 +29,7 @@ const showDashboard = async (req, res, next) => {
     const [[{ total_respons }]] = await db.query(
       "SELECT COUNT(*) AS total_respons FROM survey_responses WHERE status = 'completed'"
     );
+    const [[{ total_pin }]] = await db.query("SELECT COUNT(*) AS total_pin FROM survey_invitations");
 
     // 2. Query all partners for dropdown
     const [allPartners] = await db.query("SELECT id, name FROM partners ORDER BY name ASC");
@@ -62,6 +63,7 @@ const showDashboard = async (req, res, next) => {
       total_mitra,
       total_pin_aktif,
       total_respons,
+      total_pin,
       perusahaan,
       allPartners,
       search,
