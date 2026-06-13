@@ -68,7 +68,12 @@
     }
     @media (min-width: 768px) {
       .dashboard-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (min-width: 1024px) {
+      .dashboard-grid {
+        grid-template-columns: repeat(4, 1fr);
       }
     }
     .charts-grid {
@@ -479,6 +484,30 @@
                 <path d="M0 25 C 20 23, 30 15, 50 18 C 70 21, 80 5, 100 8 L 100 30 L 0 30 Z" fill="url(#sparkline-grad)" />
                 <path d="M0 25 C 20 23, 30 15, 50 18 C 70 21, 80 5, 100 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
+            </div>
+          </div>
+
+          <!-- Card 4: Indeks Kepuasan -->
+          <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col justify-between gap-5">
+            <div class="flex items-start gap-4">
+              <div class="p-3 bg-indigo-500/10 rounded-2xl text-indigo-600 dark:text-indigo-400 border border-indigo-500/15 shrink-0">
+                <i data-lucide="star" class="size-5"></i>
+              </div>
+              <div class="space-y-1">
+                <p class="card-title-small">Indeks Kepuasan</p>
+                <h3 class="text-3xl font-extrabold tracking-tight text-foreground">
+                  <%= (locals.average_skor && average_skor !== null ? parseFloat(average_skor).toFixed(1) : "0.0") %>
+                </h3>
+                <span class="card-subtext block mt-0.5">
+                  Rata-rata skor kuesioner
+                </span>
+              </div>
+            </div>
+            <div class="card-divider">
+              <div class="flex justify-between items-center text-[10px] font-bold text-muted-foreground">
+                <span>Skor Akumulatif</span>
+                <span class="text-foreground">Skala Dinamis</span>
+              </div>
             </div>
           </div>
 

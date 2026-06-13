@@ -30,9 +30,18 @@ const showDashboard = async (req, res, next) => {
       "SELECT COUNT(*) AS total_respons FROM survey_responses WHERE status = 'completed'"
     );
     const [[{ total_pin }]] = await db.query("SELECT COUNT(*) AS total_pin FROM survey_invitations");
+    const [[{ average_skor }]] = await db.query(
+      "SELECT AVG(score_total) AS average_skor FROM survey_responses WHERE status = 'completed'"
+    );
 
-    // 2. Query all partners for dropdown
-    const [allPartners] = await db.query("SELECT id, name FROM partners ORDER BY name ASC");
+    // 2. Query all partners for dropdown (exclude partners with active/unused PINs)
+    const [allPartners] = await db.query(
+      `SELECT id, name FROM partners 
+       WHERE id NOT IN (
+         SELECT partner_id FROM survey_invitations WHERE is_used = 0
+       )
+       ORDER BY name ASC`
+    );
 
     // 3. Query PIN lists with search and pagination (joins partners and invitations)
     const [invitationsCountRows] = await db.query(
@@ -64,6 +73,7 @@ const showDashboard = async (req, res, next) => {
       total_pin_aktif,
       total_respons,
       total_pin,
+      average_skor,
       perusahaan,
       allPartners,
       search,
@@ -148,6 +158,19 @@ const generatePIN = async (req, res, next) => {
       return res.status(400).json({ 
         success: false, 
         message: "No surveys available in the database. Please create a survey first." 
+      });
+    }
+
+    // Check if partner already has an active (unused) PIN for this survey
+    const [existingPin] = await db.query(
+      "SELECT id FROM survey_invitations WHERE partner_id = ? AND survey_id = ? AND is_used = 0",
+      [partner_id, surveyId]
+    );
+
+    if (existingPin.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Mitra ini masih memiliki PIN aktif yang belum digunakan untuk survei ini."
       });
     }
 
