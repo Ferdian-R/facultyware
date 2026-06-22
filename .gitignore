@@ -66,3 +66,7 @@ typings/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# Testing Files
+/tests/
+playwright.config.js
