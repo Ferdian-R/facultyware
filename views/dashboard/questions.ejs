@@ -6,7 +6,7 @@
     (() => {
       try {
         localStorage.removeItem("themeVariant");
-      } catch (_) {}
+      } catch (_) { }
       try {
         const stored = localStorage.getItem("themeMode");
         if (
@@ -67,25 +67,63 @@
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03) !important;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
+
     .premium-card:hover {
       transform: translateY(-2px);
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.06) !important;
     }
+
     /* Select styling */
     select {
       background-color: var(--card) !important;
       color: var(--foreground) !important;
     }
+
     select option {
       background-color: var(--card) !important;
       color: var(--foreground) !important;
     }
+
     .dark select option {
       background-color: #1e293b !important;
       color: #f8fafc !important;
     }
+
     .dark {
       color-scheme: dark;
+    }
+
+    /* Table styling enhancements for visual hierarchy & spacing */
+    .questions-table {
+      border-collapse: separate !important;
+      border-spacing: 0 !important;
+      width: 100% !important;
+    }
+    .questions-table tr {
+      transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    .questions-table tbody tr {
+      border-bottom: 1px solid var(--border) !important;
+    }
+    .questions-table tbody tr:hover {
+      background-color: rgba(0, 0, 0, 0.015) !important;
+    }
+    .dark .questions-table tbody tr:hover {
+      background-color: rgba(255, 255, 255, 0.01) !important;
+    }
+    .questions-table th {
+      padding: 1rem 1.25rem !important;
+      font-weight: 600 !important;
+      font-size: 0.75rem !important;
+      letter-spacing: 0.05em !important;
+      text-transform: uppercase !important;
+      color: var(--muted-foreground) !important;
+      border-bottom: 1px solid var(--border) !important;
+      vertical-align: middle !important;
+    }
+    .questions-table td {
+      padding: 1.5rem 1.25rem !important;
+      vertical-align: middle !important;
     }
   </style>
 </head>
@@ -100,7 +138,8 @@
         <div>
           <header class="p-4 border-b">
             <a href="/admin/dashboard" class="flex items-center gap-2">
-              <img src="/image/fti%20logo.jpg" alt="Logo FTI" class="h-8 w-8 rounded-lg object-contain bg-white p-0.5 border" />
+              <img src="/image/fti%20logo.jpg" alt="Logo FTI"
+                class="h-8 w-8 rounded-lg object-contain bg-white p-0.5 border" />
               <div class="grid flex-1 text-left text-sm leading-tight">
                 <span class="truncate font-semibold text-foreground">SUKAFTI</span>
                 <span class="truncate text-xs text-muted-foreground">Survey Kerjasama</span>
@@ -229,25 +268,24 @@
 
                 <!-- Filter & Action Card -->
                 <div data-slot="card" class="premium-card rounded-2xl overflow-hidden">
-                  <div class="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b">
-                    <div>
-                      <h3 class="text-base font-semibold leading-none tracking-tight">Daftar Pertanyaan Kuesioner</h3>
+                  <div class="p-8 md:p-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-border/60">
+                    <div class="space-y-1">
+                      <h3 class="text-lg font-bold leading-none tracking-tight">Daftar Pertanyaan Kuesioner</h3>
                       <% const selectedSurvey = surveys.find(s => s.id === selectedSurveyId); %>
-                      <p class="text-xs text-muted-foreground mt-1.5">
+                      <p class="text-xs text-muted-foreground">
                         <%= selectedSurvey ? `${selectedSurvey.title} (${selectedSurvey.status})` : 'Tidak ada kuesioner aktif' %>
                       </p>
                     </div>
 
-
-                    <div class="flex gap-2 w-full md:w-auto justify-end">
+                    <div class="flex flex-wrap gap-2 w-full md:w-auto justify-end">
                       <% if (selectedSurveyId) { %>
                         <a href="/admin/questions/export-pdf?survey_id=<%= selectedSurveyId %>"
-                          class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 py-2">
+                          class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-semibold transition-all border border-border/80 bg-background/50 hover:bg-muted text-muted-foreground hover:text-foreground h-9 px-4 py-2">
                           <i data-lucide="printer" class="size-4"></i>
                           <span>Cetak PDF</span>
                         </a>
                         <button id="btn-add-question"
-                          class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3 py-2">
+                          class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-semibold transition-all bg-primary text-primary-foreground hover:bg-primary/95 h-9 px-4 py-2 hover:scale-[1.01]">
                           <i data-lucide="plus-circle" class="size-4"></i>
                           <span>Tambah Pertanyaan</span>
                         </button>
@@ -256,72 +294,69 @@
                   </div>
 
                   <div class="overflow-x-auto w-full">
-                    <table class="w-full text-sm">
-                      <thead class="bg-muted/50 border-b">
-                        <tr class="transition-colors hover:bg-muted/50">
-                          <th class="h-10 px-4 text-center align-middle font-medium text-muted-foreground w-20">Urutan
-                          </th>
-                          <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Teks Pertanyaan
-                          </th>
-                          <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground w-36">Tipe</th>
-                          <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Opsi Jawaban
-                            &amp; Bobot Skor</th>
-                          <th class="h-10 px-4 text-center align-middle font-medium text-muted-foreground w-28">Aksi
-                          </th>
+                    <table class="questions-table text-sm">
+                      <thead>
+                        <tr>
+                          <th class="text-center w-20">Urutan</th>
+                          <th class="text-left">Teks Pertanyaan</th>
+                          <th class="text-left w-36">Tipe</th>
+                          <th class="text-left">Opsi Jawaban &amp; Bobot Skor</th>
+                          <th class="text-center w-28">Aksi</th>
                         </tr>
                       </thead>
-                      <tbody class="divide-y">
+                      <tbody>
                         <% if (locals.questions && questions.length> 0) { %>
                           <% questions.forEach(function(q) { %>
-                            <tr id="row-question-<%= q.id %>" class="hover:bg-muted/30 transition-colors">
-                              <td class="p-4 align-middle text-center font-bold text-foreground">
+                            <tr id="row-question-<%= q.id %>">
+                              <td class="text-center font-bold text-foreground">
                                 <%= q.order_number %>
                               </td>
-                              <td class="p-4 align-middle font-medium text-foreground max-w-xs leading-relaxed">
+                              <td class="font-medium text-foreground max-w-xs leading-relaxed">
                                 <%= q.question_text %>
                               </td>
-                              <td class="p-4 align-middle">
+                              <td>
                                 <% if (q.type==='essay' ) { %>
                                   <span
-                                    class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold bg-slate-500/10 text-slate-500 border-slate-500/20">Essay</span>
+                                    class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-slate-500/10 text-slate-500 border-slate-500/20">Essay</span>
                                   <% } else if (q.type==='multiple_choice' ) { %>
                                     <span
-                                      class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold bg-sky-500/10 text-sky-500 border-sky-500/20">Pilihan
-                                      Ganda</span>
+                                      class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-sky-500/10 text-sky-500 border-sky-500/20">Pilihan Ganda</span>
                                     <% } else if (q.type==='rating' ) { %>
                                       <span
-                                        class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold bg-blue-500/10 text-blue-500 border-blue-500/20">Rating
-                                        Skala</span>
+                                        class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-blue-500/10 text-blue-500 border-blue-500/20">Rating Skala</span>
                                       <% } %>
                               </td>
-                              <td class="p-4 align-middle">
+                              <td>
                                 <% if (q.options && q.options.length> 0) { %>
-                                  <div class="flex flex-wrap gap-1">
+                                  <div class="flex flex-wrap gap-1.5">
                                     <% q.options.forEach(function(opt) { %>
                                       <span
-                                        class="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-xs text-foreground font-medium transition-colors hover:bg-primary/10">
-                                        <span><%= opt.option_text %></span>
-                                        <span class="h-3 w-px bg-border mx-1"></span>
-                                        <span class="text-[10px] font-extrabold text-primary">Skor: <%= opt.score %></span>
+                                        class="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/40 hover:bg-muted px-2.5 py-1 text-xs text-foreground font-medium transition-colors">
+                                        <span>
+                                          <%= opt.option_text %>
+                                        </span>
+                                        <span class="text-muted-foreground/60 font-normal">&bull;</span>
+                                        <span class="text-[10px] font-extrabold text-muted-foreground"><%= opt.score %> pts</span>
                                       </span>
                                       <% }) %>
                                   </div>
                                   <% } else { %>
-                                    <span class="text-xs text-muted-foreground italic">— Jawaban bebas deskriptif
-                                      (Essay) —</span>
+                                    <span class="text-xs text-muted-foreground italic">— Jawaban bebas deskriptif (Essay) —</span>
                                     <% } %>
                               </td>
-                              <td class="p-4 align-middle text-center">
+                              <td class="text-center">
                                 <div class="flex items-center justify-center gap-2">
                                   <button
-                                    class="btn-edit-question h-8 w-8 inline-flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+                                    style="width: 32px; height: 32px; min-width: 32px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;"
+                                    class="btn-edit-question rounded-md border hover:bg-accent hover:text-accent-foreground text-muted-foreground"
                                     data-id="<%= q.id %>" data-text="<%= q.question_text %>" data-type="<%= q.type %>"
                                     data-order="<%= q.order_number %>"
                                     data-options='<%= JSON.stringify(q.options || []) %>' title="Ubah Pertanyaan">
                                     <i data-lucide="edit-3" class="size-3.5"></i>
                                   </button>
                                   <button
-                                    class="h-8 w-8 inline-flex items-center justify-center rounded-md border border-destructive/20 hover:bg-destructive/10 text-destructive"
+                                    style="width: 32px; height: 32px; min-width: 32px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;"
+                                    class="rounded-md border border-destructive/20 hover:bg-destructive/10 text-destructive"
                                     hx-delete="/admin/questions/<%= q.id %>?survey_id=<%= selectedSurveyId %>"
                                     hx-confirm="Apakah Anda yakin ingin menghapus pertanyaan ini?"
                                     hx-target="#row-question-<%= q.id %>" hx-swap="outerHTML" title="Hapus Pertanyaan">
@@ -350,128 +385,130 @@
   <!-- Tambah Pertanyaan Dialog Modal -->
   <dialog id="add-dialog" class="dialog">
     <div class="!max-w-md w-full max-h-[85vh] overflow-y-auto pr-1">
-    <div class="flex items-center gap-2 border-b pb-3">
-      <div class="p-2 bg-primary/10 text-primary rounded-lg">
-        <i data-lucide="help-circle" class="size-5"></i>
-      </div>
-      <div>
-        <h3 class="text-lg font-semibold leading-none tracking-tight">Tambah Pertanyaan Baru</h3>
-        <p class="text-xs text-muted-foreground mt-1">Masukkan teks pertanyaan dan tentukan metode pengisian jawaban.
-        </p>
-      </div>
-    </div>
-
-    <form action="/admin/questions" method="POST" id="form-add-question" class="flex flex-col gap-4">
-      <input type="hidden" name="survey_id" value="<%= selectedSurveyId %>" />
-
-      <div class="flex flex-col gap-2">
-        <label class="text-sm font-medium leading-none" for="add-question-text">Teks Pertanyaan</label>
-        <textarea id="add-question-text" name="question_text"
-          class="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          placeholder="Tuliskan pertanyaan survei..." required></textarea>
-      </div>
-
-      <div class="flex flex-col gap-2">
-        <label class="text-sm font-medium leading-none" for="add-type">Tipe Jawaban</label>
-        <select id="add-type" name="type"
-          class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          required>
-          <option value="essay">Essay (Teks Deskriptif)</option>
-          <option value="multiple_choice">Pilihan Ganda</option>
-          <option value="rating">Rating Skala (1-5)</option>
-        </select>
-      </div>
-
-      <!-- Opsi Jawaban Container -->
-      <div id="add-options-section" class="border rounded-md p-4 bg-muted/30 flex flex-col gap-3" style="display:none;">
-        <label class="text-sm font-semibold leading-none text-foreground">Daftar Pilihan &amp; Bobot Skor</label>
-        <div id="add-options-list" class="flex flex-col gap-2">
-          <!-- Dynamic list -->
+      <div class="flex items-center gap-2 border-b pb-3">
+        <div class="p-2 bg-primary/10 text-primary rounded-lg">
+          <i data-lucide="help-circle" class="size-5"></i>
         </div>
-        <button type="button"
-          class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-semibold border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 py-1"
-          id="btn-add-option-row">
-          <i data-lucide="plus" class="size-3.5"></i>
-          <span>Tambah Opsi Jawaban</span>
-        </button>
+        <div>
+          <h3 class="text-lg font-semibold leading-none tracking-tight">Tambah Pertanyaan Baru</h3>
+          <p class="text-xs text-muted-foreground mt-1">Masukkan teks pertanyaan dan tentukan metode pengisian jawaban.
+          </p>
+        </div>
       </div>
 
-      <div class="flex justify-end gap-2 border-t pt-3 mt-2">
-        <button type="button" id="btn-close-add"
-          class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
-          Batal
-        </button>
-        <button type="submit"
-          class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
-          Simpan Pertanyaan
-        </button>
-      </div>
-    </form>
-  </div>
-</dialog>
+      <form action="/admin/questions" method="POST" id="form-add-question" class="flex flex-col gap-4">
+        <input type="hidden" name="survey_id" value="<%= selectedSurveyId %>" />
+
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium leading-none" for="add-question-text">Teks Pertanyaan</label>
+          <textarea id="add-question-text" name="question_text"
+            class="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            placeholder="Tuliskan pertanyaan survei..." required></textarea>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium leading-none" for="add-type">Tipe Jawaban</label>
+          <select id="add-type" name="type"
+            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            required>
+            <option value="essay">Essay (Teks Deskriptif)</option>
+            <option value="multiple_choice">Pilihan Ganda</option>
+            <option value="rating">Rating Skala (1-5)</option>
+          </select>
+        </div>
+
+        <!-- Opsi Jawaban Container -->
+        <div id="add-options-section" class="border rounded-md p-4 bg-muted/30 flex flex-col gap-3"
+          style="display:none;">
+          <label class="text-sm font-semibold leading-none text-foreground">Daftar Pilihan &amp; Bobot Skor</label>
+          <div id="add-options-list" class="flex flex-col gap-2">
+            <!-- Dynamic list -->
+          </div>
+          <button type="button"
+            class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-semibold border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 py-1"
+            id="btn-add-option-row">
+            <i data-lucide="plus" class="size-3.5"></i>
+            <span>Tambah Opsi Jawaban</span>
+          </button>
+        </div>
+
+        <div class="flex justify-end gap-2 border-t pt-3 mt-2">
+          <button type="button" id="btn-close-add"
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
+            Batal
+          </button>
+          <button type="submit"
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
+            Simpan Pertanyaan
+          </button>
+        </div>
+      </form>
+    </div>
+  </dialog>
 
   <!-- Ubah Pertanyaan Dialog Modal -->
   <dialog id="edit-dialog" class="dialog">
     <div class="!max-w-md w-full max-h-[85vh] overflow-y-auto pr-1">
-    <div class="flex items-center gap-2 border-b pb-3">
-      <div class="p-2 bg-primary/10 text-primary rounded-lg">
-        <i data-lucide="edit-3" class="size-5"></i>
-      </div>
-      <div>
-        <h3 class="text-lg font-semibold leading-none tracking-tight">Ubah Pertanyaan</h3>
-        <p class="text-xs text-muted-foreground mt-1">Perbarui teks pertanyaan, tipe, maupun urutan butir instrumen.</p>
-      </div>
-    </div>
-
-    <form id="form-edit-question" method="POST" class="flex flex-col gap-4">
-      <input type="hidden" name="survey_id" value="<%= selectedSurveyId %>" />
-
-      <div class="flex flex-col gap-2">
-        <label class="text-sm font-medium leading-none" for="edit-question-text">Teks Pertanyaan</label>
-        <textarea id="edit-question-text" name="question_text"
-          class="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          placeholder="Tuliskan pertanyaan survei..." required></textarea>
-      </div>
-
-      <div class="flex flex-col gap-2">
-        <label class="text-sm font-medium leading-none" for="edit-type">Tipe Jawaban</label>
-        <select id="edit-type" name="type"
-          class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          required>
-          <option value="essay">Essay (Teks Deskriptif)</option>
-          <option value="multiple_choice">Pilihan Ganda</option>
-          <option value="rating">Rating Skala (1-5)</option>
-        </select>
-      </div>
-
-      <!-- Opsi Jawaban Container -->
-      <div id="edit-options-section" class="border rounded-md p-4 bg-muted/30 flex flex-col gap-3"
-        style="display:none;">
-        <label class="text-sm font-semibold leading-none text-foreground">Daftar Pilihan &amp; Bobot Skor</label>
-        <div id="edit-options-list" class="flex flex-col gap-2">
-          <!-- Dynamic list -->
+      <div class="flex items-center gap-2 border-b pb-3">
+        <div class="p-2 bg-primary/10 text-primary rounded-lg">
+          <i data-lucide="edit-3" class="size-5"></i>
         </div>
-        <button type="button"
-          class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-semibold border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 py-1"
-          id="btn-edit-add-option-row">
-          <i data-lucide="plus" class="size-3.5"></i>
-          <span>Tambah Opsi Jawaban</span>
-        </button>
+        <div>
+          <h3 class="text-lg font-semibold leading-none tracking-tight">Ubah Pertanyaan</h3>
+          <p class="text-xs text-muted-foreground mt-1">Perbarui teks pertanyaan, tipe, maupun urutan butir instrumen.
+          </p>
+        </div>
       </div>
 
-      <div class="flex justify-end gap-2 border-t pt-3 mt-2">
-        <button type="button" id="btn-close-edit"
-          class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
-          Batal
-        </button>
-        <button type="submit"
-          class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
-          Simpan Perubahan
-        </button>
-      </div>
-    </form>
-  </div>
-</dialog>
+      <form id="form-edit-question" method="POST" class="flex flex-col gap-4">
+        <input type="hidden" name="survey_id" value="<%= selectedSurveyId %>" />
+
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium leading-none" for="edit-question-text">Teks Pertanyaan</label>
+          <textarea id="edit-question-text" name="question_text"
+            class="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            placeholder="Tuliskan pertanyaan survei..." required></textarea>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium leading-none" for="edit-type">Tipe Jawaban</label>
+          <select id="edit-type" name="type"
+            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            required>
+            <option value="essay">Essay (Teks Deskriptif)</option>
+            <option value="multiple_choice">Pilihan Ganda</option>
+            <option value="rating">Rating Skala (1-5)</option>
+          </select>
+        </div>
+
+        <!-- Opsi Jawaban Container -->
+        <div id="edit-options-section" class="border rounded-md p-4 bg-muted/30 flex flex-col gap-3"
+          style="display:none;">
+          <label class="text-sm font-semibold leading-none text-foreground">Daftar Pilihan &amp; Bobot Skor</label>
+          <div id="edit-options-list" class="flex flex-col gap-2">
+            <!-- Dynamic list -->
+          </div>
+          <button type="button"
+            class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-semibold border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 py-1"
+            id="btn-edit-add-option-row">
+            <i data-lucide="plus" class="size-3.5"></i>
+            <span>Tambah Opsi Jawaban</span>
+          </button>
+        </div>
+
+        <div class="flex justify-end gap-2 border-t pt-3 mt-2">
+          <button type="button" id="btn-close-edit"
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
+            Batal
+          </button>
+          <button type="submit"
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
+            Simpan Perubahan
+          </button>
+        </div>
+      </form>
+    </div>
+  </dialog>
 
   <script>
     lucide.createIcons();

@@ -6,7 +6,7 @@
     (() => {
       try {
         localStorage.removeItem("themeVariant");
-      } catch (_) {}
+      } catch (_) { }
       try {
         const stored = localStorage.getItem("themeMode");
         if (
@@ -46,7 +46,7 @@
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
 
   <link rel="stylesheet" href="/assets/styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
 
   <script src="/assets/js/basecoat.js?v=0.3.11" defer></script>
   <script src="/assets/js/command.js?v=0.3.11" defer></script>
@@ -66,45 +66,43 @@
       grid-template-columns: 1fr;
       gap: 1.25rem;
     }
+
     @media (min-width: 768px) {
       .dashboard-grid {
         grid-template-columns: repeat(2, 1fr);
       }
     }
+
     @media (min-width: 1024px) {
       .dashboard-grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(3, 1fr);
       }
     }
-    .charts-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-    @media (min-width: 768px) {
-      .charts-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-    
+
+
+
     /* Premium welcome banner styling utilizing Basecoat variables */
     .welcome-banner {
       background: linear-gradient(135deg, #1e293b 0%, #111827 50%, #0f172a 100%) !important;
       border: 1px solid rgba(255, 255, 255, 0.1) !important;
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
     }
+
     .dark .welcome-banner {
       background: linear-gradient(135deg, #0f172a 0%, #030712 100%) !important;
       border-color: rgba(255, 255, 255, 0.08) !important;
     }
+
     .welcome-title {
       color: #ffffff !important;
       font-weight: 700;
     }
+
     .welcome-desc {
       color: #cbd5e1 !important;
       opacity: 0.95;
     }
+
     .dark .welcome-desc {
       color: #cbd5e1 !important;
     }
@@ -117,6 +115,7 @@
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03) !important;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
+
     .premium-card:hover {
       transform: translateY(-2px);
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.06) !important;
@@ -137,12 +136,14 @@
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
       backdrop-filter: blur(4px) !important;
     }
+
     .welcome-banner-stats .num {
       font-size: 1.875rem !important;
       font-weight: 900 !important;
       color: #ffffff !important;
       line-height: 1 !important;
     }
+
     .welcome-banner-stats .label {
       font-size: 0.55rem !important;
       font-weight: 700 !important;
@@ -152,7 +153,7 @@
       margin-top: 0.5rem !important;
       line-height: 1.2 !important;
     }
-    
+
     /* Mockup circle shapes for welcome banner background */
     .welcome-circle-1 {
       position: absolute;
@@ -163,6 +164,7 @@
       border-radius: 9999px;
       border: 2px solid rgba(255, 255, 255, 0.08);
     }
+
     .welcome-circle-2 {
       position: absolute;
       right: -1.25rem;
@@ -172,6 +174,7 @@
       border-radius: 9999px;
       border: 1px solid rgba(255, 255, 255, 0.04);
     }
+
     .welcome-circle-3 {
       position: absolute;
       right: 3rem;
@@ -191,14 +194,17 @@
       font-weight: 600 !important;
       color: #10b981 !important;
     }
+
     .card-divider {
       border-top: 1px solid #f1f5f9 !important;
       padding-top: 0.75rem !important;
       margin-top: 0.75rem !important;
     }
+
     .dark .card-divider {
       border-top: 1px solid #334155 !important;
     }
+
     .custom-progress-track {
       height: 0.375rem !important;
       width: 100% !important;
@@ -207,27 +213,42 @@
       overflow: hidden !important;
       margin-top: 0.5rem !important;
     }
+
     .dark .custom-progress-track {
       background-color: #334155 !important;
     }
+
     .custom-progress-fill {
       height: 100% !important;
       border-radius: 9999px !important;
       transition: width 0.5s ease-in-out !important;
     }
+
     .custom-progress-fill.indigo {
       background-color: #4f46e5 !important;
     }
+
     .custom-progress-fill.amber {
       background-color: #f59e0b !important;
     }
+
+    .custom-progress-fill.emerald {
+      background-color: #10b981 !important;
+    }
+
+    .custom-progress-fill.red {
+      background-color: #ef4444 !important;
+    }
+
     .card-subtext {
       font-size: 0.6875rem !important;
       color: #64748b !important;
     }
+
     .dark .card-subtext {
       color: #94a3b8 !important;
     }
+
     .card-title-small {
       font-size: 0.625rem !important;
       font-weight: 700 !important;
@@ -235,32 +256,24 @@
       text-transform: uppercase !important;
       letter-spacing: 0.05em !important;
     }
+
     .dark .card-title-small {
       color: #94a3b8 !important;
     }
-    
-    /* Donut layout flex column to row spacing */
-    .donut-row {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 2rem;
-    }
-    @media (min-width: 640px) {
-      .donut-row {
-        flex-direction: row;
-      }
-    }
+
+
+
     /* Native select styling fix for white-on-white text */
     select option {
       background-color: var(--card) !important;
       color: var(--foreground) !important;
     }
+
     .dark select option {
       background-color: #1e293b !important;
       color: #f8fafc !important;
     }
+
     .dark {
       color-scheme: dark;
     }
@@ -277,7 +290,8 @@
         <div>
           <header class="p-4 border-b">
             <a href="/admin/dashboard" class="flex items-center gap-2">
-              <img src="/image/fti%20logo.jpg" alt="Logo FTI" class="h-8 w-8 rounded-lg object-contain bg-white p-0.5 border" />
+              <img src="/image/fti%20logo.jpg" alt="Logo FTI"
+                class="h-8 w-8 rounded-lg object-contain bg-white p-0.5 border" />
               <div class="grid flex-1 text-left text-sm leading-tight">
                 <span class="truncate font-semibold text-foreground">SUKAFTI</span>
                 <span class="truncate text-xs text-muted-foreground">Survey Kerjasama</span>
@@ -385,42 +399,59 @@
       <div class="p-6 md:p-8 flex-1 space-y-6">
 
         <!-- Welcome Hero Card (Stunning Gradient) -->
-        <div data-slot="card" class="welcome-banner rounded-2xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div data-slot="card"
+          class="welcome-banner rounded-2xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <!-- Abstract Background shapes (Mockup circles) -->
           <div class="absolute right-0 top-0 bottom-0 w-1/3 opacity-30 pointer-events-none hidden md:block">
             <div class="welcome-circle-1"></div>
             <div class="welcome-circle-2"></div>
             <div class="welcome-circle-3"></div>
           </div>
-          <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(99,102,241,0.15),transparent_50%)] pointer-events-none"></div>
-          
+          <div
+            class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(99,102,241,0.15),transparent_50%)] pointer-events-none">
+          </div>
+
           <div class="relative z-10 max-w-2xl space-y-2">
-            <h2 class="text-2xl font-bold tracking-tight mb-2 welcome-title flex items-center gap-2">Selamat Datang, Admin FTI! <span class="animate-bounce">🚀</span></h2>
+            <h2 class="text-2xl font-bold tracking-tight mb-2 welcome-title flex items-center gap-2">Selamat Datang,
+              Admin FTI! <span class="animate-bounce">🚀</span></h2>
             <p class="text-slate-300 text-xs md:text-sm leading-relaxed welcome-desc">
               Pantau aktivitas survey, kelola data mitra, dan generate PIN kerjasama industri dari satu tempat.
             </p>
           </div>
           <div class="welcome-banner-stats relative z-10 shrink-0 ml-auto">
-            <span class="num"><%= total_respons %></span>
+            <span class="num">
+              <%= total_respons %>
+            </span>
             <span class="label">Total Aktivitas Bulan Ini</span>
           </div>
         </div>
 
         <!-- Stats Grid -->
         <div class="dashboard-grid gap-4">
-          
+
           <!-- Card 1: Total Mitra -->
           <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col justify-between gap-5">
             <div class="flex items-start gap-4">
-              <div class="p-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-slate-600 dark:text-slate-300 border border-slate-200/50 dark:border-slate-700/50 shrink-0">
+              <div class="p-3 bg-indigo-500/10 rounded-2xl text-indigo-600 dark:text-indigo-400 border border-indigo-500/15 shrink-0">
                 <i data-lucide="building-2" class="size-5"></i>
               </div>
               <div class="space-y-1">
                 <p class="card-title-small">Total Mitra</p>
-                <h3 class="text-3xl font-extrabold tracking-tight text-foreground"><%= total_mitra %></h3>
-                <span class="trend-badge">
-                  <i data-lucide="trending-up" class="size-3.5"></i> +3 bulan ini
+                <h3 class="text-3xl font-extrabold tracking-tight text-foreground">
+                  <%= total_mitra %>
+                </h3>
+                <span class="trend-badge inline-flex items-center gap-1 mt-0.5">
+                  <i data-lucide="trending-up" class="size-3"></i> +3 bulan ini
                 </span>
+              </div>
+            </div>
+            <div class="card-divider">
+              <div class="flex justify-between items-center text-[10px] font-bold text-muted-foreground">
+                <span>Status Mitra Terdaftar</span>
+                <span class="text-foreground">Aktif &amp; Terverifikasi</span>
+              </div>
+              <div class="custom-progress-track">
+                <div class="custom-progress-fill indigo" style="width: 100%"></div>
               </div>
             </div>
           </div>
@@ -428,12 +459,15 @@
           <!-- Card 2: PIN Aktif -->
           <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col justify-between gap-5">
             <div class="flex items-start gap-4">
-              <div class="p-3 bg-amber-500/10 rounded-2xl text-amber-600 dark:text-amber-400 border border-amber-500/15 shrink-0">
+              <div
+                class="p-3 bg-amber-500/10 rounded-2xl text-amber-600 dark:text-amber-400 border border-amber-500/15 shrink-0">
                 <i data-lucide="key-round" class="size-5"></i>
               </div>
               <div class="space-y-1">
                 <p class="card-title-small">PIN Aktif</p>
-                <h3 class="text-3xl font-extrabold tracking-tight text-foreground"><%= total_pin_aktif %></h3>
+                <h3 class="text-3xl font-extrabold tracking-tight text-foreground">
+                  <%= total_pin_aktif %>
+                </h3>
                 <span class="card-subtext block mt-0.5">
                   Belum digunakan mitra
                 </span>
@@ -442,110 +476,50 @@
             <div class="card-divider">
               <div class="flex justify-between items-center text-[10px] font-bold text-muted-foreground">
                 <span>Dari total PIN</span>
-                <span class="text-foreground"><%= total_pin_aktif %> / <%= total_pin %></span>
+                <span class="text-foreground">
+                  <%= total_pin_aktif %> / <%= total_pin %>
+                </span>
               </div>
               <div class="custom-progress-track">
-                <div class="custom-progress-fill amber" style="width: <%= total_pin > 0 ? Math.min(100, Math.round((total_pin_aktif / total_pin) * 100)) : 0 %>%"></div>
+                <div class="custom-progress-fill amber"
+                  style="width: <%= total_pin > 0 ? Math.min(100, Math.round((total_pin_aktif / total_pin) * 100)) : 0 %>%">
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Card 3: Survey Selesai -->
-          <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col justify-between gap-3">
+          <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col justify-between gap-5">
             <div class="flex items-start gap-4">
-              <div class="p-3 bg-emerald-500/10 rounded-2xl text-emerald-600 dark:text-emerald-400 border border-emerald-500/15 shrink-0">
+              <div
+                class="p-3 bg-emerald-500/10 rounded-2xl text-emerald-600 dark:text-emerald-400 border border-emerald-500/15 shrink-0">
                 <i data-lucide="check-circle-2" class="size-5"></i>
               </div>
               <div class="space-y-1">
                 <p class="card-title-small">Survey Selesai</p>
-                <h3 class="text-3xl font-extrabold tracking-tight text-foreground"><%= total_respons %></h3>
-                <span class="trend-badge">
-                  <i data-lucide="trending-up" class="size-3.5"></i> 75% completion rate
-                </span>
-              </div>
-            </div>
-            <div class="h-9 w-full mt-1 overflow-hidden shrink-0">
-              <svg class="w-full h-full text-emerald-500 dark:text-emerald-400" viewBox="0 0 100 30" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="sparkline-grad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="rgb(16, 185, 129)" stop-opacity="0.2"/>
-                    <stop offset="100%" stop-color="rgb(16, 185, 129)" stop-opacity="0"/>
-                  </linearGradient>
-                </defs>
-                <path d="M0 25 C 20 23, 30 15, 50 18 C 70 21, 80 5, 100 8 L 100 30 L 0 30 Z" fill="url(#sparkline-grad)" />
-                <path d="M0 25 C 20 23, 30 15, 50 18 C 70 21, 80 5, 100 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </div>
-          </div>
-
-          <!-- Card 4: Indeks Kepuasan -->
-          <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col justify-between gap-5">
-            <div class="flex items-start gap-4">
-              <div class="p-3 bg-indigo-500/10 rounded-2xl text-indigo-600 dark:text-indigo-400 border border-indigo-500/15 shrink-0">
-                <i data-lucide="star" class="size-5"></i>
-              </div>
-              <div class="space-y-1">
-                <p class="card-title-small">Indeks Kepuasan</p>
                 <h3 class="text-3xl font-extrabold tracking-tight text-foreground">
-                  <%= (locals.average_skor && average_skor !== null ? parseFloat(average_skor).toFixed(1) : "0.0") %>
+                  <%= total_respons %>
                 </h3>
                 <span class="card-subtext block mt-0.5">
-                  Rata-rata skor kuesioner
+                  Kuesioner berhasil diisi
                 </span>
               </div>
             </div>
             <div class="card-divider">
+              <% const rate = total_pin > 0 ? Math.min(100, Math.round((total_respons / total_pin) * 100)) : 0; %>
               <div class="flex justify-between items-center text-[10px] font-bold text-muted-foreground">
-                <span>Skor Akumulatif</span>
-                <span class="text-foreground">Skala Dinamis</span>
+                <span>Rasio Pengisian (Completion Rate)</span>
+                <span class="text-foreground"><%= rate %>% Selesai</span>
+              </div>
+              <div class="custom-progress-track">
+                <div class="custom-progress-fill emerald" style="width: <%= rate %>%"></div>
               </div>
             </div>
           </div>
 
         </div>
 
-        <!-- Charts Row -->
-        <div class="charts-grid gap-6">
-          
-          <!-- Chart Bar -->
-          <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col gap-4">
-            <div>
-              <h3 class="font-bold text-foreground leading-none tracking-tight text-sm">Tren Survey per Bulan</h3>
-              <p class="text-[11px] text-muted-foreground mt-1">Jumlah kuesioner diselesaikan mitra — 6 bulan terakhir</p>
-            </div>
-            <div class="h-64 relative w-full mt-2">
-              <canvas id="chartSurveyBar"></canvas>
-            </div>
-          </div>
 
-          <!-- Chart Donut -->
-          <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col gap-4">
-            <div>
-              <h3 class="font-bold text-foreground leading-none tracking-tight text-sm">Distribusi Status PIN</h3>
-              <p class="text-[11px] text-muted-foreground mt-1">Proporsi PIN aktif, terpakai, dan kadaluarsa</p>
-            </div>
-            <div class="donut-row h-64 mt-2">
-              <div class="h-44 w-44 relative shrink-0">
-                <canvas id="chartPinDonut"></canvas>
-              </div>
-              <div class="space-y-2.5 text-xs text-muted-foreground">
-                <div class="flex items-center gap-2.5">
-                  <span class="size-3.5 rounded-full bg-slate-700 block border border-white/10 shadow-xs"></span>
-                  <span class="font-medium">Aktif: <strong id="l-aktif" class="text-foreground font-bold">0</strong></span>
-                </div>
-                <div class="flex items-center gap-2.5">
-                  <span class="size-3.5 rounded-full bg-slate-400 block border border-white/10 shadow-xs"></span>
-                  <span class="font-medium">Terpakai: <strong id="l-terpakai" class="text-foreground font-bold">0</strong></span>
-                </div>
-                <div class="flex items-center gap-2.5">
-                  <span class="size-3.5 rounded-full bg-slate-200 block border border-white/10 shadow-xs"></span>
-                  <span class="font-medium">Kadaluarsa: <strong id="l-kadaluarsa" class="text-foreground font-bold">0</strong></span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
 
         <!-- Data Table Card -->
         <div data-slot="card" class="premium-card rounded-2xl overflow-hidden">
@@ -555,12 +529,13 @@
               <p class="text-xs text-muted-foreground mt-1.5">Kelola token PIN kuesioner industri</p>
             </div>
             <div class="flex flex-wrap gap-2 w-full md:w-auto">
-              <div class="relative flex-1 md:flex-initial">
-                <i data-lucide="search" class="absolute left-2.5 top-2.5 size-4 text-muted-foreground"></i>
+              <label class="relative flex items-center flex-1 md:flex-initial">
+                <i data-lucide="search" class="text-muted-foreground" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; pointer-events: none;"></i>
                 <input type="text" id="topbar-search" placeholder="Cari nama mitra..." value="<%= search %>"
                   autocomplete="off"
-                  class="pl-8 h-9 rounded-md border text-sm w-full md:w-60 bg-transparent outline-none focus-visible:ring-1 focus-visible:ring-ring" />
-              </div>
+                  style="padding-left: 36px;"
+                  class="h-9 rounded-md border border-border bg-background/60 hover:bg-background/80 focus:bg-background text-sm w-full md:w-60 outline-none focus-visible:ring-1 focus-visible:ring-primary transition-all" />
+              </label>
               <a href="/admin/dashboard/export-pdf"
                 class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 py-2">
                 <i data-lucide="printer" class="size-4"></i>
@@ -669,31 +644,36 @@
                   <%= totalPages %>
                 </strong> (Total: <%= totalItems %> data)
               </div>
-              <div class="flex gap-1">
+              <div class="flex gap-1" style="display: flex; gap: 4px;">
                 <% if (page> 1) { %>
                   <a href="?search=<%= search %>&page=<%= page - 1 %>"
-                    class="h-8 w-8 inline-flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground text-muted-foreground"><i
+                    style="width: 32px; min-width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;"
+                    class="rounded-md border hover:bg-accent hover:text-accent-foreground text-muted-foreground"><i
                       data-lucide="chevron-left" class="size-4"></i></a>
                   <% } else { %>
                     <span
-                      class="h-8 w-8 inline-flex items-center justify-center rounded-md border opacity-50 cursor-not-allowed text-muted-foreground"><i
+                      style="width: 32px; min-width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;"
+                      class="rounded-md border opacity-50 cursor-not-allowed text-muted-foreground"><i
                         data-lucide="chevron-left" class="size-4"></i></span>
                     <% } %>
 
                       <% for(let i=1; i <=totalPages; i++) { %>
                         <a href="?search=<%= search %>&page=<%= i %>"
-                          class="h-8 w-8 inline-flex items-center justify-center rounded-md border text-sm <%= page === i ? 'bg-primary text-primary-foreground font-semibold border-primary' : 'hover:bg-accent hover:text-accent-foreground text-muted-foreground' %>">
+                          style="width: 32px; min-width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;"
+                          class="rounded-md border text-sm <%= page === i ? 'bg-primary text-primary-foreground font-semibold border-primary' : 'hover:bg-accent hover:text-accent-foreground text-muted-foreground' %>">
                           <%= i %>
                         </a>
                         <% } %>
 
                           <% if (page < totalPages) { %>
                             <a href="?search=<%= search %>&page=<%= page + 1 %>"
-                              class="h-8 w-8 inline-flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground text-muted-foreground"><i
+                              style="width: 32px; min-width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;"
+                              class="rounded-md border hover:bg-accent hover:text-accent-foreground text-muted-foreground"><i
                                 data-lucide="chevron-right" class="size-4"></i></a>
                             <% } else { %>
                               <span
-                                class="h-8 w-8 inline-flex items-center justify-center rounded-md border opacity-50 cursor-not-allowed text-muted-foreground"><i
+                                style="width: 32px; min-width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;"
+                                class="rounded-md border opacity-50 cursor-not-allowed text-muted-foreground"><i
                                   data-lucide="chevron-right" class="size-4"></i></span>
                               <% } %>
               </div>
@@ -761,95 +741,7 @@
       }
     });
 
-    // Chart.js Configuration
-    Chart.defaults.font.family = "system-ui, -apple-system, sans-serif";
 
-    // Bar Chart: Tren Survey per Bulan
-    const ctxBar = document.getElementById('chartSurveyBar').getContext('2d');
-    const isDark = document.documentElement.classList.contains('dark');
-    const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)';
-    const textColor = isDark ? '#a1a1aa' : '#64748b';
-
-    new Chart(ctxBar, {
-      type: 'bar',
-      data: {
-        labels: ['Des', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei'],
-        datasets: [{
-          label: 'Survey Selesai',
-          data: [3, 5, 4, 7, 6, <%= total_respons %>],
-          backgroundColor: '#0f172a',
-          borderRadius: 6,
-        }, {
-          label: 'PIN Digenerate',
-          data: [4, 6, 5, 9, 8, <%= total_pin_aktif + total_respons %>],
-          backgroundColor: '#94a3b8',
-          borderRadius: 6,
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'top', labels: { boxWidth: 12, usePointStyle: true, font: { size: 11 }, color: textColor } }
-        },
-        scales: {
-          x: { grid: { display: false }, ticks: { color: textColor, font: { size: 11 } } },
-          y: { grid: { color: gridColor }, ticks: { stepSize: 2, color: textColor, font: { size: 11 } }, beginAtZero: true }
-        }
-      }
-    });
-
-    // Donut Chart: Status PIN
-    let pinDonutChart = null;
-
-    function renderDonutChart(active, used, expired) {
-      const ctxDonut = document.getElementById('chartPinDonut').getContext('2d');
-      if (pinDonutChart) pinDonutChart.destroy();
-
-      const isDark = document.documentElement.classList.contains('dark');
-
-      pinDonutChart = new Chart(ctxDonut, {
-        type: 'doughnut',
-        data: {
-          labels: ['Aktif', 'Terpakai', 'Kadaluarsa'],
-          datasets: [{
-            data: [active, used, expired],
-            backgroundColor: ['#334155', '#94a3b8', isDark ? '#27272a' : '#f1f5f9'],
-            borderWidth: 0,
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '75%',
-          plugins: {
-            legend: { display: false }
-          }
-        }
-      });
-
-      document.getElementById('l-aktif').innerText = active;
-      document.getElementById('l-terpakai').innerText = used;
-      document.getElementById('l-kadaluarsa').innerText = expired;
-    }
-
-    function fetchDashboardStats() {
-      fetch('/api/dashboard-stats')
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            const stats = data.data;
-            if (stats.pin_stats) {
-              renderDonutChart(stats.pin_stats.active || 0, stats.pin_stats.used || 0, stats.pin_stats.expired || 0);
-            } else {
-              renderDonutChart(0, 0, 0);
-            }
-          }
-        })
-        .catch(err => console.error('Error fetching dashboard stats:', err));
-    }
-
-    fetchDashboardStats();
 
     // Dialog controls
     const pinDialog = document.getElementById('pin-dialog');
@@ -931,7 +823,7 @@
               if (data.success) {
                 alert('PIN berhasil dihapus!');
                 document.getElementById(`row-pin-${id}`).remove();
-                fetchDashboardStats();
+
               } else {
                 alert('Gagal menghapus PIN: ' + data.message);
               }

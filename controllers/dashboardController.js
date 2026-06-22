@@ -34,6 +34,7 @@ const showDashboard = async (req, res, next) => {
       "SELECT AVG(score_total) AS average_skor FROM survey_responses WHERE status = 'completed'"
     );
 
+
     // 2. Query all partners for dropdown (exclude partners with active/unused PINs)
     const [allPartners] = await db.query(
       `SELECT id, name FROM partners 
@@ -81,6 +82,7 @@ const showDashboard = async (req, res, next) => {
       totalPages,
       totalItems
     });
+
   } catch (err) {
     next(err);
   }
@@ -142,7 +144,7 @@ const generatePIN = async (req, res, next) => {
     const [surveys] = await db.query(
       "SELECT id FROM surveys WHERE status = 'published' ORDER BY id DESC LIMIT 1"
     );
-    
+
     let surveyId = null;
     if (surveys.length > 0) {
       surveyId = surveys[0].id;
@@ -155,9 +157,9 @@ const generatePIN = async (req, res, next) => {
     }
 
     if (!surveyId) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "No surveys available in the database. Please create a survey first." 
+      return res.status(400).json({
+        success: false,
+        message: "No surveys available in the database. Please create a survey first."
       });
     }
 
