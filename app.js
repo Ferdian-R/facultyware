@@ -19,6 +19,16 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(logger('dev'));
+app.use((req, res, next) => {
+  const fs = require('fs');
+  console.log('[REQ START]', req.method, req.url);
+  fs.appendFileSync('requests.log', `[REQ START] ${req.method} ${req.url}\n`);
+  res.on('finish', () => {
+    console.log('[REQ FINISH]', req.method, req.url);
+    fs.appendFileSync('requests.log', `[REQ FINISH] ${req.method} ${req.url}\n`);
+  });
+  next();
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());

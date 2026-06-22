@@ -86,7 +86,7 @@ router.post(
 
     try {
       // 1. Verify partner exists
-      const [[partner]] = await db.query("SELECT id FROM partners WHERE id = ?", [partner_id]);
+      const [[partner]] = await db.query("SELECT id, name, email, phone FROM partners WHERE id = ?", [partner_id]);
       if (!partner) {
         return res.status(404).json({ success: false, message: "Partner not found." });
       }
@@ -111,8 +111,8 @@ router.post(
 
       // 4. Insert into database
       const [result] = await db.query(
-        "INSERT INTO survey_invitations (partner_id, survey_id, pin, is_used) VALUES (?, ?, ?, 0)",
-        [partner_id, survey_id, pin]
+        "INSERT INTO survey_invitations (survey_id, name, email, phone, pin, is_used) VALUES (?, ?, ?, ?, ?, 0)",
+        [survey_id, partner.name, partner.email, partner.phone, pin]
       );
 
       res.status(201).json({
@@ -120,8 +120,10 @@ router.post(
         message: "PIN created successfully.",
         data: {
           id: result.insertId,
-          partner_id,
           survey_id,
+          name: partner.name,
+          email: partner.email,
+          phone: partner.phone,
           pin,
           is_used: 0
         }
@@ -468,28 +470,26 @@ router.post(
 
       // 2. Insert response
       const [responseResult] = await conn.query(
-        `INSERT INTO survey_responses (survey_id, partner_id, survey_invitation_id, status, score_total, submitted_at) 
-         VALUES (?, ?, ?, 'completed', ?, NOW())`,
-        [survey_id, partner_id, survey_invitation_id || null, scoreTotal]
+        `INSERT INTO survey_responses (survey_id, survey_invitation_id, submitted_at) 
+         VALUES (?, ?, NOW())`,
+        [survey_id, survey_invitation_id || null]
       );
       const responseId = responseResult.insertId;
 
       // 3. Insert individual answers
       for (const ans of answersToInsert) {
-        await conn.query(
-          `INSERT INTO survey_answers (survey_response_id, survey_question_id, survey_question_option_id, answer_text, score) 
-           VALUES (?, ?, ?, ?, ?)`,
-          [responseId, ans.survey_question_id, ans.survey_question_option_id, ans.answer_text, ans.score]
+        const [saResult] = await conn.query(
+          `INSERT INTO survey_answers (survey_response_id, survey_question_id, answer_text) 
+           VALUES (?, ?, ?)`,
+          [responseId, ans.survey_question_id, ans.answer_text]
         );
+        if (ans.survey_question_option_id) {
+          await conn.query(
+            `INSERT INTO survey_answer_options (survey_answer_id, survey_question_option_id) VALUES (?, ?)`,
+            [saResult.insertId, ans.survey_question_option_id]
+          );
+        }
       }
-
-      // 4. Audit Log
-      const ipAddress = req.ip || req.connection.remoteAddress;
-      const userAgent = req.headers["user-agent"] || "";
-      await conn.query(
-        "INSERT INTO audit_logs (partner_id, activity, ip_address, user_agent) VALUES (?, 'SUBMIT_SURVEY_API', ?, ?)",
-        [partner_id, ipAddress, userAgent]
-      );
 
       // 5. If survey_invitation_id was provided, mark it as used
       if (survey_invitation_id) {

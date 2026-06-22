@@ -255,7 +255,7 @@
                 <div class="border border-border/80 rounded-xl p-6 bg-card/50 hover:shadow-xs transition-all duration-300 border-l-4 border-l-primary/70 space-y-4">
                   <div class="flex items-center justify-between gap-4 border-b border-border/40 pb-2">
                     <span class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Pertanyaan <%= ans.order_number %></span>
-                    <% if (ans.question_type !== 'essay') { %>
+                    <% if (ans.question_type !== 'short_answer') { %>
                       <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-extrabold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                         Skor: <%= ans.answer_score %>
                       </span>
@@ -270,7 +270,7 @@
                   
                   <div class="pt-3 border-t border-border/40 text-xs">
                     <span class="text-muted-foreground font-semibold">Jawaban Anda:</span>
-                    <% if (ans.question_type !== 'essay') { %>
+                    <% if (ans.question_type !== 'short_answer') { %>
                       <p class="text-foreground font-bold mt-1.5 flex items-center gap-2 text-sm">
                         <i data-lucide="check-circle-2" class="size-4 text-emerald-500 shrink-0"></i>
                         <span><%= ans.selected_option %></span>
@@ -302,14 +302,14 @@
                     <td class="p-2 text-center font-bold"><%= ans.order_number %></td>
                     <td class="p-2 leading-relaxed"><%= ans.question_text %></td>
                     <td class="p-2">
-                      <% if (ans.question_type !== 'essay') { %>
+                      <% if (ans.question_type !== 'short_answer') { %>
                         <strong><%= ans.selected_option %></strong>
                       <% } else { %>
                         <span class="italic"><%= ans.answer_text %></span>
                       <% } %>
                     </td>
                     <td class="p-2 text-center font-bold">
-                      <%= ans.question_type !== 'essay' ? ans.answer_score : '—' %>
+                      <%= ans.question_type !== 'short_answer' ? ans.answer_score : '—' %>
                     </td>
                   </tr>
                 <% }) %>

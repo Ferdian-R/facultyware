@@ -390,8 +390,9 @@ const buildQuestionsReport = (data) => {
 
       // Question Type Badge/Label
       let typeLabel = "";
-      if (q.type === "essay") typeLabel = "Tipe: Essay (Jawaban Bebas)";
+      if (q.type === "essay" || q.type === "short_answer") typeLabel = "Tipe: Jawaban Singkat / Deskriptif";
       else if (q.type === "multiple_choice") typeLabel = "Tipe: Pilihan Ganda";
+      else if (q.type === "single_choice") typeLabel = "Tipe: Pilihan Tunggal";
       else if (q.type === "rating") typeLabel = "Tipe: Skala Rating (1-5)";
 
       const typeY = doc.y;
@@ -403,8 +404,8 @@ const buildQuestionsReport = (data) => {
       
       doc.y = typeY + doc.heightOfString(typeLabel, { width: 465 }) + 6;
 
-      // Render Options if Mc or Rating
-      if ((q.type === "multiple_choice" || q.type === "rating") && q.options && q.options.length > 0) {
+      // Render Options if Mc, Single Choice, or Rating
+      if ((q.type === "multiple_choice" || q.type === "single_choice" || q.type === "rating") && q.options && q.options.length > 0) {
         q.options.forEach(opt => {
           // Prevent overflow
           if (doc.y > 720) {

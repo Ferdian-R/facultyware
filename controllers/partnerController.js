@@ -25,8 +25,8 @@ const showPartnersPage = async (req, res, next) => {
 
     // 1. Gather stats metrics
     const [[{ total }]] = await db.query("SELECT COUNT(*) AS total FROM partners");
-    const [[{ active }]] = await db.query("SELECT COUNT(*) AS active FROM partners WHERE status = 'active'");
-    const [[{ inactive }]] = await db.query("SELECT COUNT(*) AS inactive FROM partners WHERE status = 'inactive'");
+    const active = total;
+    const inactive = 0;
 
     // 2. Build filter queries
     let queryParams = [`%${search}%`, `%${search}%`];
@@ -35,10 +35,6 @@ const showPartnersPage = async (req, res, next) => {
     if (type) {
       whereClause += " AND type = ?";
       queryParams.push(type);
-    }
-    if (status) {
-      whereClause += " AND status = ?";
-      queryParams.push(status);
     }
 
     // Get filtered total items count
@@ -52,7 +48,7 @@ const showPartnersPage = async (req, res, next) => {
     // Get paginated partners
     queryParams.push(limit, offset);
     const [partners] = await db.query(
-      `SELECT id, name, type, email, phone, status, created_at 
+      `SELECT id, name, type, email, phone, created_at 
        FROM partners 
        WHERE ${whereClause} 
        ORDER BY created_at DESC 
@@ -101,13 +97,13 @@ const showPartnerDetailPage = async (req, res, next) => {
 
     // 3. Fetch survey invitation and response history
     const [surveys] = await db.query(
-      `SELECT si.pin, si.is_used, si.used_at, s.title AS survey_title, sr.score_total 
+      `SELECT si.pin, si.is_used, si.used_at, s.title AS survey_title, sr.id AS response_id 
        FROM survey_invitations si 
        JOIN surveys s ON si.survey_id = s.id 
-       LEFT JOIN survey_responses sr ON si.id = sr.survey_invitation_id AND sr.status = 'completed'
-       WHERE si.partner_id = ?
+       LEFT JOIN survey_responses sr ON si.id = sr.survey_invitation_id
+       WHERE si.name = ?
        ORDER BY si.created_at DESC`,
-      [id]
+      [partner.name]
     );
 
     res.render("dashboard/partner_detail", {
@@ -129,7 +125,7 @@ const showPartnerDetailPage = async (req, res, next) => {
  * POST /admin/partners
  */
 const createPartner = async (req, res, next) => {
-  const { name, type, email, phone, address, description, status, contact_name, contact_position, contact_email, contact_phone } = req.body;
+  const { name, type, email, phone, address, description, contact_name, contact_position, contact_email, contact_phone } = req.body;
 
   if (!name || !type || !contact_name || !contact_position) {
     return res.redirect("/admin/partners?error=Data+input+tidak+lengkap.+Nama+mitra,+tipe,+dan+kontak+utama+wajib+diisi.");
@@ -141,9 +137,9 @@ const createPartner = async (req, res, next) => {
 
     // 1. Insert partner profile
     const [partnerResult] = await conn.query(
-      `INSERT INTO partners (name, type, email, phone, address, description, status) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [name, type, email || null, phone || null, address || null, description || null, status || 'active']
+      `INSERT INTO partners (name, type, email, phone, address, description) 
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [name, type, email || null, phone || null, address || null, description || null]
     );
     const partnerId = partnerResult.insertId;
 
@@ -170,7 +166,7 @@ const createPartner = async (req, res, next) => {
  */
 const updatePartner = async (req, res, next) => {
   const { id } = req.params;
-  const { name, type, email, phone, address, description, status } = req.body;
+  const { name, type, email, phone, address, description } = req.body;
 
   if (!name || !type) {
     return res.redirect(`/admin/partners/${id}?error=Nama+dan+Tipe+mitra+wajib+diisi.`);
@@ -179,9 +175,9 @@ const updatePartner = async (req, res, next) => {
   try {
     await db.query(
       `UPDATE partners 
-       SET name = ?, type = ?, email = ?, phone = ?, address = ?, description = ?, status = ? 
+       SET name = ?, type = ?, email = ?, phone = ?, address = ?, description = ? 
        WHERE id = ?`,
-      [name, type, email || null, phone || null, address || null, description || null, status || 'active', id]
+      [name, type, email || null, phone || null, address || null, description || null, id]
     );
 
     res.redirect(`/admin/partners/${id}?success=Profil+mitra+berhasil+diperbarui.`);
@@ -314,13 +310,13 @@ const exportPartnerPDF = async (req, res, next) => {
     );
 
     const [surveys] = await db.query(
-      `SELECT si.pin, si.is_used, si.used_at, s.title AS survey_title, sr.score_total 
+      `SELECT si.pin, si.is_used, si.used_at, s.title AS survey_title, sr.id AS response_id 
        FROM survey_invitations si 
        JOIN surveys s ON si.survey_id = s.id 
-       LEFT JOIN survey_responses sr ON si.id = sr.survey_invitation_id AND sr.status = 'completed'
-       WHERE si.partner_id = ?
+       LEFT JOIN survey_responses sr ON si.id = sr.survey_invitation_id
+       WHERE si.name = ?
        ORDER BY si.created_at DESC`,
-      [id]
+      [partner.name]
     );
 
     const data = {
@@ -334,7 +330,7 @@ const exportPartnerPDF = async (req, res, next) => {
     const doc = pdfService.buildPartnerDetailReport(data);
 
     // 3. Set download headers
-    res.setHeader("Content-Disposition", `attachment; filename=Detail_Mitra_${id}_${partner.name.replace(/\s+/g, '_')}.pdf`);
+    res.setHeader("Content-Disposition", `attachment; filename=Detail_Mitra_${id}_${partner.name.replace(/[name, type, email || null, phone || null, address || null, description || null]+/g, '_')}.pdf`);
     res.setHeader("Content-Type", "application/pdf");
     doc.pipe(res);
   } catch (err) {
@@ -349,7 +345,7 @@ const exportPartnerPDF = async (req, res, next) => {
 const apiGetPartners = async (req, res, next) => {
   try {
     const search = req.query.search || "";
-    let query = "SELECT id, name, type, email, phone, status, created_at FROM partners";
+    let query = "SELECT id, name, type, email, phone, created_at FROM partners";
     let params = [];
 
     if (search) {
@@ -379,7 +375,7 @@ const apiCreatePartner = async (req, res, next) => {
     return res.status(400).json({ success: false, errors: errors.array() });
   }
 
-  const { name, type, email, phone, address, description, status, contact_name, contact_position, contact_email, contact_phone } = req.body;
+  const { name, type, email, phone, address, description, contact_name, contact_position, contact_email, contact_phone } = req.body;
 
   const conn = await db.getConnection();
   try {
@@ -387,9 +383,9 @@ const apiCreatePartner = async (req, res, next) => {
 
     // 1. Insert partner profile
     const [partnerResult] = await conn.query(
-      `INSERT INTO partners (name, type, email, phone, address, description, status) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [name, type, email || null, phone || null, address || null, description || null, status || 'active']
+      `INSERT INTO partners (name, type, email, phone, address, description) 
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [name, type, email || null, phone || null, address || null, description || null]
     );
     const partnerId = partnerResult.insertId;
 
@@ -413,7 +409,6 @@ const apiCreatePartner = async (req, res, next) => {
         phone,
         address,
         description,
-        status: status || 'active',
         primary_contact: {
           id: contactResult.insertId,
           name: contact_name,

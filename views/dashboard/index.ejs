@@ -563,7 +563,7 @@
               </thead>
               <tbody class="divide-y">
                 <% if (locals.perusahaan && perusahaan.length> 0) { %>
-                  <% perusahaan.forEach(function(p) { const avatarStr=p.nama_perusahaan.substring(0, 2).toUpperCase();
+                  <% perusahaan.forEach(function(p) { const avatarStr=(p.nama_perusahaan || "NA").substring(0, 2).toUpperCase();
                     let formattedDate="—" ; if (p.created_at) { const dateObj=new Date(p.created_at);
                     formattedDate=dateObj.toLocaleDateString('id-ID', { day: '2-digit' , month: 'short' ,
                     year: 'numeric' }); } let formattedUsedDate="—" ; if (p.used_at) { const dateObj=new
@@ -584,10 +584,10 @@
                           </div>
                           <div>
                             <div class="text-foreground">
-                              <%= p.nama_perusahaan %>
+                              <%= p.nama_perusahaan || "Unknown" %>
                             </div>
-                            <div class="text-xs text-muted-foreground font-normal">#MITRA-<%=
-                                p.partner_id.toString().padStart(3, '0' ) %>
+                            <div class="text-xs text-muted-foreground font-normal">#INV-<%=
+                                (p.id || 0).toString().padStart(3, '0' ) %>
                             </div>
                           </div>
                         </div>

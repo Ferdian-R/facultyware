@@ -1,0 +1,10 @@
+{
+  "ignore": [
+    "tests/*",
+    "test-results/*",
+    "playwright-report/*",
+    "docs/*",
+    "playwright.config.js"
+  ],
+  "ext": "js,ejs,css"
+}

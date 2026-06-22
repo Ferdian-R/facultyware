@@ -60,7 +60,10 @@ const login = async (req, res, next) => {
     req.session.username = user.username;
     req.session.role = "admin";
 
-    res.redirect("/admin/dashboard");
+    req.session.save((err) => {
+      if (err) return next(err);
+      res.redirect("/admin/dashboard");
+    });
   } catch (err) {
     next(err);
   }
@@ -81,10 +84,8 @@ const loginMitra = async (req, res, next) => {
   try {
     // 1. Fetch PIN details
     const [results] = await db.query(
-      `SELECT si.id AS invitation_id, si.pin, si.is_used, si.used_at,
-              p.id AS partner_id, p.name AS nama_perusahaan
+      `SELECT si.id AS invitation_id, si.pin, si.is_used, si.used_at, si.name AS nama_perusahaan, si.survey_id
        FROM survey_invitations si
-       JOIN partners p ON si.partner_id = p.id
        WHERE si.pin = ?`,
       [pin]
     );
@@ -114,21 +115,22 @@ const loginMitra = async (req, res, next) => {
       [pinData.invitation_id]
     );
 
-    // 4. Write to Audit Trail logs
-    const ipAddress = req.ip || req.connection.remoteAddress;
-    const userAgent = req.headers["user-agent"] || "";
-    await db.query(
-      "INSERT INTO audit_logs (partner_id, activity, ip_address, user_agent) VALUES (?, 'LOGIN', ?, ?)",
-      [pinData.partner_id, ipAddress, userAgent]
-    );
+    // 4. Legacy Audit Trail removed (table not in v2 schema)
+    
+    const [partnerRow] = await db.query("SELECT id FROM partners WHERE name = ? LIMIT 1", [pinData.nama_perusahaan]);
+    const partnerId = partnerRow.length > 0 ? partnerRow[0].id : null;
 
     // 5. Establish session
-    req.session.partnerId = pinData.partner_id;
     req.session.partnerName = pinData.nama_perusahaan;
+    req.session.partnerId = partnerId; // Optional now, since responses use survey_invitation_id directly
     req.session.invitationId = pinData.invitation_id;
+    req.session.surveyId = pinData.survey_id;
     req.session.role = "mitra";
 
-    res.redirect("/survey-mitra");
+    req.session.save((err) => {
+      if (err) return next(err);
+      res.redirect("/survey-mitra");
+    });
   } catch (err) {
     next(err);
   }

@@ -16,9 +16,9 @@ const showRecapPage = async (req, res, next) => {
     const [countRows] = await db.query(
       `SELECT COUNT(*) AS total 
        FROM survey_responses sr
-       JOIN partners p ON sr.partner_id = p.id
+       JOIN survey_invitations si ON sr.survey_invitation_id = si.id
        JOIN surveys s ON sr.survey_id = s.id
-       WHERE sr.status = 'completed' AND (p.name LIKE ? OR s.title LIKE ?)`,
+       WHERE (si.name LIKE ? OR s.title LIKE ?)`,
       [`%${search}%`, `%${search}%`]
     );
     const totalItems = countRows[0].total;
@@ -26,11 +26,18 @@ const showRecapPage = async (req, res, next) => {
 
     // 2. Fetch responses list
     const [responses] = await db.query(
-      `SELECT sr.id, sr.score_total, sr.submitted_at, s.title AS survey_title, p.name AS partner_name
+      `SELECT sr.id, sr.submitted_at, s.title AS survey_title, si.name AS partner_name,
+              (
+                 SELECT SUM(sqo.weight)
+                 FROM survey_answers sa
+                 JOIN survey_answer_options sao ON sa.id = sao.survey_answer_id
+                 JOIN survey_question_options sqo ON sao.survey_question_option_id = sqo.id
+                 WHERE sa.survey_response_id = sr.id
+              ) AS score_total
        FROM survey_responses sr
        JOIN surveys s ON sr.survey_id = s.id
-       JOIN partners p ON sr.partner_id = p.id
-       WHERE sr.status = 'completed' AND (p.name LIKE ? OR s.title LIKE ?)
+       JOIN survey_invitations si ON sr.survey_invitation_id = si.id
+       WHERE (si.name LIKE ? OR s.title LIKE ?)
        ORDER BY sr.submitted_at DESC
        LIMIT ? OFFSET ?`,
       [`%${search}%`, `%${search}%`, limit, offset]
@@ -62,10 +69,17 @@ const getResponseDetailJSON = async (req, res, next) => {
   try {
     // Verify response exists
     const [[response]] = await db.query(
-      `SELECT sr.id, sr.score_total, sr.submitted_at, s.title AS survey_title, p.name AS partner_name
+      `SELECT sr.id, sr.submitted_at, s.title AS survey_title, si.name AS partner_name,
+              (
+                 SELECT SUM(sqo.weight)
+                 FROM survey_answers sa
+                 JOIN survey_answer_options sao ON sa.id = sao.survey_answer_id
+                 JOIN survey_question_options sqo ON sao.survey_question_option_id = sqo.id
+                 WHERE sa.survey_response_id = sr.id
+              ) AS score_total
        FROM survey_responses sr
        JOIN surveys s ON sr.survey_id = s.id
-       JOIN partners p ON sr.partner_id = p.id
+       JOIN survey_invitations si ON sr.survey_invitation_id = si.id
        WHERE sr.id = ?`,
       [id]
     );
@@ -76,13 +90,15 @@ const getResponseDetailJSON = async (req, res, next) => {
 
     // Fetch answers
     const [answers] = await db.query(
-      `SELECT sa.id, sq.question_text, sq.type, sa.answer_text, sa.score, sqo.option_text
+      `SELECT sa.id, sq.question_text, sq.type, sa.answer_text, sqo.weight AS score, sqo.option_text
        FROM survey_answers sa
        JOIN survey_questions sq ON sa.survey_question_id = sq.id
-       LEFT JOIN survey_question_options sqo ON sa.survey_question_option_id = sqo.id
+       JOIN survey_question_assignments sqa ON sq.id = sqa.survey_question_id AND sqa.survey_id = ?
+       LEFT JOIN survey_answer_options sao ON sa.id = sao.survey_answer_id
+       LEFT JOIN survey_question_options sqo ON sao.survey_question_option_id = sqo.id
        WHERE sa.survey_response_id = ?
-       ORDER BY sq.order_number ASC, sq.id ASC`,
-      [id]
+       ORDER BY sqa.order ASC, sq.id ASC`,
+      [response.survey_id, id]
     );
 
     res.json({
@@ -105,48 +121,97 @@ const exportExcel = async (req, res, next) => {
   try {
     // 1. Fetch raw answers join query
     const [rows] = await db.query(
-      `SELECT sr.id AS response_id, sr.score_total, sr.submitted_at, 
-              s.title AS survey_title, p.name AS partner_name, p.email AS partner_email, p.phone AS partner_phone,
-              sq.question_text, sq.type AS question_type, sa.answer_text, sa.score AS answer_score, sqo.option_text
+      `SELECT sr.id AS response_id, sr.submitted_at, 
+              s.title AS survey_title, si.name AS partner_name, si.email AS partner_email, si.phone AS partner_phone,
+              sq.question_text, sq.type AS question_type, sa.answer_text, sqo.weight AS answer_score, sqo.option_text,
+              (
+                 SELECT SUM(sqo_inner.weight)
+                 FROM survey_answers sa_inner
+                 JOIN survey_answer_options sao_inner ON sa_inner.id = sao_inner.survey_answer_id
+                 JOIN survey_question_options sqo_inner ON sao_inner.survey_question_option_id = sqo_inner.id
+                 WHERE sa_inner.survey_response_id = sr.id
+              ) AS score_total
        FROM survey_responses sr
        JOIN surveys s ON sr.survey_id = s.id
-       JOIN partners p ON sr.partner_id = p.id
+       JOIN survey_invitations si ON sr.survey_invitation_id = si.id
        JOIN survey_answers sa ON sa.survey_response_id = sr.id
        JOIN survey_questions sq ON sa.survey_question_id = sq.id
-       LEFT JOIN survey_question_options sqo ON sa.survey_question_option_id = sqo.id
-       WHERE sr.status = 'completed'
-       ORDER BY sr.submitted_at DESC, sq.order_number ASC, sq.id ASC`
+       LEFT JOIN survey_answer_options sao ON sa.id = sao.survey_answer_id
+       LEFT JOIN survey_question_options sqo ON sao.survey_question_option_id = sqo.id
+       ORDER BY sr.submitted_at DESC, sq.id ASC`
     );
 
-    // 2. Initialize workbook
+    // 2. Group Data by Response & Collect Unique Questions
+    const responsesMap = {};
+    const questionsSet = new Map();
+
+    rows.forEach(r => {
+      if (!responsesMap[r.response_id]) {
+        const dateObj = new Date(r.submitted_at);
+        const formattedDate = dateObj.toLocaleDateString("id-ID", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric"
+        }) + " " + dateObj.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+
+        responsesMap[r.response_id] = {
+          partner_name: r.partner_name,
+          survey_title: r.survey_title,
+          submitted_at: formattedDate,
+          score_total: r.score_total || 0,
+          answers: {}
+        };
+      }
+      
+      if (r.question_text) {
+        if (!questionsSet.has(r.question_text)) {
+          questionsSet.set(r.question_text, r.question_text);
+        }
+
+        let answerVal = "—";
+        if (r.question_type === "essay" || r.question_type === "short_answer") {
+          answerVal = r.answer_text || "—";
+        } else {
+          answerVal = r.option_text ? `${r.option_text} (Skor: ${r.answer_score})` : "—";
+        }
+        
+        responsesMap[r.response_id].answers[r.question_text] = answerVal;
+      }
+    });
+
+    const uniqueQuestions = Array.from(questionsSet.keys());
+
+    // 3. Initialize workbook
     const workbook = new exceljs.Workbook();
     const worksheet = workbook.addWorksheet("Rekap Jawaban Mitra");
 
-    // Ensure grid lines are visible even with fill colors
     worksheet.views = [{ showGridLines: true }];
 
-    // Set exact column widths to accommodate wrapped text
-    const colWidths = [6, 22, 28, 45, 16, 20, 30, 8, 22];
+    // Set dynamic column widths
+    const colWidths = [6, 25, 30, 15, 20];
+    uniqueQuestions.forEach(() => colWidths.push(40)); // 40 width for each question column
     colWidths.forEach((w, colIdx) => {
       worksheet.getColumn(colIdx + 1).width = w;
     });
 
     // Title blocks
-    worksheet.mergeCells("A1:I1");
+    const lastColIndex = String.fromCharCode(65 + Math.min(colWidths.length - 1, 25)); // A-Z simple bound, assume < 26 cols
+    const mergeRange = `A1:${lastColIndex}1`;
+    try { worksheet.mergeCells(`A1:${lastColIndex}1`); } catch(e){}
     const titleCell = worksheet.getCell("A1");
     titleCell.value = "REKAPITULASI JAWABAN HASIL SURVEI MITRA";
     titleCell.font = { name: "Arial", size: 14, bold: true, color: { argb: "FF0F172A" } };
     titleCell.alignment = { vertical: "middle", horizontal: "center" };
     worksheet.getRow(1).height = 30;
 
-    worksheet.mergeCells("A2:I2");
+    try { worksheet.mergeCells(`A2:${lastColIndex}2`); } catch(e){}
     const subtitleCell = worksheet.getCell("A2");
     subtitleCell.value = "SUKAFTI — Fakultas Teknologi Informasi Universitas Andalas";
     subtitleCell.font = { name: "Arial", size: 10, italic: true, color: { argb: "FF475569" } };
     subtitleCell.alignment = { vertical: "middle", horizontal: "center" };
     worksheet.getRow(2).height = 20;
 
-    worksheet.mergeCells("A3:I3");
+    try { worksheet.mergeCells(`A3:${lastColIndex}3`); } catch(e){}
     const dateCell = worksheet.getCell("A3");
     const dateStr = new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
     dateCell.value = `Tanggal Ekspor: ${dateStr}`;
@@ -154,7 +219,7 @@ const exportExcel = async (req, res, next) => {
     dateCell.alignment = { vertical: "middle", horizontal: "center" };
     worksheet.getRow(3).height = 20;
 
-    worksheet.addRow([]); // empty spacing row
+    worksheet.addRow([]);
     worksheet.getRow(4).height = 15;
 
     // Table Headers
@@ -162,34 +227,17 @@ const exportExcel = async (req, res, next) => {
       "No",
       "Nama Mitra",
       "Judul Survei",
-      "Teks Pertanyaan",
-      "Tipe Pertanyaan",
-      "Pilihan Jawaban",
-      "Jawaban Essay",
-      "Skor",
-      "Tanggal Pengisian"
+      "Total Skor",
+      "Tanggal Pengisian",
+      ...uniqueQuestions
     ];
     const headerRow = worksheet.addRow(headers);
-    headerRow.height = 28;
+    headerRow.height = 35; // taller for question wrap
 
-    // Header styling
     headerRow.eachCell((cell) => {
-      cell.fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FF0F172A" } // Deep Slate dark background
-      };
-      cell.font = {
-        name: "Arial",
-        size: 10,
-        bold: true,
-        color: { argb: "FFFFFFFF" } // white text
-      };
-      cell.alignment = {
-        vertical: "middle",
-        horizontal: "center",
-        wrapText: true
-      };
+      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF0F172A" } };
+      cell.font = { name: "Arial", size: 10, bold: true, color: { argb: "FFFFFFFF" } };
+      cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
       cell.border = {
         top: { style: "thin", color: { argb: "FF475569" } },
         left: { style: "thin", color: { argb: "FF475569" } },
@@ -200,57 +248,35 @@ const exportExcel = async (req, res, next) => {
 
     // Write Data Rows
     let index = 1;
-    rows.forEach((row) => {
-      const typeMap = {
-        essay: "Essay",
-        multiple_choice: "Pilihan Ganda",
-        rating: "Rating Skala"
-      };
-
-      const dateObj = new Date(row.submitted_at);
-      const formattedDate = dateObj.toLocaleDateString("id-ID", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric"
-      }) + " " + dateObj.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
-
-      const dataRow = worksheet.addRow([
+    const responseArr = Object.values(responsesMap);
+    
+    responseArr.forEach((resp) => {
+      const rowData = [
         index++,
-        row.partner_name,
-        row.survey_title,
-        row.question_text,
-        typeMap[row.question_type] || row.question_type,
-        row.option_text || "—",
-        row.answer_text || "—",
-        row.question_type === "essay" ? "—" : row.answer_score,
-        formattedDate
-      ]);
+        resp.partner_name,
+        resp.survey_title,
+        resp.score_total,
+        resp.submitted_at
+      ];
 
-      // Calculate dynamic row height based on content lengths
-      const qLen = row.question_text ? row.question_text.length : 0;
-      const essayLen = row.answer_text ? row.answer_text.length : 0;
-      const maxTextLen = Math.max(qLen, essayLen);
+      // Add answers in order of uniqueQuestions
+      uniqueQuestions.forEach(qText => {
+        rowData.push(resp.answers[qText] || "—");
+      });
 
-      if (maxTextLen > 90) {
-        dataRow.height = 56; // tall enough for 3+ lines
-      } else if (maxTextLen > 45) {
-        dataRow.height = 38; // tall enough for 2 lines
-      } else {
-        dataRow.height = 26; // clean single line height
-      }
+      const dataRow = worksheet.addRow(rowData);
+      dataRow.height = 40; // Default reasonable height for wrap
 
-      // Styling normal data rows
       dataRow.eachCell((cell, colNum) => {
         cell.font = { name: "Arial", size: 9.5 };
         cell.border = {
-          top: { style: "thin", color: { argb: "FFCBD5E1" } }, // Slate-200 color
+          top: { style: "thin", color: { argb: "FFCBD5E1" } },
           left: { style: "thin", color: { argb: "FFCBD5E1" } },
           bottom: { style: "thin", color: { argb: "FFCBD5E1" } },
           right: { style: "thin", color: { argb: "FFCBD5E1" } }
         };
 
-        // Align columns appropriately
-        if (colNum === 1 || colNum === 5 || colNum === 8 || colNum === 9) {
+        if (colNum === 1 || colNum === 4 || colNum === 5) {
           cell.alignment = { vertical: "middle", horizontal: "center" };
         } else {
           cell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };

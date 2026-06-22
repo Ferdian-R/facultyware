@@ -315,16 +315,15 @@
                                 <%= q.question_text %>
                               </td>
                               <td>
-                                <% if (q.type==='essay' ) { %>
-                                  <span
-                                    class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-slate-500/10 text-slate-500 border-slate-500/20">Essay</span>
-                                  <% } else if (q.type==='multiple_choice' ) { %>
-                                    <span
-                                      class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-sky-500/10 text-sky-500 border-sky-500/20">Pilihan Ganda</span>
-                                    <% } else if (q.type==='rating' ) { %>
-                                      <span
-                                        class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-blue-500/10 text-blue-500 border-blue-500/20">Rating Skala</span>
-                                      <% } %>
+                                <% if (q.type === 'essay' || q.type === 'short_answer') { %>
+                                  <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-slate-500/10 text-slate-500 border-slate-500/20">Jawaban Singkat</span>
+                                <% } else if (q.type === 'multiple_choice') { %>
+                                  <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-sky-500/10 text-sky-500 border-sky-500/20">Pilihan Ganda</span>
+                                <% } else if (q.type === 'single_choice') { %>
+                                  <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-emerald-500/10 text-emerald-500 border-emerald-500/20">Pilihan Tunggal</span>
+                                <% } else if (q.type === 'rating') { %>
+                                  <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-blue-500/10 text-blue-500 border-blue-500/20">Rating Skala</span>
+                                <% } %>
                               </td>
                               <td>
                                 <% if (q.options && q.options.length> 0) { %>
