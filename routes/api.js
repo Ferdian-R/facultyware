@@ -32,19 +32,17 @@ router.get("/pin-logs", async (req, res, next) => {
 
     const [countRows] = await db.query(
       `SELECT COUNT(*) AS total FROM survey_invitations si
-       JOIN partners p ON si.partner_id = p.id
-       WHERE p.name LIKE ?`,
+       WHERE si.name LIKE ?`,
       [`%${search}%`]
     );
 
     const total = countRows[0].total;
 
     const [rows] = await db.query(
-      `SELECT si.id, p.id AS partner_id, p.name AS partner_name, 
+      `SELECT si.id, NULL AS partner_id, si.name AS partner_name, 
               si.pin, si.is_used, si.used_at, si.created_at
        FROM survey_invitations si
-       JOIN partners p ON si.partner_id = p.id
-       WHERE p.name LIKE ?
+       WHERE si.name LIKE ?
        ORDER BY si.created_at DESC
        LIMIT ? OFFSET ?`,
       [`%${search}%`, limit, offset]
@@ -246,8 +244,8 @@ router.post(
     body("survey_id").isInt().withMessage("Survey ID must be an integer."),
     body("question_text").notEmpty().withMessage("Question text is required."),
     body("type")
-      .isIn(["essay", "multiple_choice", "rating"])
-      .withMessage("Type must be essay, multiple_choice, or rating."),
+      .isIn(["short_answer", "single_choice", "multiple_choice"])
+      .withMessage("Type must be short_answer, single_choice, or multiple_choice."),
     body("order_number").optional().isInt().withMessage("Order number must be an integer."),
     body("options").optional().isArray().withMessage("Options must be an array of options with option_text and score.")
   ],
@@ -302,10 +300,8 @@ router.get("/survey-responses", async (req, res, next) => {
       whereClause += " AND sr.survey_id = ?";
       params.push(surveyId);
     }
-    if (partnerId) {
-      whereClause += " AND sr.partner_id = ?";
-      params.push(partnerId);
-    }
+    // Note: Filtering by partnerId is no longer supported directly via survey_responses since partner_id is removed.
+    // If you need to filter by partner name, join survey_invitations and use LIKE. For now, we skip partnerId filter.
 
     // Get count
     const [countRows] = await db.query(
@@ -317,11 +313,11 @@ router.get("/survey-responses", async (req, res, next) => {
     // Get responses
     const selectParams = [...params, limit, offset];
     const [responses] = await db.query(
-      `SELECT sr.id, sr.survey_id, sr.partner_id, sr.survey_invitation_id, sr.status, sr.score_total, sr.submitted_at, sr.created_at,
-              s.title AS survey_title, p.name AS partner_name
+      `SELECT sr.id, sr.survey_id, sr.survey_invitation_id, sr.submitted_at, sr.created_at,
+              s.title AS survey_title, si.name AS partner_name
        FROM survey_responses sr
        JOIN surveys s ON sr.survey_id = s.id
-       JOIN partners p ON sr.partner_id = p.id
+       LEFT JOIN survey_invitations si ON sr.survey_invitation_id = si.id
        WHERE ${whereClause}
        ORDER BY sr.submitted_at DESC
        LIMIT ? OFFSET ?`,
@@ -389,28 +385,21 @@ router.post(
   "/survey-responses",
   [
     body("survey_id").isInt().withMessage("Survey ID must be an integer."),
-    body("partner_id").isInt().withMessage("Partner ID must be an integer."),
     body("survey_invitation_id").optional().isInt().withMessage("Survey Invitation ID must be an integer."),
     body("answers").isArray({ min: 1 }).withMessage("Answers must be a non-empty array."),
     body("answers.*.survey_question_id").isInt().withMessage("Each answer must have a valid survey_question_id."),
     body("answers.*.survey_question_option_id").optional({ checkFalsy: true }).isInt().withMessage("Option ID must be an integer."),
-    body("answers.*.answer_text").optional({ checkFalsy: true }).isString(),
-    body("answers.*.score").optional().isInt().withMessage("Score must be an integer.")
+    body("answers.*.answer_text").optional({ checkFalsy: true }).isString()
   ],
   validateRequest,
   async (req, res, next) => {
-    const { survey_id, partner_id, survey_invitation_id, answers } = req.body;
+    const { survey_id, survey_invitation_id, answers } = req.body;
 
-    // 1. Verify survey and partner exist
+    // 1. Verify survey exists
     try {
       const [[survey]] = await db.query("SELECT id FROM surveys WHERE id = ?", [survey_id]);
       if (!survey) {
         return res.status(404).json({ success: false, message: "Survey not found." });
-      }
-
-      const [[partner]] = await db.query("SELECT id FROM partners WHERE id = ?", [partner_id]);
-      if (!partner) {
-        return res.status(404).json({ success: false, message: "Partner not found." });
       }
     } catch (err) {
       return res.status(500).json({ success: false, message: err.message });
@@ -420,35 +409,39 @@ router.post(
     try {
       await conn.beginTransaction();
 
-      // Compute total score and build inserts
-      let scoreTotal = 0;
       const answersToInsert = [];
 
       for (const ans of answers) {
         const qId = ans.survey_question_id;
 
-        // Fetch question details
-        const [[q]] = await conn.query("SELECT type FROM survey_questions WHERE id = ? AND survey_id = ?", [qId, survey_id]);
-        if (!q) {
+        // Fetch question details (must join with assignments to verify it belongs to survey)
+        const [qResult] = await conn.query(`
+          SELECT sq.type 
+          FROM survey_questions sq
+          JOIN survey_question_assignments sqa ON sq.id = sqa.survey_question_id
+          WHERE sq.id = ? AND sqa.survey_id = ?
+        `, [qId, survey_id]);
+        
+        if (qResult.length === 0) {
           throw new Error(`Question ID ${qId} does not belong to survey ID ${survey_id}.`);
         }
+        const q = qResult[0];
 
-        if (q.type === "essay") {
+        if (q.type === "short_answer") {
           answersToInsert.push({
             survey_question_id: qId,
             survey_question_option_id: null,
-            answer_text: ans.answer_text || "",
-            score: 0
+            answer_text: ans.answer_text || ""
           });
         } else {
-          // multiple_choice or rating
+          // single_choice or multiple_choice
           const optionId = ans.survey_question_option_id;
           if (!optionId) {
-            throw new Error(`survey_question_option_id is required for choice/rating question ID ${qId}.`);
+            throw new Error(`survey_question_option_id is required for choice question ID ${qId}.`);
           }
 
           const [[option]] = await conn.query(
-            "SELECT score FROM survey_question_options WHERE id = ? AND survey_question_id = ?",
+            "SELECT id FROM survey_question_options WHERE id = ? AND survey_question_id = ?",
             [optionId, qId]
           );
 
@@ -456,14 +449,10 @@ router.post(
             throw new Error(`Option ID ${optionId} does not belong to question ID ${qId}.`);
           }
 
-          const score = ans.score !== undefined ? parseInt(ans.score) : option.score;
-          scoreTotal += score;
-
           answersToInsert.push({
             survey_question_id: qId,
             survey_question_option_id: optionId,
-            answer_text: null,
-            score
+            answer_text: null
           });
         }
       }
@@ -507,10 +496,7 @@ router.post(
         data: {
           response_id: responseId,
           survey_id,
-          partner_id,
-          survey_invitation_id: survey_invitation_id || null,
-          score_total: scoreTotal,
-          status: "completed"
+          survey_invitation_id: survey_invitation_id || null
         }
       });
     } catch (err) {
