@@ -67,6 +67,6 @@ typings/
 /playwright/.cache/
 /playwright/.auth/
 
-# Testing Files
-/tests/
-playwright.config.js
+# Testing Files (Required for Final Submission)
+# /tests/
+# playwright.config.js
