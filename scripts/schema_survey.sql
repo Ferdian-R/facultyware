@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS `partners` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NOT NULL,
   `type` ENUM('university', 'company', 'government', 'ngo', 'other') NOT NULL,
+  `is_active` TINYINT(1) NOT NULL DEFAULT '1',
   `address` TEXT NULL DEFAULT NULL,
   `email` VARCHAR(255) NULL DEFAULT NULL,
   `phone` VARCHAR(255) NULL DEFAULT NULL,
@@ -207,3 +208,6 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- Fix Enums in production
 ALTER TABLE survey_questions MODIFY COLUMN type ENUM('essay', 'multiple_choice', 'rating', 'single_choice', 'short_answer') NOT NULL;
 ALTER TABLE partners MODIFY COLUMN type ENUM('university', 'company', 'government', 'ngo', 'other', '') NOT NULL;
+
+-- Fix: Add is_active to partners
+ALTER TABLE partners ADD COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1;
