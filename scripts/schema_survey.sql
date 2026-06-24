@@ -1,22 +1,5 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
-DROP TABLE IF EXISTS `role_has_permissions`;
-DROP TABLE IF EXISTS `model_has_roles`;
-DROP TABLE IF EXISTS `permissions`;
-DROP TABLE IF EXISTS `roles`;
-DROP TABLE IF EXISTS `users`;
-DROP TABLE IF EXISTS `survey_answer_options`;
-DROP TABLE IF EXISTS `survey_question_options`;
-DROP TABLE IF EXISTS `survey_answers`;
-DROP TABLE IF EXISTS `survey_responses`;
-DROP TABLE IF EXISTS `survey_invitations`;
-DROP TABLE IF EXISTS `survey_question_assignments`;
-DROP TABLE IF EXISTS `survey_questions`;
-DROP TABLE IF EXISTS `surveys`;
-DROP TABLE IF EXISTS `audit_logs`;
-DROP TABLE IF EXISTS `feedbacks`;
-DROP TABLE IF EXISTS `partner_contacts`;
-DROP TABLE IF EXISTS `partners`;
 
 CREATE TABLE IF NOT EXISTS `users` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -71,6 +54,20 @@ CREATE TABLE IF NOT EXISTS `partners` (
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `partner_contacts` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `partner_id` BIGINT UNSIGNED NOT NULL,
+  `name` VARCHAR(255) NOT NULL,
+  `position` VARCHAR(255) NOT NULL,
+  `email` VARCHAR(255) NULL DEFAULT NULL,
+  `phone` VARCHAR(255) NULL DEFAULT NULL,
+  `is_primary` TINYINT(1) NOT NULL DEFAULT '0',
+  `created_at` TIMESTAMP NULL DEFAULT NULL,
+  `updated_at` TIMESTAMP NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `partner_contacts_partner_id_foreign` FOREIGN KEY (`partner_id`) REFERENCES `partners` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 -- 2. Tabel Surveys
 CREATE TABLE IF NOT EXISTS `surveys` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -90,7 +87,7 @@ CREATE TABLE IF NOT EXISTS `surveys` (
 CREATE TABLE IF NOT EXISTS `survey_questions` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `question_text` TEXT NOT NULL,
-  `type` ENUM('single_choice', 'multiple_choice', 'short_answer') NOT NULL,
+  `type` enum('essay','multiple_choice','rating','single_choice','short_answer') NOT NULL,
   `is_active` TINYINT(1) NOT NULL DEFAULT '1',
   `created_at` TIMESTAMP NULL DEFAULT NULL,
   `updated_at` TIMESTAMP NULL DEFAULT NULL,
@@ -206,3 +203,7 @@ CREATE TABLE IF NOT EXISTS `audit_logs` (
 ) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- Fix Enums in production
+ALTER TABLE survey_questions MODIFY COLUMN type ENUM('essay', 'multiple_choice', 'rating', 'single_choice', 'short_answer') NOT NULL;
+ALTER TABLE partners MODIFY COLUMN type ENUM('university', 'company', 'government', 'ngo', 'other', '') NOT NULL;
