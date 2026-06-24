@@ -120,14 +120,20 @@
 
                     <div role="group" data-slot="field" data-orientation="vertical" class="group/field flex w-full gap-2 flex-col">
                       <label data-slot="field-label" class="text-sm font-medium leading-none" for="admin-email">Email / Username</label>
-                      <input type="text" name="email" id="admin-email" data-slot="input" class="h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring" placeholder="admin" required />
+                      <input type="text" name="email" id="admin-email" data-slot="input" class="h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring" placeholder="Masukkan Email atau Username" required />
                     </div>
 
                     <div role="group" data-slot="field" data-orientation="vertical" class="group/field flex w-full gap-2 flex-col">
                       <div class="flex items-center justify-between">
                         <label data-slot="field-label" class="text-sm font-medium leading-none" for="admin-password">Password</label>
                       </div>
-                      <input type="password" name="password" id="admin-password" data-slot="input" class="h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring" required />
+                      <div class="relative">
+                        <input type="password" name="password" id="admin-password" data-slot="input" class="h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 pr-10 text-sm shadow-xs transition-colors placeholder:text-muted-foreground outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring" required />
+                        <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground" onclick="togglePasswordVisibility()">
+                          <span id="icon-show"><i data-lucide="eye" class="size-4"></i></span>
+                          <span id="icon-hide" class="hidden"><i data-lucide="eye-off" class="size-4"></i></span>
+                        </button>
+                      </div>
                     </div>
 
                     <button data-slot="button" data-variant="default" data-size="default" class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2" type="submit">
@@ -229,6 +235,23 @@
 
     <script>
       lucide.createIcons();
+
+      // Password Visibility Toggle
+      function togglePasswordVisibility() {
+        const passwordInput = document.getElementById('admin-password');
+        const iconShow = document.getElementById('icon-show');
+        const iconHide = document.getElementById('icon-hide');
+        
+        if (passwordInput.type === 'password') {
+          passwordInput.type = 'text';
+          iconShow.classList.add('hidden');
+          iconHide.classList.remove('hidden');
+        } else {
+          passwordInput.type = 'password';
+          iconShow.classList.remove('hidden');
+          iconHide.classList.add('hidden');
+        }
+      }
 
       // OTP PIN Logic
       const pinBoxes = document.querySelectorAll('.pin-box');
