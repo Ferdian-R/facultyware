@@ -104,8 +104,8 @@ CREATE TABLE IF NOT EXISTS `survey_question_assignments` (
   `created_at` TIMESTAMP NULL DEFAULT NULL,
   `updated_at` TIMESTAMP NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  INDEX `survey_question_assignments_survey_id_foreign` (`survey_id` ASC) VISIBLE,
-  INDEX `survey_question_assignments_survey_question_id_foreign` (`survey_question_id` ASC) VISIBLE,
+  INDEX `survey_question_assignments_survey_id_foreign` (`survey_id` ASC),
+  INDEX `survey_question_assignments_survey_question_id_foreign` (`survey_question_id` ASC),
   CONSTRAINT `survey_question_assignments_survey_id_foreign`
     FOREIGN KEY (`survey_id`) REFERENCES `surveys` (`id`) ON DELETE CASCADE,
   CONSTRAINT `survey_question_assignments_survey_question_id_foreign`
@@ -121,7 +121,7 @@ CREATE TABLE IF NOT EXISTS `survey_question_options` (
   `created_at` TIMESTAMP NULL DEFAULT NULL,
   `updated_at` TIMESTAMP NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  INDEX `survey_question_options_survey_question_id_foreign` (`survey_question_id` ASC) VISIBLE,
+  INDEX `survey_question_options_survey_question_id_foreign` (`survey_question_id` ASC),
   CONSTRAINT `survey_question_options_survey_question_id_foreign`
     FOREIGN KEY (`survey_question_id`) REFERENCES `survey_questions` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
@@ -139,8 +139,8 @@ CREATE TABLE IF NOT EXISTS `survey_invitations` (
   `created_at` TIMESTAMP NULL DEFAULT NULL,
   `updated_at` TIMESTAMP NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `survey_invitations_pin_unique` (`pin` ASC) VISIBLE,
-  INDEX `survey_invitations_survey_id_foreign` (`survey_id` ASC) VISIBLE,
+  UNIQUE INDEX `survey_invitations_pin_unique` (`pin` ASC),
+  INDEX `survey_invitations_survey_id_foreign` (`survey_id` ASC),
   CONSTRAINT `survey_invitations_survey_id_foreign`
     FOREIGN KEY (`survey_id`) REFERENCES `surveys` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
@@ -154,8 +154,8 @@ CREATE TABLE IF NOT EXISTS `survey_responses` (
   `created_at` TIMESTAMP NULL DEFAULT NULL,
   `updated_at` TIMESTAMP NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  INDEX `survey_responses_survey_id_foreign` (`survey_id` ASC) VISIBLE,
-  INDEX `survey_responses_survey_invitation_id_foreign` (`survey_invitation_id` ASC) VISIBLE,
+  INDEX `survey_responses_survey_id_foreign` (`survey_id` ASC),
+  INDEX `survey_responses_survey_invitation_id_foreign` (`survey_invitation_id` ASC),
   CONSTRAINT `survey_responses_survey_id_foreign`
     FOREIGN KEY (`survey_id`) REFERENCES `surveys` (`id`) ON DELETE CASCADE,
   CONSTRAINT `survey_responses_survey_invitation_id_foreign`
@@ -171,8 +171,8 @@ CREATE TABLE IF NOT EXISTS `survey_answers` (
   `created_at` TIMESTAMP NULL DEFAULT NULL,
   `updated_at` TIMESTAMP NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  INDEX `survey_answers_survey_response_id_foreign` (`survey_response_id` ASC) VISIBLE,
-  INDEX `survey_answers_survey_question_id_foreign` (`survey_question_id` ASC) VISIBLE,
+  INDEX `survey_answers_survey_response_id_foreign` (`survey_response_id` ASC),
+  INDEX `survey_answers_survey_question_id_foreign` (`survey_question_id` ASC),
   CONSTRAINT `survey_answers_survey_question_id_foreign`
     FOREIGN KEY (`survey_question_id`) REFERENCES `survey_questions` (`id`) ON DELETE CASCADE,
   CONSTRAINT `survey_answers_survey_response_id_foreign`
@@ -187,8 +187,8 @@ CREATE TABLE IF NOT EXISTS `survey_answer_options` (
   `created_at` TIMESTAMP NULL DEFAULT NULL,
   `updated_at` TIMESTAMP NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  INDEX `survey_answer_options_survey_answer_id_foreign` (`survey_answer_id` ASC) VISIBLE,
-  INDEX `survey_answer_options_survey_question_option_id_foreign` (`survey_question_option_id` ASC) VISIBLE,
+  INDEX `survey_answer_options_survey_answer_id_foreign` (`survey_answer_id` ASC),
+  INDEX `survey_answer_options_survey_question_option_id_foreign` (`survey_question_option_id` ASC),
   CONSTRAINT `survey_answer_options_survey_answer_id_foreign`
     FOREIGN KEY (`survey_answer_id`) REFERENCES `survey_answers` (`id`) ON DELETE CASCADE,
   CONSTRAINT `survey_answer_options_survey_question_option_id_foreign`
@@ -208,6 +208,3 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- Fix Enums in production
 ALTER TABLE survey_questions MODIFY COLUMN type ENUM('essay', 'multiple_choice', 'rating', 'single_choice', 'short_answer') NOT NULL;
 ALTER TABLE partners MODIFY COLUMN type ENUM('university', 'company', 'government', 'ngo', 'other', '') NOT NULL;
-
--- Fix: Add is_active to partners
-ALTER TABLE partners ADD COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1;
