@@ -162,3 +162,45 @@ CREATE TABLE IF NOT EXISTS `audit_logs` (
 ) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
+CREATE TABLE IF NOT EXISTS users (
+  id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  
+ame varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  email varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  password varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY users_email_unique (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS oles (
+  id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  
+ame varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY oles_name_unique (
+ame)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS model_has_roles (
+  ole_id bigint(20) unsigned NOT NULL,
+  model_type varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  model_id bigint(20) unsigned NOT NULL,
+  PRIMARY KEY (ole_id,model_id,model_type),
+  KEY model_has_roles_model_id_model_type_index (model_id,model_type),
+  CONSTRAINT model_has_roles_role_id_foreign FOREIGN KEY (ole_id) REFERENCES oles (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS permissions (
+  id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  
+ame varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS ole_has_permissions (
+  permission_id bigint(20) unsigned NOT NULL,
+  ole_id bigint(20) unsigned NOT NULL,
+  PRIMARY KEY (permission_id,ole_id),
+  CONSTRAINT ole_has_permissions_permission_id_foreign FOREIGN KEY (permission_id) REFERENCES permissions (id) ON DELETE CASCADE,
+  CONSTRAINT ole_has_permissions_role_id_foreign FOREIGN KEY (ole_id) REFERENCES oles (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
