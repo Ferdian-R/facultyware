@@ -10,7 +10,7 @@ async function seed() {
       database: process.env.DB_NAME || 'facultyware'
     });
 
-    console.log("Starting v2 database seeding...");
+    console.log("Starting database seeding...");
 
     // 1. Seed Partners
     const [partners] = await db.query("SELECT * FROM partners LIMIT 1");
@@ -127,10 +127,10 @@ async function seed() {
       console.log("Generated default Invitation PIN: FTI26A");
     }
 
-    console.log("v2 Database seeding complete!");
+    console.log("Database seeding complete!");
     db.end();
   } catch (err) {
-    console.error("Error seeding v2 database:", err);
+    console.error("Error seeding database:", err);
     process.exit(1);
   }
 }
