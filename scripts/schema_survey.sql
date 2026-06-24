@@ -1,10 +1,10 @@
-DROP TABLE IF EXISTS ole_has_permissions;
-DROP TABLE IF EXISTS model_has_roles;
-DROP TABLE IF EXISTS permissions;
-DROP TABLE IF EXISTS oles;
-DROP TABLE IF EXISTS users;
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS `role_has_permissions`;
+DROP TABLE IF EXISTS `model_has_roles`;
+DROP TABLE IF EXISTS `permissions`;
+DROP TABLE IF EXISTS `roles`;
+DROP TABLE IF EXISTS `users`;
 DROP TABLE IF EXISTS `survey_answer_options`;
 DROP TABLE IF EXISTS `survey_question_options`;
 DROP TABLE IF EXISTS `survey_answers`;
@@ -17,6 +17,45 @@ DROP TABLE IF EXISTS `audit_logs`;
 DROP TABLE IF EXISTS `feedbacks`;
 DROP TABLE IF EXISTS `partner_contacts`;
 DROP TABLE IF EXISTS `partners`;
+
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `roles` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `roles_name_unique` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `model_has_roles` (
+  `role_id` bigint(20) unsigned NOT NULL,
+  `model_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `model_id` bigint(20) unsigned NOT NULL,
+  PRIMARY KEY (`role_id`,`model_id`,`model_type`),
+  KEY `model_has_roles_model_id_model_type_index` (`model_id`,`model_type`),
+  CONSTRAINT `model_has_roles_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `permissions` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `role_has_permissions` (
+  `permission_id` bigint(20) unsigned NOT NULL,
+  `role_id` bigint(20) unsigned NOT NULL,
+  PRIMARY KEY (`permission_id`,`role_id`),
+  CONSTRAINT `role_has_permissions_permission_id_foreign` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `role_has_permissions_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 1. Tabel Partners
 CREATE TABLE IF NOT EXISTS `partners` (
@@ -167,58 +206,3 @@ CREATE TABLE IF NOT EXISTS `audit_logs` (
 ) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
-CREATE TABLE IF NOT EXISTS users (
-  id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  
-ame varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  email varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  password varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (id),
-  UNIQUE KEY users_email_unique (email)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS 
-oles (
-  id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  
-ame varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (id),
-  UNIQUE KEY 
-oles_name_unique (
-ame)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS model_has_roles (
-  
-ole_id bigint(20) unsigned NOT NULL,
-  model_type varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  model_id bigint(20) unsigned NOT NULL,
-  PRIMARY KEY (
-ole_id,model_id,model_type),
-  KEY model_has_roles_model_id_model_type_index (model_id,model_type),
-  CONSTRAINT model_has_roles_role_id_foreign FOREIGN KEY (
-ole_id) REFERENCES 
-oles (id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS permissions (
-  id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  
-ame varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS 
-ole_has_permissions (
-  permission_id bigint(20) unsigned NOT NULL,
-  
-ole_id bigint(20) unsigned NOT NULL,
-  PRIMARY KEY (permission_id,
-ole_id),
-  CONSTRAINT 
-ole_has_permissions_permission_id_foreign FOREIGN KEY (permission_id) REFERENCES permissions (id) ON DELETE CASCADE,
-  CONSTRAINT 
-ole_has_permissions_role_id_foreign FOREIGN KEY (
-ole_id) REFERENCES 
-oles (id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
