@@ -203,7 +203,7 @@
               </div>
 
               <div class="w-full">
-                <% if (q.type==='single_choice' && q.options[0] && q.options[0].score !== undefined && (q.options[0].score === 1 || q.options[0].score === '1') && q.options.length === 5 && q.options[0].option_text.includes('Buruk')) { %>
+                <% if (q.type==='rating' || (q.type==='single_choice' && q.options[0] && q.options[0].score !== undefined && (q.options[0].score === 1 || q.options[0].score === '1') && q.options.length === 5 && q.options[0].option_text.includes('Buruk'))) { %>
                   <!-- Rating Skala (1-5) using pure Tailwind styles for Question 1 -->
                   <div class="flex flex-wrap justify-between gap-4 mt-2">
                     <% q.options.forEach(function(opt) { %>
@@ -234,7 +234,7 @@
                         </label>
                         <% }) %>
                     </div>
-                    <% } else if (q.type==='text' ) { %>
+                    <% } else if (q.type==='short_answer' || q.type==='essay' ) { %>
                       <!-- Qualitative text area -->
                       <textarea name="question_<%= q.id %>"
                         class="flex min-h-[100px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-xs shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring mt-2"
