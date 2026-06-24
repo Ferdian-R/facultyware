@@ -67,4 +67,45 @@ test.describe('Manajemen Mitra — CRUD Data Mitra', () => {
     }
   });
 
+  test('6. Validasi gagal: Menambah mitra dengan nama kosong', async ({ page }) => {
+    // Klik tombol Tambah Mitra
+    const btnAdd = page.locator('#btn-add-partner');
+    if (await btnAdd.isVisible()) {
+      await btnAdd.click();
+
+      // Kosongkan nama
+      await page.locator('#add-name').fill('');
+      
+      // Submit form
+      await page.locator('#form-add-partner button[type="submit"]').click();
+
+      // Validasi HTML5 "required" akan mencegah form disubmit
+      // Kita bisa cek apakah dialog masih terbuka
+      await expect(page.locator('#add-name')).toBeVisible();
+      
+      // Tutup dialog
+      await page.locator('#btn-close-add').click();
+    }
+  });
+
+  test('7. Validasi gagal: Email mitra tidak sesuai format', async ({ page }) => {
+    const btnAdd = page.locator('#btn-add-partner');
+    if (await btnAdd.isVisible()) {
+      await btnAdd.click();
+
+      // Isi nama, tapi email invalid
+      await page.locator('#add-name').fill('Mitra Invalid');
+      await page.locator('#add-email').fill('email-yang-salah');
+      
+      // Submit form
+      await page.locator('#form-add-partner button[type="submit"]').click();
+
+      // HTML5 type="email" validation
+      await expect(page.locator('#add-email')).toBeVisible();
+      
+      // Tutup dialog
+      await page.locator('#btn-close-add').click();
+    }
+  });
+
 });

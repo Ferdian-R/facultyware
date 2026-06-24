@@ -83,4 +83,23 @@ test.describe('Pertanyaan Survey — CRUD Instrumen Kuesioner', () => {
     }
   });
 
+  test('5. Validasi gagal: Menambah pertanyaan dengan teks kosong', async ({ page }) => {
+    const btnAdd = page.locator('#btn-add-question');
+    if (await btnAdd.isVisible()) {
+      await btnAdd.click();
+
+      // Kosongkan question_text
+      await page.locator('#add-question-text').fill('');
+      
+      // Submit form
+      await page.locator('#form-add-question button[type="submit"]').click();
+
+      // Validasi HTML5 "required" mencegah submit, form masih terlihat
+      await expect(page.locator('#add-question-text')).toBeVisible();
+      
+      // Tutup dialog
+      await page.locator('#btn-close-add').click();
+    }
+  });
+
 });
