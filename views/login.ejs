@@ -84,6 +84,11 @@
       .dark .pin-box:focus {
         box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
       }
+      /* Hide native browser password reveal icon */
+      input[type="password"]::-ms-reveal,
+      input[type="password"]::-ms-clear {
+        display: none;
+      }
     </style>
   </head>
   <body class="bg-background">
@@ -127,11 +132,11 @@
                       <div class="flex items-center justify-between">
                         <label data-slot="field-label" class="text-sm font-medium leading-none" for="admin-password">Password</label>
                       </div>
-                      <div class="relative">
-                        <input type="password" name="password" id="admin-password" data-slot="input" class="h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 pr-10 text-sm shadow-xs transition-colors placeholder:text-muted-foreground outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring" required />
-                        <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground" onclick="togglePasswordVisibility()">
+                      <div style="position: relative;">
+                        <input type="password" name="password" id="admin-password" data-slot="input" class="h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring" style="padding-right: 2.5rem;" required />
+                        <button type="button" class="text-muted-foreground hover:text-foreground" style="position: absolute; top: 0; bottom: 0; right: 0; display: flex; align-items: center; padding-right: 0.75rem;" onclick="togglePasswordVisibility()">
                           <span id="icon-show"><i data-lucide="eye" class="size-4"></i></span>
-                          <span id="icon-hide" class="hidden"><i data-lucide="eye-off" class="size-4"></i></span>
+                          <span id="icon-hide" style="display: none;"><i data-lucide="eye-off" class="size-4"></i></span>
                         </button>
                       </div>
                     </div>
@@ -244,12 +249,12 @@
         
         if (passwordInput.type === 'password') {
           passwordInput.type = 'text';
-          iconShow.classList.add('hidden');
-          iconHide.classList.remove('hidden');
+          iconShow.style.display = 'none';
+          iconHide.style.display = 'inline-block';
         } else {
           passwordInput.type = 'password';
-          iconShow.classList.remove('hidden');
-          iconHide.classList.add('hidden');
+          iconShow.style.display = 'inline-block';
+          iconHide.style.display = 'none';
         }
       }
 
