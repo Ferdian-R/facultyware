@@ -32,8 +32,8 @@ const login = async (req, res, next) => {
 
   try {
     const [rows] = await db.query(
-      "SELECT * FROM users WHERE username = ? OR email = ?",
-      [identifier, identifier]
+      "SELECT * FROM users WHERE email = ?",
+      [identifier]
     );
 
     if (rows.length === 0) {

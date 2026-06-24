@@ -5,25 +5,17 @@ async function setup() {
   try {
     console.log("Checking database connection and tables...");
 
-    // 1. Add email column to users table if it doesn't exist
-    const [columns] = await db.query("SHOW COLUMNS FROM users");
-    const hasEmail = columns.some((col) => col.Field === "email");
-    if (!hasEmail) {
-      await db.query("ALTER TABLE users ADD COLUMN email VARCHAR(255) NULL UNIQUE AFTER username");
-      console.log("Added 'email' column to 'users' table.");
-    }
-
     // 2. Hash password
     const hashedPassword = await bcrypt.hash("password", 10);
 
     // 3. Create or update test admin user
-    const [users] = await db.query("SELECT * FROM users WHERE username = ?", ["admin"]);
+    const [users] = await db.query("SELECT * FROM users WHERE email = ?", ["admin@sukafti.com"]);
     let adminUserId;
 
     if (users.length === 0) {
       const [insertResult] = await db.query(
-        "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-        ["admin", "admin@sukafti.com", hashedPassword]
+        "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
+        ["Administrator", "admin@sukafti.com", hashedPassword]
       );
       adminUserId = insertResult.insertId;
       console.log("Test user 'admin' created with password 'password' and email 'admin@sukafti.com'.");
@@ -31,8 +23,8 @@ async function setup() {
       adminUserId = users[0].id;
       // Update password and email to default
       await db.query(
-        "UPDATE users SET email = ?, password = ? WHERE id = ?",
-        ["admin@sukafti.com", hashedPassword, adminUserId]
+        "UPDATE users SET name = ?, password = ? WHERE id = ?",
+        ["Administrator", hashedPassword, adminUserId]
       );
       console.log("Test user 'admin' updated to password 'password' and email 'admin@sukafti.com'.");
     }
@@ -48,19 +40,20 @@ async function setup() {
       adminRoleId = roles[0].id;
     }
 
-    // 5. Map admin user to admin role in user_has_roles
-    const [mappings] = await db.query(
-      "SELECT * FROM user_has_roles WHERE user_id = ? AND role_id = ?",
+    // 5. Ensure admin user has 'admin' role
+    const [userRoles] = await db.query(
+      "SELECT * FROM model_has_roles WHERE model_id = ? AND role_id = ? AND model_type = 'App\\Models\\User'",
       [adminUserId, adminRoleId]
     );
-    if (mappings.length === 0) {
-      await db.query("INSERT INTO user_has_roles (user_id, role_id) VALUES (?, ?)", [
-        adminUserId,
+
+    if (userRoles.length === 0) {
+      await db.query("INSERT INTO model_has_roles (role_id, model_type, model_id) VALUES (?, 'App\\Models\\User', ?)", [
         adminRoleId,
+        adminUserId,
       ]);
-      console.log("Mapped user 'admin' to role 'admin' in 'user_has_roles'.");
+      console.log("Role 'admin' assigned to user 'admin'.");
     } else {
-      console.log("User 'admin' is already mapped to role 'admin'.");
+      console.log("User 'admin' already has 'admin' role.");
     }
 
     console.log("\nSetup complete! You can now log in using:");
