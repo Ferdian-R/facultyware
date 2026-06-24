@@ -212,6 +212,12 @@ const submitSurvey = async (req, res, next) => {
     }
 
     // 4. Legacy Audit Trail removed (table not in v2 schema)
+    
+    // 5. Burn PIN
+    await conn.query(
+      "UPDATE survey_invitations SET is_used = 1, used_at = NOW() WHERE id = ?",
+      [invitationId]
+    );
 
     await conn.commit();
     req.session.lastResponseId = responseId;

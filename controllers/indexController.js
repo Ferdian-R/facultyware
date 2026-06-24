@@ -109,11 +109,7 @@ const loginMitra = async (req, res, next) => {
       });
     }
 
-    // 3. Burn PIN (set is_used = 1 and used_at = NOW())
-    await db.query(
-      "UPDATE survey_invitations SET is_used = 1, used_at = NOW() WHERE id = ?",
-      [pinData.invitation_id]
-    );
+    // Removed PIN burn on login. PIN will be burned upon survey submission instead.
 
     // 4. Legacy Audit Trail removed (table not in v2 schema)
     
