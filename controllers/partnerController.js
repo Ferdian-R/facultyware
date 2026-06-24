@@ -25,8 +25,8 @@ const showPartnersPage = async (req, res, next) => {
 
     // 1. Gather stats metrics
     const [[{ total }]] = await db.query("SELECT COUNT(*) AS total FROM partners");
-    const active = total;
-    const inactive = 0;
+    const [[{ active }]] = await db.query("SELECT COUNT(*) AS active FROM partners WHERE is_active = 1");
+    const inactive = total - active;
 
     // 2. Build filter queries
     let queryParams = [`%${search}%`, `%${search}%`];
@@ -35,6 +35,11 @@ const showPartnersPage = async (req, res, next) => {
     if (type) {
       whereClause += " AND type = ?";
       queryParams.push(type);
+    }
+    
+    if (status) {
+      whereClause += " AND is_active = ?";
+      queryParams.push(status === "active" ? 1 : 0);
     }
 
     // Get filtered total items count
@@ -48,7 +53,7 @@ const showPartnersPage = async (req, res, next) => {
     // Get paginated partners
     queryParams.push(limit, offset);
     const [partners] = await db.query(
-      `SELECT id, name, type, email, phone, created_at 
+      `SELECT id, name, type, email, phone, created_at, IF(is_active = 1, 'active', 'inactive') AS status 
        FROM partners 
        WHERE ${whereClause} 
        ORDER BY created_at DESC 
@@ -84,7 +89,7 @@ const showPartnerDetailPage = async (req, res, next) => {
 
   try {
     // 1. Fetch partner profile
-    const [[partner]] = await db.query("SELECT * FROM partners WHERE id = ?", [id]);
+    const [[partner]] = await db.query("SELECT *, IF(is_active = 1, 'active', 'inactive') AS status FROM partners WHERE id = ?", [id]);
     if (!partner) {
       return res.redirect("/admin/partners?error=Mitra+tidak+ditemukan.");
     }
@@ -125,7 +130,7 @@ const showPartnerDetailPage = async (req, res, next) => {
  * POST /admin/partners
  */
 const createPartner = async (req, res, next) => {
-  const { name, type, email, phone, address, description, contact_name, contact_position, contact_email, contact_phone } = req.body;
+  const { name, type, status, email, phone, address, description, contact_name, contact_position, contact_email, contact_phone } = req.body;
 
   if (!name || !type || !contact_name || !contact_position) {
     return res.redirect("/admin/partners?error=Data+input+tidak+lengkap.+Nama+mitra,+tipe,+dan+kontak+utama+wajib+diisi.");
@@ -166,7 +171,7 @@ const createPartner = async (req, res, next) => {
  */
 const updatePartner = async (req, res, next) => {
   const { id } = req.params;
-  const { name, type, email, phone, address, description } = req.body;
+  const { name, type, status, email, phone, address, description } = req.body;
 
   if (!name || !type) {
     return res.redirect(`/admin/partners/${id}?error=Nama+dan+Tipe+mitra+wajib+diisi.`);
@@ -175,9 +180,9 @@ const updatePartner = async (req, res, next) => {
   try {
     await db.query(
       `UPDATE partners 
-       SET name = ?, type = ?, email = ?, phone = ?, address = ?, description = ? 
+       SET name = ?, type = ?, is_active = ?, email = ?, phone = ?, address = ?, description = ? 
        WHERE id = ?`,
-      [name, type, email || null, phone || null, address || null, description || null, id]
+      [name, type, status === 'active' ? 1 : 0, email || null, phone || null, address || null, description || null, id]
     );
 
     res.redirect(`/admin/partners/${id}?success=Profil+mitra+berhasil+diperbarui.`);
@@ -299,7 +304,7 @@ const exportPartnerPDF = async (req, res, next) => {
 
   try {
     // 1. Fetch details
-    const [[partner]] = await db.query("SELECT * FROM partners WHERE id = ?", [id]);
+    const [[partner]] = await db.query("SELECT *, IF(is_active = 1, 'active', 'inactive') AS status FROM partners WHERE id = ?", [id]);
     if (!partner) {
       return res.status(404).send("Partner not found.");
     }
@@ -345,7 +350,7 @@ const exportPartnerPDF = async (req, res, next) => {
 const apiGetPartners = async (req, res, next) => {
   try {
     const search = req.query.search || "";
-    let query = "SELECT id, name, type, email, phone, created_at FROM partners";
+    let query = "SELECT id, name, type, email, phone, created_at, IF(is_active = 1, 'active', 'inactive') AS status FROM partners";
     let params = [];
 
     if (search) {
@@ -375,7 +380,7 @@ const apiCreatePartner = async (req, res, next) => {
     return res.status(400).json({ success: false, errors: errors.array() });
   }
 
-  const { name, type, email, phone, address, description, contact_name, contact_position, contact_email, contact_phone } = req.body;
+  const { name, type, status, email, phone, address, description, contact_name, contact_position, contact_email, contact_phone } = req.body;
 
   const conn = await db.getConnection();
   try {

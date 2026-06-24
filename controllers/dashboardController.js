@@ -191,7 +191,7 @@ const generatePIN = async (req, res, next) => {
 
     // Insert into database
     await db.query(
-      "INSERT INTO survey_invitations (survey_id, name, email, phone, pin, is_used) VALUES (?, ?, ?, ?, ?, 0)",
+      "INSERT INTO survey_invitations (survey_id, name, email, phone, pin, is_used, created_at) VALUES (?, ?, ?, ?, ?, 0, NOW())",
       [surveyId, partner.name, partner.email, partner.phone, pin]
     );
 
