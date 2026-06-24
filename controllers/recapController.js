@@ -69,7 +69,7 @@ const getResponseDetailJSON = async (req, res, next) => {
   try {
     // Verify response exists
     const [[response]] = await db.query(
-      `SELECT sr.id, sr.submitted_at, s.title AS survey_title, si.name AS partner_name,
+      `SELECT sr.id, sr.survey_id, sr.submitted_at, s.title AS survey_title, si.name AS partner_name,
               (
                  SELECT SUM(sqo.weight)
                  FROM survey_answers sa
