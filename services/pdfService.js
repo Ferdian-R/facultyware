@@ -371,6 +371,7 @@ const buildQuestionsReport = (data) => {
 
       const qY = doc.y;
       const qText = q.question_text || "";
+      doc.font("Helvetica-Bold").fontSize(10);
       const qHeight = doc.heightOfString(qText, { width: 465 });
       
       // Question block
