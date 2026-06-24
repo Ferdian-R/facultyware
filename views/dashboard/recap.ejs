@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="id">
 
 <head>
@@ -187,7 +187,7 @@
 
       <!-- Topbar Header -->
       <header
-        class="bg-background sticky inset-x-0 top-0 isolate flex shrink-0 items-center justify-between border-b z-10 h-14 px-4 gap-4">
+        class="bg-background sticky inset-x-0 top-0 isolate flex shrink-0 items-center justify-between border-b z-40 h-14 px-4 gap-4">
         <div class="flex items-center gap-2">
           <button type="button" onclick="document.dispatchEvent(new CustomEvent('basecoat:sidebar'))"
             aria-label="Toggle sidebar"
@@ -253,7 +253,7 @@
               <tbody class="divide-y">
                 <% if (locals.responses && responses.length> 0) { %>
                   <% responses.forEach(function(r) { const avatarStr=r.partner_name.substring(0, 2).toUpperCase(); let
-                    formattedDate="—" ; if (r.submitted_at) { const dateObj=new Date(r.submitted_at);
+                    formattedDate="â€”" ; if (r.submitted_at) { const dateObj=new Date(r.submitted_at);
                     formattedDate=dateObj.toLocaleDateString('id-ID', { day: '2-digit' , month: 'short' ,
                     year: 'numeric' }) + " " + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit' , minute: '2-digit'
                     }); } %>
@@ -448,8 +448,8 @@
                 item.appendChild(qText);
 
                 const answerTextVal = ans.question_type === 'essay'
-                  ? (ans.answer_text || '— Tidak diisi —')
-                  : `${ans.option_text || '—'} (Skor: ${ans.score})`;
+                  ? (ans.answer_text || 'â€” Tidak diisi â€”')
+                  : `${ans.option_text || 'â€”'} (Skor: ${ans.score})`;
 
                 const ansDiv = document.createElement('div');
                 ansDiv.className = 'text-xs text-muted-foreground bg-background border rounded-md p-2 mt-2 leading-relaxed';

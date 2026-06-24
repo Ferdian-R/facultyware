@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="id">
 
 <head>
@@ -192,7 +192,7 @@
 
       <!-- Topbar Header -->
       <header
-        class="bg-background sticky inset-x-0 top-0 isolate flex shrink-0 items-center justify-between border-b z-10 h-14 px-4 gap-4">
+        class="bg-background sticky inset-x-0 top-0 isolate flex shrink-0 items-center justify-between border-b z-40 h-14 px-4 gap-4">
         <div class="flex items-center gap-2">
           <a href="/admin/partners"
             class="h-8 w-8 inline-flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground text-muted-foreground mr-1"
@@ -279,7 +279,7 @@
                             <div class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Email
                               Instansi Resmi</div>
                             <div class="text-sm text-foreground mt-0.5">
-                              <%= partner.email || '—' %>
+                              <%= partner.email || 'â€”' %>
                             </div>
                           </div>
 
@@ -287,7 +287,7 @@
                             <div class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Nomor
                               Telepon</div>
                             <div class="text-sm text-foreground mt-0.5">
-                              <%= partner.phone || '—' %>
+                              <%= partner.phone || 'â€”' %>
                             </div>
                           </div>
 
@@ -295,7 +295,7 @@
                             <div class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Alamat
                               Kantor</div>
                             <div class="text-sm text-foreground mt-0.5 whitespace-pre-line">
-                              <%= partner.address || '—' %>
+                              <%= partner.address || 'â€”' %>
                             </div>
                           </div>
 
@@ -355,10 +355,10 @@
                                   </div>
                                   <div class="text-xs text-muted-foreground mt-2 flex flex-wrap gap-4">
                                     <span class="flex items-center gap-1"><i data-lucide="mail" class="size-3"></i>
-                                      <%= c.email || '—' %>
+                                      <%= c.email || 'â€”' %>
                                     </span>
                                     <span class="flex items-center gap-1"><i data-lucide="phone" class="size-3"></i>
-                                      <%= c.phone || '—' %>
+                                      <%= c.phone || 'â€”' %>
                                     </span>
                                   </div>
                                 </div>
@@ -435,11 +435,11 @@
                                       <%= d.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'})
                                         %>
                                         <% } else { %>
-                                          —
+                                          â€”
                                           <% } %>
                                   </td>
                                   <td class="p-4 align-middle text-center font-bold text-foreground">
-                                    <%= s.is_used===1 ? `${s.score_total} Poin` : '—' %>
+                                    <%= s.is_used===1 ? `${s.score_total} Poin` : 'â€”' %>
                                   </td>
                                 </tr>
                                 <% }) %>
