@@ -30,6 +30,7 @@ async function setup() {
     }
 
     // 4. Ensure roles table has 'admin'
+
     const [roles] = await db.query("SELECT * FROM roles WHERE name = ?", ["admin"]);
     let adminRoleId;
     if (roles.length === 0) {
