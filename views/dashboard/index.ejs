@@ -80,18 +80,6 @@
       }
     }
 
-    .charts-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-
-    @media (min-width: 768px) {
-      .charts-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
 
 
     /* Premium welcome banner styling utilizing Basecoat variables */
@@ -385,7 +373,8 @@
 
       <!-- Topbar Header -->
       <header
-        class="bg-background sticky inset-x-0 top-0 isolate flex shrink-0 items-center justify-between border-b z-10 h-14 px-4 gap-4" style="z-index: 40;">
+        class="bg-background sticky inset-x-0 top-0 isolate flex shrink-0 items-center justify-between border-b z-10 h-14 px-4 gap-4"
+        style="z-index: 40;">
         <div class="flex items-center gap-2">
           <button type="button" onclick="document.dispatchEvent(new CustomEvent('basecoat:sidebar'))"
             aria-label="Toggle sidebar"
@@ -445,7 +434,8 @@
           <!-- Card 1: Total Mitra -->
           <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col justify-between gap-5">
             <div class="flex items-start gap-4">
-              <div class="p-3 bg-indigo-500/10 rounded-2xl text-indigo-600 dark:text-indigo-400 border border-indigo-500/15 shrink-0">
+              <div
+                class="p-3 bg-indigo-500/10 rounded-2xl text-indigo-600 dark:text-indigo-400 border border-indigo-500/15 shrink-0">
                 <i data-lucide="building-2" class="size-5"></i>
               </div>
               <div class="space-y-1">
@@ -519,22 +509,26 @@
               </div>
             </div>
             <div class="card-divider">
-              <% const rate = total_pin > 0 ? Math.min(100, Math.round((total_respons / total_pin) * 100)) : 0; %>
-              <div class="flex justify-between items-center text-[10px] font-bold text-muted-foreground">
-                <span>Rasio Pengisian (Completion Rate)</span>
-                <span class="text-foreground"><%= rate %>% Selesai</span>
-              </div>
-              <div class="custom-progress-track">
-                <div class="custom-progress-fill emerald" style="width: <%= rate %>%"></div>
+              <% const rate=total_pin> 0 ? Math.min(100, Math.round((total_respons / total_pin) * 100)) : 0; %>
+                <div class="flex justify-between items-center text-[10px] font-bold text-muted-foreground">
+                  <span>Rasio Pengisian (Completion Rate)</span>
+                  <span class="text-foreground">
+                    <%= rate %>% Selesai
+                  </span>
+                </div>
+                <div class="custom-progress-track">
+                  <div class="custom-progress-fill emerald" style="width: <%= rate %>%"></div>
+                </div>
+            </div>
           </div>
 
         </div>
 
         <!-- Charts Row -->
-        <div class="charts-grid gap-6 mt-6">
+        <div class="dashboard-grid gap-6 mt-6">
           
           <!-- Chart Bar -->
-          <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col gap-4">
+          <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col gap-4 lg:col-span-2 md:col-span-2">
             <div>
               <h3 class="font-bold text-foreground leading-none tracking-tight text-sm">Tren Survey per Bulan</h3>
               <p class="text-[11px] text-muted-foreground mt-1">Jumlah kuesioner diselesaikan mitra — 6 bulan terakhir</p>
@@ -584,10 +578,10 @@
             </div>
             <div class="flex flex-wrap gap-2 w-full md:w-auto">
               <label class="relative flex items-center flex-1 md:flex-initial">
-                <i data-lucide="search" class="text-muted-foreground" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; pointer-events: none;"></i>
+                <i data-lucide="search" class="text-muted-foreground"
+                  style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; pointer-events: none;"></i>
                 <input type="text" id="topbar-search" placeholder="Cari nama mitra..." value="<%= search %>"
-                  autocomplete="off"
-                  style="padding-left: 36px;"
+                  autocomplete="off" style="padding-left: 36px;"
                   class="h-9 rounded-md border border-border bg-background/60 hover:bg-background/80 focus:bg-background text-sm w-full md:w-60 outline-none focus-visible:ring-1 focus-visible:ring-primary transition-all" />
               </label>
               <a href="/admin/dashboard/export-pdf"
@@ -617,8 +611,8 @@
               </thead>
               <tbody class="divide-y">
                 <% if (locals.perusahaan && perusahaan.length> 0) { %>
-                  <% perusahaan.forEach(function(p) { const avatarStr=(p.nama_perusahaan || "NA").substring(0, 2).toUpperCase();
-                    let formattedDate="—" ; if (p.created_at) { const dateObj=new Date(p.created_at);
+                  <% perusahaan.forEach(function(p) { const avatarStr=(p.nama_perusahaan || "NA" ).substring(0,
+                    2).toUpperCase(); let formattedDate="—" ; if (p.created_at) { const dateObj=new Date(p.created_at);
                     formattedDate=dateObj.toLocaleDateString('id-ID', { day: '2-digit' , month: 'short' ,
                     year: 'numeric' }); } let formattedUsedDate="—" ; if (p.used_at) { const dateObj=new
                     Date(p.used_at); formattedUsedDate=dateObj.toLocaleDateString('id-ID', { day: '2-digit' ,
@@ -640,8 +634,8 @@
                             <div class="text-foreground">
                               <%= p.nama_perusahaan || "Unknown" %>
                             </div>
-                            <div class="text-xs text-muted-foreground font-normal">#INV-<%=
-                                (p.id || 0).toString().padStart(3, '0' ) %>
+                            <div class="text-xs text-muted-foreground font-normal">#INV-<%= (p.id ||
+                                0).toString().padStart(3, '0' ) %>
                             </div>
                           </div>
                         </div>
