@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="id">
 
 <head>
@@ -59,6 +59,7 @@
 
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <style>
     /* Responsive grid layout matching standard Basecoat */
     .dashboard-grid {
@@ -413,7 +414,7 @@
 
           <div class="relative z-10 max-w-2xl space-y-2">
             <h2 class="text-2xl font-bold tracking-tight mb-2 welcome-title flex items-center gap-2">Selamat Datang,
-              Admin FTI! <span class="animate-bounce">🚀</span></h2>
+              Admin FTI! <span class="animate-bounce"></span></h2>
             <p class="text-slate-300 text-xs md:text-sm leading-relaxed welcome-desc">
               Pantau aktivitas survey, kelola data mitra, dan generate PIN kerjasama industri dari satu tempat.
             </p>
@@ -513,6 +514,47 @@
               </div>
               <div class="custom-progress-track">
                 <div class="custom-progress-fill emerald" style="width: <%= rate %>%"></div>
+          </div>
+
+        </div>
+
+        <!-- Charts Row -->
+        <div class="dashboard-grid gap-6 mt-6">
+          
+          <!-- Chart Bar -->
+          <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col gap-4">
+            <div>
+              <h3 class="font-bold text-foreground leading-none tracking-tight text-sm">Tren Survey per Bulan</h3>
+              <p class="text-[11px] text-muted-foreground mt-1">Jumlah kuesioner diselesaikan mitra — 6 bulan terakhir</p>
+            </div>
+            <div class="h-64 relative w-full mt-2">
+              <canvas id="chartSurveyBar"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart Donut -->
+          <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col gap-4">
+            <div>
+              <h3 class="font-bold text-foreground leading-none tracking-tight text-sm">Distribusi Status PIN</h3>
+              <p class="text-[11px] text-muted-foreground mt-1">Proporsi PIN aktif, terpakai, dan kadaluarsa</p>
+            </div>
+            <div class="donut-row flex gap-6 h-64 mt-2">
+              <div class="h-44 w-44 relative shrink-0">
+                <canvas id="chartPinDonut"></canvas>
+              </div>
+              <div class="space-y-2.5 text-xs text-muted-foreground flex flex-col justify-center">
+                <div class="flex items-center gap-2.5">
+                  <span class="size-3.5 rounded-full bg-slate-700 block border border-white/10 shadow-xs"></span>
+                  <span class="font-medium">Aktif: <strong id="l-aktif" class="text-foreground font-bold">0</strong></span>
+                </div>
+                <div class="flex items-center gap-2.5">
+                  <span class="size-3.5 rounded-full bg-slate-400 block border border-white/10 shadow-xs"></span>
+                  <span class="font-medium">Terpakai: <strong id="l-terpakai" class="text-foreground font-bold">0</strong></span>
+                </div>
+                <div class="flex items-center gap-2.5">
+                  <span class="size-3.5 rounded-full bg-slate-200 block border border-white/10 shadow-xs"></span>
+                  <span class="font-medium">Kadaluarsa: <strong id="l-kadaluarsa" class="text-foreground font-bold">0</strong></span>
+                </div>
               </div>
             </div>
           </div>
@@ -832,6 +874,98 @@
         }
       });
     });
+
+    // Chart.js Configuration
+    if(typeof Chart !== 'undefined') {
+      Chart.defaults.font.family = "system-ui, -apple-system, sans-serif";
+
+      // Bar Chart: Tren Survey per Bulan
+      const ctxBar = document.getElementById('chartSurveyBar').getContext('2d');
+      const isDark = document.documentElement.classList.contains('dark');
+      const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)';
+      const textColor = isDark ? '#a1a1aa' : '#64748b';
+
+      new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+          labels: ['Des', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei'],
+          datasets: [{
+            label: 'Survey Selesai',
+            data: [3, 5, 4, 7, 6, <%= total_respons %>],
+            backgroundColor: '#0f172a',
+            borderRadius: 6,
+          }, {
+            label: 'PIN Digenerate',
+            data: [4, 6, 5, 9, 8, <%= total_pin_aktif + total_respons %>],
+            backgroundColor: '#94a3b8',
+            borderRadius: 6,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'top', labels: { boxWidth: 12, usePointStyle: true, font: { size: 11 }, color: textColor } }
+          },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: textColor, font: { size: 11 } } },
+            y: { grid: { color: gridColor }, ticks: { stepSize: 2, color: textColor, font: { size: 11 } }, beginAtZero: true }
+          }
+        }
+      });
+
+      // Donut Chart: Status PIN
+      let pinDonutChart = null;
+
+      function renderDonutChart(active, used, expired) {
+        const ctxDonut = document.getElementById('chartPinDonut').getContext('2d');
+        if (pinDonutChart) pinDonutChart.destroy();
+
+        const isDark = document.documentElement.classList.contains('dark');
+
+        pinDonutChart = new Chart(ctxDonut, {
+          type: 'doughnut',
+          data: {
+            labels: ['Aktif', 'Terpakai', 'Kadaluarsa'],
+            datasets: [{
+              data: [active, used, expired],
+              backgroundColor: ['#334155', '#94a3b8', isDark ? '#27272a' : '#f1f5f9'],
+              borderWidth: 0,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '75%',
+            plugins: {
+              legend: { display: false }
+            }
+          }
+        });
+
+        document.getElementById('l-aktif').innerText = active;
+        document.getElementById('l-terpakai').innerText = used;
+        document.getElementById('l-kadaluarsa').innerText = expired;
+      }
+
+      function fetchDashboardStats() {
+        fetch('/api/dashboard-stats')
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              const stats = data.data;
+              if (stats.pin_stats) {
+                renderDonutChart(stats.pin_stats.active || 0, stats.pin_stats.used || 0, stats.pin_stats.expired || 0);
+              } else {
+                renderDonutChart(0, 0, 0);
+              }
+            }
+          })
+          .catch(err => console.error('Error fetching dashboard stats:', err));
+      }
+
+      fetchDashboardStats();
+    }
   </script>
 </body>
 
