@@ -924,10 +924,19 @@
       const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)';
       const textColor = isDark ? '#a1a1aa' : '#64748b';
 
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+      const dynamicLabels = [];
+      const currentMonth = new Date().getMonth();
+      for (let i = 5; i >= 0; i--) {
+        let m = currentMonth - i;
+        if (m < 0) m += 12;
+        dynamicLabels.push(monthNames[m]);
+      }
+
       new Chart(ctxBar, {
         type: 'bar',
         data: {
-          labels: ['Des', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei'],
+          labels: dynamicLabels,
           datasets: [{
             label: 'Survey Selesai',
             data: [3, 5, 4, 7, 6, <%= total_respons %>],
