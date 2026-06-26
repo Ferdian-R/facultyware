@@ -60,6 +60,7 @@
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     /* Responsive grid layout matching standard Basecoat */
     .dashboard-grid {
@@ -826,9 +827,15 @@
         .then(res => res.json())
         .then(data => {
           if (data.success) {
-            alert('PIN Berhasil dibuat: ' + data.pin_code);
             pinDialog.close();
-            window.location.reload();
+            Swal.fire({
+              title: 'Berhasil!',
+              text: 'PIN Baru: ' + data.pin_code,
+              icon: 'success',
+              confirmButtonText: 'Tutup'
+            }).then(() => {
+              window.location.reload();
+            });
           } else {
             pinAlert.innerText = data.message || 'Gagal generate PIN';
           }
@@ -844,46 +851,66 @@
         const id = this.getAttribute('data-id');
         const currentlyUsed = parseInt(this.getAttribute('data-used'));
         const nextUsed = currentlyUsed === 1 ? 0 : 1;
+        const nextStatusName = nextUsed === 1 ? 'Terpakai' : 'Aktif';
 
-        if (confirm(`Apakah Anda yakin ingin me-reset status PIN ini menjadi ${nextUsed === 1 ? 'Terpakai' : 'Aktif'}?`)) {
-          fetch(`/api/pin-logs/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ is_used: nextUsed })
-          })
-            .then(res => res.json())
-            .then(data => {
-              if (data.success) {
-                alert('Status PIN berhasil diperbarui!');
-                window.location.reload();
-              } else {
-                alert('Gagal memperbarui PIN: ' + data.message);
-              }
+        Swal.fire({
+          title: 'Konfirmasi Reset',
+          text: `Apakah Anda yakin ingin me-reset status PIN ini menjadi ${nextStatusName}?`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Ya, Reset!',
+          cancelButtonText: 'Batal'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            fetch(`/api/pin-logs/${id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ is_used: nextUsed })
             })
-            .catch(err => alert('Gagal memproses request.'));
-        }
+              .then(res => res.json())
+              .then(data => {
+                if (data.success) {
+                  Swal.fire('Berhasil!', 'Status PIN berhasil diperbarui.', 'success').then(() => {
+                    window.location.reload();
+                  });
+                } else {
+                  Swal.fire('Gagal!', 'Gagal memperbarui PIN: ' + data.message, 'error');
+                }
+              })
+              .catch(err => Swal.fire('Error!', 'Gagal memproses request.', 'error'));
+          }
+        });
       });
     });
 
     document.querySelectorAll('.btn-delete-pin').forEach(btn => {
       btn.addEventListener('click', function () {
         const id = this.getAttribute('data-id');
-        if (confirm('Apakah Anda yakin ingin menghapus PIN ini secara permanen dari database?')) {
-          fetch(`/api/pin-logs/${id}`, {
-            method: 'DELETE'
-          })
-            .then(res => res.json())
-            .then(data => {
-              if (data.success) {
-                alert('PIN berhasil dihapus!');
-                document.getElementById(`row-pin-${id}`).remove();
-
-              } else {
-                alert('Gagal menghapus PIN: ' + data.message);
-              }
+        Swal.fire({
+          title: 'Hapus PIN?',
+          text: 'Apakah Anda yakin ingin menghapus PIN ini secara permanen dari database?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#ef4444',
+          confirmButtonText: 'Ya, Hapus!',
+          cancelButtonText: 'Batal'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            fetch(`/api/pin-logs/${id}`, {
+              method: 'DELETE'
             })
-            .catch(err => alert('Gagal memproses request.'));
-        }
+              .then(res => res.json())
+              .then(data => {
+                if (data.success) {
+                  Swal.fire('Terhapus!', 'PIN berhasil dihapus.', 'success');
+                  document.getElementById(`row-pin-${id}`).remove();
+                } else {
+                  Swal.fire('Gagal!', 'Gagal menghapus PIN: ' + data.message, 'error');
+                }
+              })
+              .catch(err => Swal.fire('Error!', 'Gagal memproses request.', 'error'));
+          }
+        });
       });
     });
 
