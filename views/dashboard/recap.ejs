@@ -447,7 +447,7 @@
                 qText.innerText = `${index + 1}. ${ans.question_text}`;
                 item.appendChild(qText);
 
-                const answerTextVal = ans.question_type === 'text'
+                const answerTextVal = (ans.question_type === 'essay' || ans.question_type === 'short_answer')
                   ? (ans.answer_text || '— Tidak diisi —')
                   : `${ans.option_text || '—'} (Skor: ${ans.score})`;
 
@@ -456,7 +456,7 @@
                 ansDiv.innerText = answerTextVal;
                 item.appendChild(ansDiv);
 
-                if (ans.question_type !== 'text') {
+                if (ans.question_type !== 'essay' && ans.question_type !== 'short_answer') {
                   const scoreBadge = document.createElement('span');
                   scoreBadge.className = 'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-bold bg-emerald-500/10 text-emerald-500 border-emerald-500/20 mt-2';
                   scoreBadge.innerHTML = '<i data-lucide="check" class="size-3"></i> Skor Bobot: ' + ans.score;
