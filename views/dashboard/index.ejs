@@ -80,6 +80,18 @@
       }
     }
 
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .charts-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
 
 
     /* Premium welcome banner styling utilizing Basecoat variables */
@@ -519,7 +531,7 @@
         </div>
 
         <!-- Charts Row -->
-        <div class="dashboard-grid gap-6 mt-6">
+        <div class="charts-grid gap-6 mt-6">
           
           <!-- Chart Bar -->
           <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col gap-4">
