@@ -80,6 +80,12 @@
       }
     }
 
+    @media (min-width: 768px) {
+      .chart-bar-span {
+        grid-column: span 2;
+      }
+    }
+
 
 
     /* Premium welcome banner styling utilizing Basecoat variables */
@@ -528,7 +534,7 @@
         <div class="dashboard-grid gap-6 mt-6">
           
           <!-- Chart Bar -->
-          <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col gap-4 lg:col-span-2 md:col-span-2">
+          <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col gap-4 chart-bar-span">
             <div>
               <h3 class="font-bold text-foreground leading-none tracking-tight text-sm">Tren Survey per Bulan</h3>
               <p class="text-[11px] text-muted-foreground mt-1">Jumlah kuesioner diselesaikan mitra — 6 bulan terakhir</p>
