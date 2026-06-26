@@ -538,7 +538,7 @@
           <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col gap-4 chart-bar-span">
             <div>
               <h3 class="font-bold text-foreground leading-none tracking-tight text-sm">Tren Survey per Bulan</h3>
-              <p class="text-[11px] text-muted-foreground mt-1">Jumlah kuesioner diselesaikan mitra — 6 bulan terakhir</p>
+              <p class="text-[11px] text-muted-foreground mt-1">Jumlah kuesioner diselesaikan mitra</p>
             </div>
             <div class="relative w-full mt-2 flex-1" style="height: 16rem; min-height: 250px;">
               <canvas id="chartSurveyBar"></canvas>
@@ -927,9 +927,8 @@
       const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
       const dynamicLabels = [];
       const currentMonth = new Date().getMonth();
-      for (let i = 5; i >= 0; i--) {
-        let m = currentMonth - i;
-        if (m < 0) m += 12;
+      for (let i = 0; i < 6; i++) {
+        let m = (currentMonth + i) % 12;
         dynamicLabels.push(monthNames[m]);
       }
 
@@ -939,12 +938,12 @@
           labels: dynamicLabels,
           datasets: [{
             label: 'Survey Selesai',
-            data: [3, 5, 4, 7, 6, <%= total_respons %>],
+            data: [<%= total_respons %>, 0, 0, 0, 0, 0],
             backgroundColor: '#0f172a',
             borderRadius: 6,
           }, {
             label: 'PIN Digenerate',
-            data: [4, 6, 5, 9, 8, <%= total_pin_aktif + total_respons %>],
+            data: [<%= total_pin_aktif + total_respons %>, 0, 0, 0, 0, 0],
             backgroundColor: '#94a3b8',
             borderRadius: 6,
           }]
