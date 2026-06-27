@@ -62,7 +62,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
-    /* Responsive grid layout matching standard Basecoat */
+    
     .dashboard-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -89,7 +89,7 @@
 
 
 
-    /* Premium welcome banner styling utilizing Basecoat variables */
+    
     .welcome-banner {
       background: linear-gradient(135deg, #1e293b 0%, #111827 50%, #0f172a 100%) !important;
       border: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -115,7 +115,7 @@
       color: #cbd5e1 !important;
     }
 
-    /* Basecard enhancements */
+    
     .premium-card {
       border: 1px solid var(--border) !important;
       background: var(--card) !important;
@@ -129,7 +129,7 @@
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.06) !important;
     }
 
-    /* Welcome Banner Custom Elements */
+    
     .welcome-banner-stats {
       background: rgba(255, 255, 255, 0.1) !important;
       border: 1px solid rgba(255, 255, 255, 0.15) !important;
@@ -162,7 +162,7 @@
       line-height: 1.2 !important;
     }
 
-    /* Mockup circle shapes for welcome banner background */
+    
     .welcome-circle-1 {
       position: absolute;
       right: -2.5rem;
@@ -193,7 +193,7 @@
       background: rgba(255, 255, 255, 0.03);
     }
 
-    /* Custom classes to replace arbitrary tailwind classes not compiled in Basecoat */
+    
     .trend-badge {
       display: inline-flex !important;
       align-items: center !important;
@@ -271,7 +271,7 @@
 
 
 
-    /* Native select styling fix for white-on-white text */
+    
     select option {
       background-color: var(--card) !important;
       color: var(--foreground) !important;
@@ -291,7 +291,7 @@
 <body class="bg-background">
   <div class="relative flex min-h-screen">
 
-    <!-- Sidebar -->
+    
     <aside id="sidebar" class="sidebar border-r bg-card text-card-foreground shrink-0" data-side="left"
       aria-hidden="false">
       <nav aria-label="Sidebar navigation" class="flex flex-col h-full justify-between">
@@ -375,10 +375,10 @@
       </nav>
     </aside>
 
-    <!-- Main Content Area -->
+    
     <main id="content" class="flex-1 flex flex-col min-w-0 bg-muted/20">
 
-      <!-- Topbar Header -->
+      
       <header
         class="bg-background sticky inset-x-0 top-0 isolate flex shrink-0 items-center justify-between border-b z-10 h-14 px-4 gap-4"
         style="z-index: 40;">
@@ -404,13 +404,13 @@
         </div>
       </header>
 
-      <!-- Inner Content -->
+      
       <div class="p-6 md:p-8 flex-1 space-y-6">
 
-        <!-- Welcome Hero Card (Stunning Gradient) -->
+        
         <div data-slot="card"
           class="welcome-banner rounded-2xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <!-- Abstract Background shapes (Mockup circles) -->
+          
           <div class="absolute right-0 top-0 bottom-0 w-1/3 opacity-30 pointer-events-none hidden md:block">
             <div class="welcome-circle-1"></div>
             <div class="welcome-circle-2"></div>
@@ -435,10 +435,10 @@
           </div>
         </div>
 
-        <!-- Stats Grid -->
+        
         <div class="dashboard-grid gap-4">
 
-          <!-- Card 1: Total Mitra -->
+          
           <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col justify-between gap-5">
             <div class="flex items-start gap-4">
               <div
@@ -466,7 +466,7 @@
             </div>
           </div>
 
-          <!-- Card 2: PIN Aktif -->
+          
           <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col justify-between gap-5">
             <div class="flex items-start gap-4">
               <div
@@ -498,7 +498,7 @@
             </div>
           </div>
 
-          <!-- Card 3: Survey Selesai -->
+          
           <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col justify-between gap-5">
             <div class="flex items-start gap-4">
               <div
@@ -531,10 +531,10 @@
 
         </div>
 
-        <!-- Charts Row -->
+        
         <div class="dashboard-grid gap-6 mt-6">
+
           
-          <!-- Chart Bar -->
           <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col gap-4 chart-bar-span">
             <div>
               <h3 class="font-bold text-foreground leading-none tracking-tight text-sm">Tren Survey per Bulan</h3>
@@ -545,7 +545,7 @@
             </div>
           </div>
 
-          <!-- Chart Donut -->
+          
           <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col gap-4">
             <div>
               <h3 class="font-bold text-foreground leading-none tracking-tight text-sm">Distribusi Status PIN</h3>
@@ -557,16 +557,22 @@
               </div>
               <div class="space-y-2.5 text-xs text-muted-foreground flex flex-col justify-center">
                 <div class="flex items-center gap-2.5">
-                  <span class="rounded-full block border border-white/10 shadow-xs" style="width: 14px; height: 14px; background-color: #334155;"></span>
-                  <span class="font-medium">Aktif: <strong id="l-aktif" class="text-foreground font-bold">0</strong></span>
+                  <span class="rounded-full block border border-white/10 shadow-xs"
+                    style="width: 14px; height: 14px; background-color: #334155;"></span>
+                  <span class="font-medium">Aktif: <strong id="l-aktif"
+                      class="text-foreground font-bold">0</strong></span>
                 </div>
                 <div class="flex items-center gap-2.5">
-                  <span class="rounded-full block border border-white/10 shadow-xs" style="width: 14px; height: 14px; background-color: #94a3b8;"></span>
-                  <span class="font-medium">Terpakai: <strong id="l-terpakai" class="text-foreground font-bold">0</strong></span>
+                  <span class="rounded-full block border border-white/10 shadow-xs"
+                    style="width: 14px; height: 14px; background-color: #94a3b8;"></span>
+                  <span class="font-medium">Terpakai: <strong id="l-terpakai"
+                      class="text-foreground font-bold">0</strong></span>
                 </div>
                 <div class="flex items-center gap-2.5">
-                  <span class="rounded-full block border border-white/10 shadow-xs" style="width: 14px; height: 14px; background-color: #e2e8f0;"></span>
-                  <span class="font-medium">Kadaluarsa: <strong id="l-kadaluarsa" class="text-foreground font-bold">0</strong></span>
+                  <span class="rounded-full block border border-white/10 shadow-xs"
+                    style="width: 14px; height: 14px; background-color: #e2e8f0;"></span>
+                  <span class="font-medium">Kadaluarsa: <strong id="l-kadaluarsa"
+                      class="text-foreground font-bold">0</strong></span>
                 </div>
               </div>
             </div>
@@ -576,7 +582,7 @@
 
 
 
-        <!-- Data Table Card -->
+        
         <div data-slot="card" class="premium-card rounded-2xl overflow-hidden">
           <div class="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b">
             <div>
@@ -689,7 +695,7 @@
             </table>
           </div>
 
-          <!-- Pagination Footer -->
+          
           <% if (locals.totalPages && totalPages> 1) { %>
             <div class="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 border-t bg-muted/20">
               <div class="text-xs text-muted-foreground">
@@ -740,7 +746,7 @@
     </main>
   </div>
 
-  <!-- Generate PIN Dialog Modal -->
+  
   <dialog id="pin-dialog" class="dialog">
     <div class="!max-w-md w-full">
       <div class="flex items-center gap-2 border-b pb-3">
@@ -915,7 +921,7 @@
     });
 
     // Chart.js Configuration
-    if(typeof Chart !== 'undefined') {
+    if (typeof Chart !== 'undefined') {
       Chart.defaults.font.family = "system-ui, -apple-system, sans-serif";
 
       // Bar Chart: Tren Survey per Bulan

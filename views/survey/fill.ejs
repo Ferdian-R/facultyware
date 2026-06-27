@@ -60,7 +60,7 @@
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
-    /* Premium banner styles using Basecoat variables */
+    
     .welcome-banner {
       background: linear-gradient(135deg, #1e293b 0%, #111827 50%, #0f172a 100%) !important;
       border: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -82,7 +82,7 @@
       color: #cbd5e1 !important;
     }
 
-    /* Basecard enhancements */
+    
     .premium-card {
       border: 1px solid var(--border) !important;
       background: var(--card) !important;
@@ -95,7 +95,7 @@
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.06) !important;
     }
 
-    /* Beautiful rating scales */
+    
     .rating-btn {
       display: flex;
       height: 3rem;
@@ -115,7 +115,7 @@
       transform: scale(1.05);
       color: var(--foreground);
     }
-    /* Hide native radio, style active custom design */
+    
     input[type="radio"]:checked + .rating-btn {
       background-color: var(--primary) !important;
       color: var(--primary-foreground) !important;
@@ -128,7 +128,7 @@
 <body class="bg-muted/30">
   <div class="max-w-3xl mx-auto px-4 py-8 md:py-12 space-y-6">
 
-    <!-- Top header bar for survey client -->
+    
     <header class="flex items-center justify-between border rounded-lg bg-card text-card-foreground shadow-sm p-4">
       <div class="flex items-center gap-2">
         <img src="/image/fti%20logo.jpg" alt="Logo FTI" class="h-8 w-8 rounded-lg object-contain bg-white p-0.5 border" />
@@ -142,7 +142,7 @@
       </button>
     </header>
 
-    <!-- Main Header Banner Card -->
+    
     <div data-slot="card"
       class="welcome-banner rounded-2xl p-6 relative overflow-hidden">
       <div class="relative z-10 space-y-3">
@@ -162,7 +162,7 @@
       </div>
     </div>
 
-    <!-- Error Alerts -->
+    
     <% if (error) { %>
       <div
         class="bg-destructive/15 text-destructive text-sm p-4 rounded-md border border-destructive/20 flex items-center gap-2">
@@ -173,7 +173,7 @@
       </div>
       <% } %>
 
-        <!-- Progress Tracking Component -->
+        
         <div data-slot="card" class="premium-card rounded-2xl p-4 flex flex-col gap-3">
           <div class="flex justify-between items-center text-xs font-semibold text-muted-foreground">
             <span>Progress Pengisian</span>
@@ -185,7 +185,7 @@
           </div>
         </div>
 
-        <!-- Questionnaire Form -->
+        
         <form action="/survey-mitra/submit" method="POST" id="survey-form" class="space-y-6">
 
           <% questions.forEach(function(q, index) { %>
@@ -204,7 +204,7 @@
 
               <div class="w-full">
                 <% if (q.type==='rating' || (q.type==='single_choice' && q.options[0] && q.options[0].score !== undefined && (q.options[0].score === 1 || q.options[0].score === '1') && q.options.length === 5 && q.options[0].option_text.includes('Buruk'))) { %>
-                  <!-- Rating Skala (1-5) using pure Tailwind styles for Question 1 -->
+                  
                   <div class="flex flex-wrap justify-between gap-4 mt-2">
                     <% q.options.forEach(function(opt) { %>
                       <label class="flex flex-col items-center gap-2 cursor-pointer flex-1 min-w-[70px]">
@@ -221,7 +221,7 @@
                       <% }) %>
                   </div>
                   <% } else if (q.type==='multiple_choice' || q.type==='single_choice') { %>
-                    <!-- Multiple Choice & Single Choice radio buttons -->
+                    
                     <div class="flex flex-col gap-2.5 mt-2">
                       <% q.options.forEach(function(opt) { %>
                         <label
@@ -235,7 +235,7 @@
                         <% }) %>
                     </div>
                     <% } else if (q.type==='short_answer' || q.type==='essay' ) { %>
-                      <!-- Qualitative text area -->
+                      
                       <textarea name="question_<%= q.id %>"
                         class="flex min-h-[100px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-xs shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring mt-2"
                         placeholder="Tuliskan jawaban deskriptif Anda secara lengkap..." required></textarea>
@@ -244,7 +244,7 @@
             </div>
             <% }) %>
 
-              <!-- Submit & Navigation Panel -->
+              
               <div class="flex items-center justify-between border-t pt-6 mt-8">
                 <a href="/logout"
                   class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-semibold border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">

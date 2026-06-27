@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `role_has_permissions` (
   CONSTRAINT `role_has_permissions_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 1. Tabel Partners
+
 CREATE TABLE IF NOT EXISTS `partners` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NOT NULL,
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `partner_contacts` (
   CONSTRAINT `partner_contacts_partner_id_foreign` FOREIGN KEY (`partner_id`) REFERENCES `partners` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
--- 2. Tabel Surveys
+
 CREATE TABLE IF NOT EXISTS `surveys` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `title` VARCHAR(255) NOT NULL,
@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS `surveys` (
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
--- 3. Tabel Survey Questions
+
 CREATE TABLE IF NOT EXISTS `survey_questions` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `question_text` TEXT NOT NULL,
@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS `survey_questions` (
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
--- 4. Tabel Survey Question Assignments
+
 CREATE TABLE IF NOT EXISTS `survey_question_assignments` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `survey_id` BIGINT UNSIGNED NOT NULL,
@@ -112,7 +112,7 @@ CREATE TABLE IF NOT EXISTS `survey_question_assignments` (
     FOREIGN KEY (`survey_question_id`) REFERENCES `survey_questions` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
--- 5. Tabel Survey Question Options
+
 CREATE TABLE IF NOT EXISTS `survey_question_options` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `survey_question_id` BIGINT UNSIGNED NOT NULL,
@@ -126,7 +126,7 @@ CREATE TABLE IF NOT EXISTS `survey_question_options` (
     FOREIGN KEY (`survey_question_id`) REFERENCES `survey_questions` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
--- 6. Tabel Survey Invitations
+
 CREATE TABLE IF NOT EXISTS `survey_invitations` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `survey_id` BIGINT UNSIGNED NOT NULL,
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS `survey_invitations` (
     FOREIGN KEY (`survey_id`) REFERENCES `surveys` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
--- 7. Tabel Survey Responses
+
 CREATE TABLE IF NOT EXISTS `survey_responses` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `survey_id` BIGINT UNSIGNED NOT NULL,
@@ -162,7 +162,7 @@ CREATE TABLE IF NOT EXISTS `survey_responses` (
     FOREIGN KEY (`survey_invitation_id`) REFERENCES `survey_invitations` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
--- 8. Tabel Survey Answers
+
 CREATE TABLE IF NOT EXISTS `survey_answers` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `survey_response_id` BIGINT UNSIGNED NOT NULL,
@@ -179,7 +179,7 @@ CREATE TABLE IF NOT EXISTS `survey_answers` (
     FOREIGN KEY (`survey_response_id`) REFERENCES `survey_responses` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
--- 9. Tabel Survey Answer Options
+
 CREATE TABLE IF NOT EXISTS `survey_answer_options` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `survey_answer_id` BIGINT UNSIGNED NOT NULL,
@@ -205,6 +205,6 @@ CREATE TABLE IF NOT EXISTS `audit_logs` (
 
 SET FOREIGN_KEY_CHECKS = 1;
 
--- Fix Enums in production
+
 ALTER TABLE survey_questions MODIFY COLUMN type ENUM('essay', 'multiple_choice', 'rating', 'single_choice', 'short_answer') NOT NULL;
 ALTER TABLE partners MODIFY COLUMN type ENUM('university', 'company', 'government', 'ngo', 'other', '') NOT NULL;

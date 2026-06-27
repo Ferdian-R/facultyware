@@ -57,7 +57,7 @@
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <style>
-      /* Basecard enhancements */
+      
       .premium-card {
         border: 1px solid var(--border) !important;
         background: var(--card) !important;
@@ -70,7 +70,7 @@
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.06) !important;
       }
       
-      /* Print styles */
+      
       @media print {
         body {
           background: white !important;
@@ -84,7 +84,7 @@
           display: none !important;
         }
         
-        /* Force display overrides on print helpers to defeat the .hidden display:none !important override */
+        
         .print\:flex {
           display: flex !important;
         }
@@ -98,7 +98,7 @@
           display: grid !important;
         }
         
-        /* Force outer containers to be block display instead of flex/grid to prevent layout collapse */
+        
         div.flex.min-h-screen, div.min-h-screen, .min-h-screen {
           display: block !important;
           min-height: auto !important;
@@ -115,7 +115,7 @@
           border: none !important;
         }
         
-        /* Reset print-card overlay defaults */
+        
         .print-card {
           border: none !important;
           box-shadow: none !important;
@@ -128,7 +128,7 @@
           display: block !important;
         }
         
-        /* Force all printed text and borders to solid black (crucial for dark mode printing) */
+        
         body, p, span, h1, h2, h3, h4, th, td, strong, a, div {
           color: black !important;
           border-color: black !important;
@@ -136,7 +136,7 @@
           print-color-adjust: exact;
         }
         
-        /* Print-specific tables formatting */
+        
         .print-table {
           border-collapse: collapse !important;
           width: 100% !important;
@@ -159,7 +159,7 @@
     <div class="flex min-h-screen items-center justify-center p-6">
       <div class="w-full max-w-3xl flex flex-col gap-6 text-center">
         
-        <!-- Header status (Screens only) -->
+        
         <div class="flex flex-col items-center gap-4 no-print mt-6">
           <div class="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 shadow-sm">
             <i data-lucide="check-circle-2" class="size-8"></i>
@@ -172,7 +172,7 @@
           </div>
         </div>
 
-        <!-- Receipt & Review Card -->
+        
         <div data-slot="card" class="premium-card print-card rounded-2xl p-6 md:p-8 text-left flex flex-col gap-6">
           
           <div class="hidden print:block text-center mb-6">
@@ -180,13 +180,13 @@
             <p class="text-xs text-slate-700 mt-1 font-mono">ID Respon: #RSP-<%= response.id.toString().padStart(5, '0') %></p>
           </div>
 
-          <!-- Top Section (Screen Only Header) -->
+          
           <div class="flex justify-between items-center border-b pb-3 no-print">
             <span class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Rincian Hasil Pengisian Survei</span>
             <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-bold bg-emerald-500/10 text-emerald-500 border-emerald-500/20 uppercase">Selesai</span>
           </div>
 
-          <!-- Screen Metadata Details -->
+          
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs no-print">
             <div class="flex justify-between md:justify-start gap-4 border-b border-border/40 pb-2 md:border-b-0 md:pb-0">
               <span class="text-muted-foreground w-28 shrink-0">ID Respon:</span>
@@ -218,7 +218,7 @@
             </div>
           </div>
 
-          <!-- Print-Only Metadata Table -->
+          
           <table class="hidden print:table w-full text-xs mb-6 border-collapse print-table">
             <tbody>
               <tr>
@@ -243,7 +243,7 @@
             </tbody>
           </table>
 
-          <!-- Answers Review Section (Screens Only) -->
+          
           <div class="border-t border-border/80 pt-5 no-print">
             <h3 class="text-base font-bold text-foreground mb-5 flex items-center gap-2">
               <i data-lucide="list-checks" class="size-5 text-primary"></i>
@@ -284,7 +284,7 @@
             </div>
           </div>
 
-          <!-- Print-Only Table of Answers -->
+          
           <div class="hidden print:block mt-6">
             <h3 class="text-xs font-extrabold text-black uppercase mb-3 border-b pb-1">Lampiran Rekapitulasi Jawaban</h3>
             <table class="w-full text-xs print-table border-collapse">
@@ -319,13 +319,13 @@
 
 
 
-          <!-- Screen Only Warning Footer -->
+          
           <div class="border-t border-border/40 pt-4 text-[10px] text-muted-foreground text-center leading-relaxed no-print">
             Bukti pengisian digital ini sah dihasilkan secara otomatis oleh sistem informasi SUKAFTI FTI Universitas Andalas.
           </div>
         </div>
 
-        <!-- Action buttons (Screens Only) -->
+        
         <div class="flex flex-col sm:flex-row gap-2 justify-center no-print mb-8">
           <button onclick="window.print()" class="inline-flex items-center justify-center gap-1.5 rounded-md text-sm font-semibold transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 flex-1 sm:flex-initial">
             <i data-lucide="printer" class="size-4"></i>

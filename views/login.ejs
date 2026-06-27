@@ -58,7 +58,7 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
     <style>
-      /* Simple styling for OTP inputs in Basecoat theme */
+      
       .pin-box-container {
         display: flex;
         gap: 0.5rem;
@@ -84,7 +84,7 @@
       .dark .pin-box:focus {
         box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
       }
-      /* Hide native browser password reveal icon */
+      
       input[type="password"]::-ms-reveal,
       input[type="password"]::-ms-clear {
         display: none;
@@ -99,7 +99,7 @@
             <div data-slot="card-content" class="grid p-0 md:grid-cols-2">
               
               <% if (activeTab === 'admin') { %>
-                <!-- Form Admin -->
+                
                 <form class="p-6 md:p-8 flex flex-col justify-between" action="/login" method="POST">
                   <div data-slot="field-group" class="flex w-full flex-col gap-6">
                     <div class="flex flex-col items-center gap-2 text-center">
@@ -155,7 +155,7 @@
                   </div>
                 </form>
               <% } else { %>
-                <!-- Form Mitra -->
+                
                 <form class="p-6 md:p-8 flex flex-col justify-between" action="/api/auth/mitra-login" method="POST">
                   <div data-slot="field-group" class="flex w-full flex-col gap-6">
                     <div class="flex flex-col items-center gap-2 text-center">
@@ -215,7 +215,7 @@
                 </form>
               <% } %>
 
-              <!-- Right Panel Illustration -->
+              
               <div class="relative hidden bg-muted md:flex flex-col items-center justify-center p-8 border-l">
                 <div class="max-w-md text-center flex flex-col items-center justify-center gap-6">
                   <img src="/image/survey_illustration.png" alt="Illustration" class="max-h-60 object-contain dark:brightness-[0.8] dark:grayscale-[0.2]" />

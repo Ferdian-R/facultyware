@@ -59,7 +59,7 @@
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
-    /* Responsive layout split grid */
+    
     .detail-split-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -70,7 +70,7 @@
         grid-template-columns: 1fr 2fr;
       }
     }
-    /* Basecard enhancements */
+    
     .premium-card {
       border: 1px solid var(--border) !important;
       background: var(--card) !important;
@@ -82,7 +82,7 @@
       transform: translateY(-2px);
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.06) !important;
     }
-    /* Select styling */
+    
     select {
       background-color: var(--card) !important;
       color: var(--foreground) !important;
@@ -104,7 +104,7 @@
 <body class="bg-background">
   <div class="relative flex min-h-screen">
 
-    <!-- Sidebar -->
+    
     <aside id="sidebar" class="sidebar border-r bg-card text-card-foreground shrink-0" data-side="left"
       aria-hidden="false">
       <nav aria-label="Sidebar navigation" class="flex flex-col h-full justify-between">
@@ -187,10 +187,10 @@
       </nav>
     </aside>
 
-    <!-- Main Content Area -->
+    
     <main id="content" class="flex-1 flex flex-col min-w-0 bg-muted/20">
 
-      <!-- Topbar Header -->
+      
       <header
         class="bg-background sticky inset-x-0 top-0 isolate flex shrink-0 items-center justify-between border-b z-10 h-14 px-4 gap-4" style="z-index: 40;">
         <div class="flex items-center gap-2">
@@ -215,10 +215,10 @@
         </div>
       </header>
 
-      <!-- Inner Content -->
+      
       <div class="p-6 md:p-8 flex-1 space-y-6">
 
-        <!-- Alerts -->
+        
         <% if (error) { %>
           <div
             class="bg-destructive/15 text-destructive text-sm p-4 rounded-md border border-destructive/20 flex items-center gap-2">
@@ -240,7 +240,7 @@
 
                 <div class="detail-split-grid items-start">
 
-                  <!-- Left Panel: Profile Info Card -->
+                  
                   <div data-slot="card"
                     class="premium-card rounded-2xl p-6 flex flex-col items-center text-center">
                     <% const avatarStr=partner.name.substring(0, 2).toUpperCase(); %>
@@ -273,7 +273,7 @@
                           </span>
                         </div>
 
-                        <!-- Metadata List -->
+                        
                         <div class="w-full border-t text-left mt-6 pt-4 space-y-4">
                           <div>
                             <div class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Email
@@ -315,10 +315,10 @@
                         </button>
                   </div>
 
-                  <!-- Right Panel: Contacts & Logs (colspan=2) -->
+                  
                   <div class="md:col-span-2 space-y-6">
 
-                    <!-- Narahubung Card -->
+                    
                     <div data-slot="card" class="premium-card rounded-2xl">
                       <div class="p-6 flex justify-between items-center border-b pb-4">
                         <h3 class="font-semibold leading-none tracking-tight flex items-center gap-2 text-foreground">
@@ -383,7 +383,7 @@
                       </div>
                     </div>
 
-                    <!-- Riwayat Survei Card -->
+                    
                     <div data-slot="card"
                       class="premium-card rounded-2xl overflow-hidden">
                       <div class="p-6 flex justify-between items-center border-b pb-4">
@@ -463,7 +463,7 @@
     </main>
   </div>
 
-  <!-- Tambah Narahubung Dialog Modal -->
+  
   <dialog id="contact-dialog"
     class="rounded-xl border bg-card text-card-foreground shadow-lg max-w-md w-full p-6 backdrop:bg-black/50 backdrop:backdrop-blur-sm">
     <div class="flex flex-col gap-4 max-h-[80vh] overflow-y-auto pr-1">
@@ -533,7 +533,7 @@
   </div>
 </dialog>
 
-  <!-- Ubah Profil Dialog Modal -->
+  
   <dialog id="edit-dialog"
     class="rounded-xl border bg-card text-card-foreground shadow-lg max-w-lg w-full p-6 backdrop:bg-black/50 backdrop:backdrop-blur-sm">
     <div class="flex flex-col gap-4 max-h-[80vh] overflow-y-auto pr-1">

@@ -2,18 +2,13 @@ const db = require("../config/db");
 const { validationResult } = require("express-validator");
 const pdfService = require("../services/pdfService");
 
-/**
- * Helper to normalize single value / array into array
- */
+
 const toArray = (val) => {
   if (val === undefined || val === null) return [];
   return Array.isArray(val) ? val : [val];
 };
 
-/**
- * Renders the partner management page
- * GET /admin/partners
- */
+
 const showPartnersPage = async (req, res, next) => {
   try {
     const search = req.query.search || "";
@@ -28,7 +23,7 @@ const showPartnersPage = async (req, res, next) => {
     const [[{ active }]] = await db.query("SELECT COUNT(*) AS active FROM partners WHERE is_active = 1");
     const inactive = total - active;
 
-    // 2. Build filter queries
+    
     let queryParams = [`%${search}%`, `%${search}%`];
     let whereClause = "(name LIKE ? OR email LIKE ?)";
 
@@ -42,7 +37,7 @@ const showPartnersPage = async (req, res, next) => {
       queryParams.push(status === "active" ? 1 : 0);
     }
 
-    // Get filtered total items count
+    
     const [countRows] = await db.query(
       `SELECT COUNT(*) AS total FROM partners WHERE ${whereClause}`,
       queryParams
@@ -50,7 +45,7 @@ const showPartnersPage = async (req, res, next) => {
     const totalItems = countRows[0].total;
     const totalPages = Math.ceil(totalItems / limit);
 
-    // Get paginated partners
+    
     queryParams.push(limit, offset);
     const [partners] = await db.query(
       `SELECT id, name, type, email, phone, created_at, IF(is_active = 1, 'active', 'inactive') AS status 
@@ -80,27 +75,24 @@ const showPartnersPage = async (req, res, next) => {
   }
 };
 
-/**
- * Renders the detailed view of a partner
- * GET /admin/partners/:id
- */
+
 const showPartnerDetailPage = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    // 1. Fetch partner profile
+    
     const [[partner]] = await db.query("SELECT *, IF(is_active = 1, 'active', 'inactive') AS status FROM partners WHERE id = ?", [id]);
     if (!partner) {
       return res.redirect("/admin/partners?error=Mitra+tidak+ditemukan.");
     }
 
-    // 2. Fetch contact persons
+    
     const [contacts] = await db.query(
       "SELECT id, name, position, email, phone, is_primary FROM partner_contacts WHERE partner_id = ? ORDER BY is_primary DESC, id ASC",
       [id]
     );
 
-    // 3. Fetch survey invitation and response history
+    
     const [surveys] = await db.query(
       `SELECT si.pin, si.is_used, si.used_at, s.title AS survey_title, sr.id AS response_id 
        FROM survey_invitations si 
@@ -125,10 +117,7 @@ const showPartnerDetailPage = async (req, res, next) => {
   }
 };
 
-/**
- * Handle form submission to create a new partner with primary contact in a single transaction
- * POST /admin/partners
- */
+
 const createPartner = async (req, res, next) => {
   const { name, type, status, email, phone, address, description, contact_name, contact_position, contact_email, contact_phone } = req.body;
 
@@ -140,7 +129,7 @@ const createPartner = async (req, res, next) => {
   try {
     await conn.beginTransaction();
 
-    // 1. Insert partner profile
+    
     const [partnerResult] = await conn.query(
       `INSERT INTO partners (name, type, email, phone, address, description) 
        VALUES (?, ?, ?, ?, ?, ?)`,
@@ -148,7 +137,7 @@ const createPartner = async (req, res, next) => {
     );
     const partnerId = partnerResult.insertId;
 
-    // 2. Insert primary contact person
+    
     await conn.query(
       `INSERT INTO partner_contacts (partner_id, name, position, email, phone, is_primary) 
        VALUES (?, ?, ?, ?, ?, 1)`,
@@ -165,10 +154,7 @@ const createPartner = async (req, res, next) => {
   }
 };
 
-/**
- * Handle form submission to update partner profile details
- * POST /admin/partners/:id/update
- */
+
 const updatePartner = async (req, res, next) => {
   const { id } = req.params;
   const { name, type, status, email, phone, address, description } = req.body;
@@ -191,10 +177,7 @@ const updatePartner = async (req, res, next) => {
   }
 };
 
-/**
- * Handle request to delete a partner (Web UI & HTMX)
- * DELETE /admin/partners/:id
- */
+
 const deletePartner = async (req, res, next) => {
   const { id } = req.params;
 
@@ -207,11 +190,11 @@ const deletePartner = async (req, res, next) => {
       return res.redirect("/admin/partners?error=Mitra+tidak+ditemukan.");
     }
 
-    // Cascade delete partner (foreign keys configured as ON DELETE CASCADE in DB)
+    
     await db.query("DELETE FROM partners WHERE id = ?", [id]);
 
     if (req.xhr || req.headers["hx-request"]) {
-      // Return empty response for HTMX row removal
+      
       return res.status(200).send("");
     }
 
@@ -238,7 +221,7 @@ const addPartnerContact = async (req, res, next) => {
   try {
     await conn.beginTransaction();
 
-    // If setting as primary contact, reset all other contacts for this partner first
+    
     if (primaryVal === 1) {
       await conn.query("UPDATE partner_contacts SET is_primary = 0 WHERE partner_id = ?", [id]);
     }
@@ -259,10 +242,7 @@ const addPartnerContact = async (req, res, next) => {
   }
 };
 
-/**
- * Delete a specific contact person (HTMX / Web UI)
- * DELETE /admin/partners/contacts/:contactId
- */
+
 const deletePartnerContact = async (req, res, next) => {
   const { contactId } = req.params;
 
@@ -331,10 +311,10 @@ const exportPartnerPDF = async (req, res, next) => {
       generatedAt: new Date()
     };
 
-    // 2. Generate PDF stream
+    
     const doc = pdfService.buildPartnerDetailReport(data);
 
-    // 3. Set download headers
+    
     res.setHeader("Content-Disposition", `attachment; filename=Detail_Mitra_${id}_${partner.name.replace(/[name, type, email || null, phone || null, address || null, description || null]+/g, '_')}.pdf`);
     res.setHeader("Content-Type", "application/pdf");
     doc.pipe(res);
@@ -343,10 +323,7 @@ const exportPartnerPDF = async (req, res, next) => {
   }
 };
 
-/**
- * RESTful JSON API: Fetch all candidate partners
- * GET /api/partners
- */
+
 const apiGetPartners = async (req, res, next) => {
   try {
     const search = req.query.search || "";
@@ -370,10 +347,7 @@ const apiGetPartners = async (req, res, next) => {
   }
 };
 
-/**
- * RESTful JSON API: Create a new candidate partner programmatically
- * POST /api/partners
- */
+
 const apiCreatePartner = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -386,7 +360,7 @@ const apiCreatePartner = async (req, res, next) => {
   try {
     await conn.beginTransaction();
 
-    // 1. Insert partner profile
+    
     const [partnerResult] = await conn.query(
       `INSERT INTO partners (name, type, email, phone, address, description) 
        VALUES (?, ?, ?, ?, ?, ?)`,
@@ -394,7 +368,7 @@ const apiCreatePartner = async (req, res, next) => {
     );
     const partnerId = partnerResult.insertId;
 
-    // 2. Insert primary contact person
+    
     const [contactResult] = await conn.query(
       `INSERT INTO partner_contacts (partner_id, name, position, email, phone, is_primary) 
        VALUES (?, ?, ?, ?, ?, 1)`,

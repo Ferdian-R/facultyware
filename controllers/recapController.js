@@ -1,10 +1,6 @@
 const db = require("../config/db");
 const exceljs = require("exceljs");
 
-/**
- * Renders the admin survey answers recap page
- * GET /admin/recap-answers
- */
 const showRecapPage = async (req, res, next) => {
   try {
     const search = req.query.search || "";
@@ -59,15 +55,11 @@ const showRecapPage = async (req, res, next) => {
   }
 };
 
-/**
- * Returns answers detail as JSON for modal popups
- * GET /admin/recap-answers/:id/json
- */
 const getResponseDetailJSON = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    // Verify response exists
+    
     const [[response]] = await db.query(
       `SELECT sr.id, sr.survey_id, sr.submitted_at, s.title AS survey_title, si.name AS partner_name,
               (
@@ -88,7 +80,7 @@ const getResponseDetailJSON = async (req, res, next) => {
       return res.status(404).json({ success: false, message: "Respon tidak ditemukan." });
     }
 
-    // Fetch answers
+    
     const [answers] = await db.query(
       `SELECT sa.id, sq.question_text, sq.type, sa.answer_text, sqo.weight AS score, sqo.option_text
        FROM survey_answers sa
@@ -113,13 +105,9 @@ const getResponseDetailJSON = async (req, res, next) => {
   }
 };
 
-/**
- * Exports all completed responses and answers to a formatted Excel file
- * GET /admin/recap-answers/export-excel
- */
 const exportExcel = async (req, res, next) => {
   try {
-    // 1. Fetch raw answers join query
+    
     const [rows] = await db.query(
       `SELECT sr.id AS response_id, sr.submitted_at, 
               s.title AS survey_title, si.name AS partner_name, si.email AS partner_email, si.phone AS partner_phone,
@@ -141,7 +129,7 @@ const exportExcel = async (req, res, next) => {
        ORDER BY sr.submitted_at DESC, sq.id ASC`
     );
 
-    // 2. Group Data by Response & Collect Unique Questions
+    
     const responsesMap = {};
     const questionsSet = new Map();
 
@@ -181,21 +169,21 @@ const exportExcel = async (req, res, next) => {
 
     const uniqueQuestions = Array.from(questionsSet.keys());
 
-    // 3. Initialize workbook
+    
     const workbook = new exceljs.Workbook();
     const worksheet = workbook.addWorksheet("Rekap Jawaban Mitra");
 
     worksheet.views = [{ showGridLines: true }];
 
-    // Set dynamic column widths
+    
     const colWidths = [6, 25, 30, 15, 20];
-    uniqueQuestions.forEach(() => colWidths.push(40)); // 40 width for each question column
+    uniqueQuestions.forEach(() => colWidths.push(40)); 
     colWidths.forEach((w, colIdx) => {
       worksheet.getColumn(colIdx + 1).width = w;
     });
 
-    // Title blocks
-    const lastColIndex = String.fromCharCode(65 + Math.min(colWidths.length - 1, 25)); // A-Z simple bound, assume < 26 cols
+    
+    const lastColIndex = String.fromCharCode(65 + Math.min(colWidths.length - 1, 25)); 
     const mergeRange = `A1:${lastColIndex}1`;
     try { worksheet.mergeCells(`A1:${lastColIndex}1`); } catch(e){}
     const titleCell = worksheet.getCell("A1");
@@ -222,7 +210,7 @@ const exportExcel = async (req, res, next) => {
     worksheet.addRow([]);
     worksheet.getRow(4).height = 15;
 
-    // Table Headers
+    
     const headers = [
       "No",
       "Nama Mitra",
@@ -232,7 +220,7 @@ const exportExcel = async (req, res, next) => {
       ...uniqueQuestions
     ];
     const headerRow = worksheet.addRow(headers);
-    headerRow.height = 35; // taller for question wrap
+    headerRow.height = 35; 
 
     headerRow.eachCell((cell) => {
       cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF0F172A" } };
@@ -246,7 +234,7 @@ const exportExcel = async (req, res, next) => {
       };
     });
 
-    // Write Data Rows
+    
     let index = 1;
     const responseArr = Object.values(responsesMap);
     
@@ -259,13 +247,13 @@ const exportExcel = async (req, res, next) => {
         resp.submitted_at
       ];
 
-      // Add answers in order of uniqueQuestions
+      
       uniqueQuestions.forEach(qText => {
         rowData.push(resp.answers[qText] || "—");
       });
 
       const dataRow = worksheet.addRow(rowData);
-      dataRow.height = 40; // Default reasonable height for wrap
+      dataRow.height = 40; 
 
       dataRow.eachCell((cell, colNum) => {
         cell.font = { name: "Arial", size: 9.5 };
@@ -284,7 +272,7 @@ const exportExcel = async (req, res, next) => {
       });
     });
 
-    // Write to response stream
+    
     res.setHeader(
       "Content-Type",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

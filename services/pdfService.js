@@ -1,8 +1,6 @@
 const PDFDocument = require("pdfkit");
 
-/**
- * Service to generate PDF reports for SUKAFTI Admin
- */
+
 const buildDashboardReport = (data) => {
   const doc = new PDFDocument({
     size: "A4",
@@ -10,19 +8,19 @@ const buildDashboardReport = (data) => {
     bufferPages: true
   });
 
-  // Color Palette
+  
   const colors = {
-    primary: "#0f172a",    // Dark Slate
-    secondary: "#475569",  // Mid Slate
-    lightBg: "#f8fafc",    // Slate 50
-    border: "#cbd5e1",     // Slate 300
-    green: "#059669",      // Emerald
+    primary: "#0f172a",    
+    secondary: "#475569",  
+    lightBg: "#f8fafc",    
+    border: "#cbd5e1",     
+    green: "#059669",      
     darkGreen: "#15803d",
-    red: "#dc2626",        // Red
-    text: "#334155"        // Slate 700
+    red: "#dc2626",        
+    text: "#334155"        
   };
 
-  // Header / Title Banner
+  
   doc
     .fillColor(colors.primary)
     .font("Helvetica-Bold")
@@ -37,7 +35,7 @@ const buildDashboardReport = (data) => {
     .text("Sistem Informasi Survey Kerja Sama FTI Universitas Andalas", { align: "center" })
     .moveDown(1.5);
 
-  // Divider Line
+  
   doc
     .strokeColor(colors.border)
     .lineWidth(1)
@@ -46,7 +44,7 @@ const buildDashboardReport = (data) => {
     .stroke()
     .moveDown(1.5);
 
-  // Section 1: Summary Statistics Cards
+  
   doc
     .fillColor(colors.primary)
     .font("Helvetica-Bold")
@@ -59,10 +57,10 @@ const buildDashboardReport = (data) => {
   const cardHeight = 65;
   const gap = 15;
 
-  // Card 1: Total Mitra
+  
   drawCard(doc, 50, startY, cardWidth, cardHeight, "TOTAL MITRA", data.total_mitra.toString(), colors);
 
-  // Card 2: PIN Aktif
+  
   drawCard(
     doc,
     50 + cardWidth + gap,
@@ -74,7 +72,7 @@ const buildDashboardReport = (data) => {
     colors
   );
 
-  // Card 3: Survey Selesai
+  
   drawCard(
     doc,
     50 + (cardWidth + gap) * 2,
@@ -86,10 +84,10 @@ const buildDashboardReport = (data) => {
     colors
   );
 
-  // Move cursor past the cards
+  
   doc.y = startY + cardHeight + 30;
 
-  // Section 2: Detailed Invitation List (Table)
+  
   doc
     .fillColor(colors.primary)
     .font("Helvetica-Bold")
@@ -97,7 +95,7 @@ const buildDashboardReport = (data) => {
     .text("Daftar Token PIN & Aktivitas Mitra", { underline: true })
     .moveDown(0.8);
 
-  // Draw Table Headers
+  
   const tableTop = doc.y;
   const colWidths = {
     partner: 185,
@@ -130,15 +128,15 @@ const buildDashboardReport = (data) => {
 
   doc.y = tableTop + 22;
 
-  // Draw Table Rows
+  
   doc.font("Helvetica").fontSize(9).fillColor(colors.text);
 
   if (data.invitations && data.invitations.length > 0) {
     data.invitations.forEach((inv, index) => {
-      // Prevent overflow to next page without headers
+      
       if (doc.y > 700) {
         doc.addPage();
-        // Redraw table headers on new page
+        
         const newTableTop = doc.y;
         doc
           .fillColor(colors.lightBg)
@@ -169,7 +167,7 @@ const buildDashboardReport = (data) => {
       const rowTop = doc.y;
       const rowHeight = 22;
 
-      // Alternating row background
+      
       if (index % 2 === 1) {
         doc
           .fillColor("#f8fafc")
@@ -177,7 +175,7 @@ const buildDashboardReport = (data) => {
           .fill();
       }
 
-      // Draw cell borders
+      
       doc
         .strokeColor(colors.border)
         .rect(50, rowTop, 495, rowHeight)
@@ -186,18 +184,18 @@ const buildDashboardReport = (data) => {
       doc.fillColor(colors.text);
 
       let x = 60;
-      // Partner Name (Truncated if too long)
+      
       const nameText = inv.nama_perusahaan.length > 32 
         ? inv.nama_perusahaan.substring(0, 30) + "..." 
         : inv.nama_perusahaan;
       doc.text(nameText, x, rowTop + 6);
 
       x += colWidths.partner;
-      // PIN
+      
       doc.font("Courier-Bold").text(inv.pin, x, rowTop + 6).font("Helvetica");
 
       x += colWidths.pin;
-      // Status
+      
       const isUsed = inv.is_used === 1;
       const statusText = isUsed ? "TERPAKAI" : "AKTIF";
       doc.fillColor(isUsed ? colors.red : colors.green);
@@ -205,7 +203,7 @@ const buildDashboardReport = (data) => {
       doc.fillColor(colors.text);
 
       x += colWidths.status;
-      // Used At Date
+      
       let usedAtText = "—";
       if (inv.used_at) {
         const dateObj = new Date(inv.used_at);
@@ -230,7 +228,7 @@ const buildDashboardReport = (data) => {
     doc.y += 30;
   }
 
-  // Footer metadata
+  
   doc.y += 30;
   doc
     .fillColor(colors.secondary)
@@ -240,7 +238,7 @@ const buildDashboardReport = (data) => {
       align: "left"
     });
 
-  // Global Page Numbering
+  
   const range = doc.bufferedPageRange();
   for (let i = range.start; i < range.start + range.count; i++) {
     doc.switchToPage(i);
@@ -251,14 +249,14 @@ const buildDashboardReport = (data) => {
       .text(`Halaman ${i + 1} dari ${range.count}`, 50, 800, { align: "right" });
   }
 
-  // Finalize PDF
+  
   doc.end();
   return doc;
 };
 
-// Helper function to draw card containers
+
 function drawCard(doc, x, y, width, height, label, value, colors) {
-  // Border & Background
+  
   doc
     .fillColor(colors.lightBg)
     .rect(x, y, width, height)
@@ -268,14 +266,14 @@ function drawCard(doc, x, y, width, height, label, value, colors) {
     .rect(x, y, width, height)
     .stroke();
 
-  // Label text
+  
   doc
     .fillColor(colors.secondary)
     .font("Helvetica-Bold")
     .fontSize(8)
     .text(label, x + 15, y + 15);
 
-  // Big Value text
+  
   doc
     .fillColor(colors.primary)
     .font("Helvetica-Bold")
@@ -290,17 +288,17 @@ const buildQuestionsReport = (data) => {
     bufferPages: true
   });
 
-  // Color Palette
+  
   const colors = {
-    primary: "#0f172a",    // Dark Slate
-    secondary: "#475569",  // Mid Slate
-    lightBg: "#f8fafc",    // Slate 50
-    border: "#cbd5e1",     // Slate 300
-    green: "#059669",      // Emerald
-    text: "#334155"        // Slate 700
+    primary: "#0f172a",    
+    secondary: "#475569",  
+    lightBg: "#f8fafc",    
+    border: "#cbd5e1",     
+    green: "#059669",      
+    text: "#334155"        
   };
 
-  // Header / Title Banner
+  
   doc
     .fillColor(colors.primary)
     .font("Helvetica-Bold")
@@ -315,7 +313,7 @@ const buildQuestionsReport = (data) => {
     .text("Sistem Informasi Survey Kerja Sama FTI Universitas Andalas (SUKAFTI)", { align: "center" })
     .moveDown(1.5);
 
-  // Divider Line
+  
   doc
     .strokeColor(colors.border)
     .lineWidth(1)
@@ -327,7 +325,7 @@ const buildQuestionsReport = (data) => {
   const boxY = doc.y;
   const boxHeight = 45;
 
-  // Metadata Block (Nama Survey, Pembuat, NIM)
+  
   doc
     .fillColor(colors.lightBg)
     .rect(50, boxY, 495, boxHeight)
@@ -346,15 +344,15 @@ const buildQuestionsReport = (data) => {
   doc.text("TANGGAL CETAK:", 65, metaY + 16);
 
   doc.font("Helvetica").fillColor(colors.text);
-  // Truncate survey title if it's too long, outputting with ellipsis formatting on a single line
+  
   const truncatedTitle = data.surveyTitle.length > 60 ? data.surveyTitle.substring(0, 57) + "..." : data.surveyTitle;
   doc.text(truncatedTitle, 170, metaY, { width: 360, height: 12, ellipsis: true });
   doc.text(data.generatedAt.toLocaleString("id-ID"), 170, metaY + 16);
 
-  // Move cursor strictly below the metadata box
+  
   doc.y = boxY + boxHeight + 15;
 
-  // List of Questions
+  
   doc
     .fillColor(colors.primary)
     .font("Helvetica-Bold")
@@ -364,7 +362,7 @@ const buildQuestionsReport = (data) => {
 
   if (data.questions && data.questions.length > 0) {
     data.questions.forEach((q) => {
-      // Prevent overflow to next page
+      
       if (doc.y > 650) {
         doc.addPage();
       }
@@ -374,7 +372,7 @@ const buildQuestionsReport = (data) => {
       doc.font("Helvetica-Bold").fontSize(10);
       const qHeight = doc.heightOfString(qText, { width: 465 });
       
-      // Question block
+      
       doc
         .fillColor(colors.primary)
         .font("Helvetica-Bold")
@@ -386,10 +384,10 @@ const buildQuestionsReport = (data) => {
         .fontSize(10)
         .text(qText, 80, qY, { width: 465, align: "left" });
 
-      // Move cursor below question text
+      
       doc.y = qY + qHeight + 4;
 
-      // Question Type Badge/Label
+      
       let typeLabel = "";
       if (q.type === "essay" || q.type === "short_answer") typeLabel = "Tipe: Jawaban Singkat / Deskriptif";
       else if (q.type === "multiple_choice") typeLabel = "Tipe: Pilihan Ganda";
@@ -405,10 +403,10 @@ const buildQuestionsReport = (data) => {
       
       doc.y = typeY + doc.heightOfString(typeLabel, { width: 465 }) + 6;
 
-      // Render Options if Mc, Single Choice, or Rating
+      
       if ((q.type === "multiple_choice" || q.type === "single_choice" || q.type === "rating") && q.options && q.options.length > 0) {
         q.options.forEach(opt => {
-          // Prevent overflow
+          
           if (doc.y > 720) {
             doc.addPage();
           }
@@ -422,7 +420,7 @@ const buildQuestionsReport = (data) => {
           doc.y = optY + doc.heightOfString(optText, { width: 450 }) + 3;
         });
       } else {
-        // Essay lines
+        
         const lineText = "........................................................................................................................................................................";
         const lineY = doc.y;
         doc
@@ -433,15 +431,15 @@ const buildQuestionsReport = (data) => {
         doc.y = lineY + doc.heightOfString(lineText, { width: 450 }) + 3;
       }
 
-      doc.y += 10; // Extra spacing between questions
+      doc.y += 10; 
     });
   } else {
     doc.font("Helvetica-Oblique").fontSize(10).fillColor(colors.text).text("Belum ada data pertanyaan untuk survey ini.", { align: "center" });
   }
 
-  // Footer metadata
+  
   doc.y += 20;
-  // Ensure we don't overflow the footer
+  
   if (doc.y > 740) {
     doc.addPage();
   }
@@ -451,7 +449,7 @@ const buildQuestionsReport = (data) => {
     .fontSize(8)
     .text(`Dokumen ini di-generate secara otomatis oleh Sistem SUKAFTI pada: ${data.generatedAt.toLocaleString("id-ID")}`, 50, doc.y);
 
-  // Global Page Numbering
+  
   const range = doc.bufferedPageRange();
   for (let i = range.start; i < range.start + range.count; i++) {
     doc.switchToPage(i);
@@ -462,7 +460,7 @@ const buildQuestionsReport = (data) => {
       .text(`Halaman ${i + 1} dari ${range.count}`, 50, 800, { align: "right" });
   }
 
-  // Finalize PDF
+  
   doc.end();
   return doc;
 };
@@ -474,20 +472,20 @@ const buildPartnerDetailReport = (data) => {
     bufferPages: true
   });
 
-  // Color Palette
+  
   const colors = {
-    primary: "#0f172a",    // Dark Slate
-    secondary: "#475569",  // Mid Slate
-    lightBg: "#f8fafc",    // Slate 50
-    border: "#cbd5e1",     // Slate 300
-    green: "#059669",      // Emerald
-    red: "#dc2626",        // Red
-    text: "#334155"        // Slate 700
+    primary: "#0f172a",    
+    secondary: "#475569",  
+    lightBg: "#f8fafc",    
+    border: "#cbd5e1",     
+    green: "#059669",      
+    red: "#dc2626",        
+    text: "#334155"        
   };
 
   const { partner, contacts, surveys, generatedAt } = data;
 
-  // Header / Title Banner
+  
   doc
     .fillColor(colors.primary)
     .font("Helvetica-Bold")
@@ -502,7 +500,7 @@ const buildPartnerDetailReport = (data) => {
     .text("Sistem Informasi Survey Kerja Sama FTI Universitas Andalas (SUKAFTI)", { align: "center" })
     .moveDown(1.5);
 
-  // Divider Line
+  
   doc
     .strokeColor(colors.border)
     .lineWidth(1)
@@ -511,7 +509,7 @@ const buildPartnerDetailReport = (data) => {
     .stroke()
     .moveDown(1.5);
 
-  // SECTION 1: Profil Perusahaan
+  
   doc
     .fillColor(colors.primary)
     .font("Helvetica-Bold")
@@ -556,9 +554,9 @@ const buildPartnerDetailReport = (data) => {
   drawProfileRow("Deskripsi Mitra:", partner.description);
 
   doc.y += 10;
-  doc.x = 50; // Reset X cursor for Section B
+  doc.x = 50; 
 
-  // SECTION 2: Kontak Hubung (Contact Persons)
+  
   if (doc.y > 650) {
     doc.addPage();
     doc.x = 50;
@@ -571,7 +569,7 @@ const buildPartnerDetailReport = (data) => {
     .text("B. Daftar Kontak Hubung (Contact Persons)", { underline: true })
     .moveDown(0.8);
 
-  // Table headers for Contacts
+  
   const contactTop = doc.y;
   const contactColWidths = {
     name: 130,
@@ -603,7 +601,7 @@ const buildPartnerDetailReport = (data) => {
   doc.text("TELEPON / HP", currentX, contactTop + 5);
 
   doc.y = contactTop + 20;
-  doc.x = 50; // Ensure X is reset for normal flow
+  doc.x = 50; 
   doc.font("Helvetica").fontSize(8.5).fillColor(colors.text);
 
   if (contacts && contacts.length > 0) {
@@ -640,7 +638,7 @@ const buildPartnerDetailReport = (data) => {
       doc.text(c.phone || "—", x, rowTop + 5);
 
       doc.y = rowTop + rowHeight;
-      doc.x = 50; // Reset X coordinate after cell prints
+      doc.x = 50; 
     });
   } else {
     doc.strokeColor(colors.border).rect(50, doc.y, 495, 25).stroke();
@@ -650,9 +648,9 @@ const buildPartnerDetailReport = (data) => {
   }
 
   doc.y += 20;
-  doc.x = 50; // Reset X cursor for Section C
+  doc.x = 50; 
 
-  // SECTION 3: Riwayat Pengisian Survey & Token PIN
+  
   if (doc.y > 650) {
     doc.addPage();
     doc.x = 50;
@@ -699,7 +697,7 @@ const buildPartnerDetailReport = (data) => {
   doc.text("SKOR", currentX, surveyTop + 5);
 
   doc.y = surveyTop + 20;
-  doc.x = 50; // Ensure X is reset for normal flow
+  doc.x = 50; 
   doc.font("Helvetica").fontSize(8.5).fillColor(colors.text);
 
   if (surveys && surveys.length > 0) {
@@ -743,7 +741,7 @@ const buildPartnerDetailReport = (data) => {
       doc.text(isUsed ? `${s.score_total} Poin` : "—", x, rowTop + 5);
 
       doc.y = rowTop + rowHeight;
-      doc.x = 50; // Reset X coordinate after cell prints
+      doc.x = 50; 
     });
   } else {
     doc.strokeColor(colors.border).rect(50, doc.y, 495, 25).stroke();
@@ -752,9 +750,9 @@ const buildPartnerDetailReport = (data) => {
     doc.x = 50;
   }
 
-  // Footer metadata
+  
   doc.y += 30;
-  doc.x = 50; // Reset X for footer
+  doc.x = 50; 
   if (doc.y > 740) {
     doc.addPage();
     doc.x = 50;
@@ -765,7 +763,7 @@ const buildPartnerDetailReport = (data) => {
     .fontSize(8)
     .text(`Dokumen Laporan Detail Kemitraan SUKAFTI | Di-generate secara otomatis pada: ${generatedAt.toLocaleString("id-ID")}`, 50, doc.y);
 
-  // Global Page Numbering
+  
   const range = doc.bufferedPageRange();
   for (let i = range.start; i < range.start + range.count; i++) {
     doc.switchToPage(i);

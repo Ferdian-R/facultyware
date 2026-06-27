@@ -14,7 +14,7 @@ const { notFoundHandler, errorHandler } = require('./middlewares/error');
 
 var app = express();
 
-// view engine setup
+
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
@@ -34,7 +34,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Session configuration
+
 const sessionStore = new MySQLStore({
   host: process.env.DB_HOST || '127.0.0.1',
   port: process.env.DB_PORT || 3306,
@@ -50,7 +50,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    maxAge: 1000 * 60 * 60 * 24 // 1 day
+    maxAge: 1000 * 60 * 60 * 24 
   }
 }));
 
@@ -59,10 +59,10 @@ app.use('/admin', dashboardRouter);
 app.use('/api', apiRouter);
 app.use('/survey-mitra', surveyMitraRouter);
 
-// catch 404 and forward to error handler
+
 app.use(notFoundHandler);
 
-// error handler
+
 app.use(errorHandler);
 
 module.exports = app;

@@ -5,10 +5,10 @@ async function setup() {
   try {
     console.log("Checking database connection and tables...");
 
-    // 2. Hash password
+    
     const hashedPassword = await bcrypt.hash("password", 10);
 
-    // 3. Create or update test admin user
+    
     const [users] = await db.query("SELECT * FROM users WHERE email = ?", ["admin@sukafti.com"]);
     let adminUserId;
 
@@ -21,7 +21,7 @@ async function setup() {
       console.log("Test user 'admin' created with password 'password' and email 'admin@sukafti.com'.");
     } else {
       adminUserId = users[0].id;
-      // Update password and email to default
+      
       await db.query(
         "UPDATE users SET name = ?, password = ? WHERE id = ?",
         ["Administrator", hashedPassword, adminUserId]
@@ -29,7 +29,7 @@ async function setup() {
       console.log("Test user 'admin' updated to password 'password' and email 'admin@sukafti.com'.");
     }
 
-    // 4. Ensure roles table has 'admin'
+    
 
     const [roles] = await db.query("SELECT * FROM roles WHERE name = ?", ["admin"]);
     let adminRoleId;
@@ -41,7 +41,7 @@ async function setup() {
       adminRoleId = roles[0].id;
     }
 
-    // 5. Ensure admin user has 'admin' role
+    
     const [userRoles] = await db.query(
       "SELECT * FROM model_has_roles WHERE model_id = ? AND role_id = ? AND model_type = 'App\\Models\\User'",
       [adminUserId, adminRoleId]

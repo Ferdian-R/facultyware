@@ -13,7 +13,7 @@ async function seed() {
 
     console.log("Starting database seeding...");
 
-    // 1. Seed Partners
+    
     const [partners] = await db.query("SELECT * FROM partners LIMIT 1");
     if (partners.length === 0) {
       const samplePartners = [
@@ -45,7 +45,7 @@ async function seed() {
       }
     }
 
-    // 2. Seed Survey
+    
     const [surveys] = await db.query("SELECT * FROM surveys LIMIT 1");
     let surveyId;
     if (surveys.length === 0) {
@@ -60,7 +60,7 @@ async function seed() {
       surveyId = surveys[0].id;
     }
 
-    // 3. Seed Survey Questions
+    
     const [questions] = await db.query("SELECT * FROM survey_questions LIMIT 1");
     if (questions.length === 0) {
       const questionsData = [
@@ -99,13 +99,13 @@ async function seed() {
         );
         const qId = qResult.insertId;
 
-        // Assign to survey
+        
         await db.query(
           "INSERT INTO survey_question_assignments (survey_id, survey_question_id, `order`) VALUES (?, ?, ?)",
           [surveyId, qId, i + 1]
         );
 
-        // Add options if any
+        
         if (q.options.length > 0) {
           for (const opt of q.options) {
             await db.query(
@@ -118,7 +118,7 @@ async function seed() {
       }
     }
 
-    // 4. Seed Invitations
+    
     const [invitations] = await db.query("SELECT * FROM survey_invitations LIMIT 1");
     if (invitations.length === 0) {
       await db.query(

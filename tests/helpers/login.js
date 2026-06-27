@@ -1,11 +1,4 @@
-/**
- * Shared login helpers for Playwright tests
- */
 
-/**
- * Login as Admin user
- * @param {import('@playwright/test').Page} page
- */
 async function loginAsAdmin(page) {
   await page.context().clearCookies();
   await page.goto('/login');
@@ -17,11 +10,6 @@ async function loginAsAdmin(page) {
   ]);
 }
 
-/**
- * Login as Mitra using a PIN code (fills the 6 individual OTP boxes)
- * @param {import('@playwright/test').Page} page
- * @param {string} pin - 6 character PIN
- */
 async function loginAsMitra(page, pin) {
   await page.goto('/login-mitra');
   const pinBoxes = page.locator('.pin-box');

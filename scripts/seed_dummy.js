@@ -13,7 +13,7 @@ async function seed() {
 
     console.log("Memulai penambahan data dummy penuh...");
 
-    // 1. Bersihkan tabel (Hati-hati, ini akan menghapus data survey!)
+    
     await db.query("SET FOREIGN_KEY_CHECKS = 0");
     await db.query("TRUNCATE TABLE survey_answer_options");
     await db.query("TRUNCATE TABLE survey_answers");
@@ -26,7 +26,7 @@ async function seed() {
     await db.query("TRUNCATE TABLE partners");
     await db.query("SET FOREIGN_KEY_CHECKS = 1");
 
-    // 2. Insert Partners
+    
     console.log("Membuat Data Mitra...");
     const partnersData = [
       { name: "PT Telkom Indonesia", type: "company", address: "Jakarta", email: "contact@telkom.co.id", phone: "021-111111" },
@@ -45,7 +45,7 @@ async function seed() {
       partnersData[i].id = res.insertId;
     }
 
-    // 3. Insert Survey
+    
     console.log("Membuat Kuesioner...");
     const [surveyResult] = await db.query(
       `INSERT INTO surveys (title, description, start_date, end_date, is_active, created_by, employee_id) 
@@ -54,7 +54,7 @@ async function seed() {
     );
     const surveyId = surveyResult.insertId;
 
-    // 4. Insert 5 Questions with different formats
+    
     console.log("Membuat 5 Pertanyaan Berbeda Format...");
     const questionsData = [
       {
@@ -102,7 +102,7 @@ async function seed() {
       {
         text: "Mohon berikan saran atau masukan Anda terkait program kerjasama ke depan agar dapat saling menguntungkan:",
         type: "short_answer",
-        options: [] // Short answer tidak memiliki options
+        options: [] 
       }
     ];
 
@@ -130,13 +130,13 @@ async function seed() {
       }
     }
 
-    // 5. Generate PIN & Responses
+    
     console.log("Membuat Undangan (PIN) dan Data Hasil Survei (Respons)...");
     for (let i = 0; i < partnersData.length; i++) {
       const partner = partnersData[i];
-      const pin = crypto.randomBytes(3).toString("hex").toUpperCase(); // 6 chars
+      const pin = crypto.randomBytes(3).toString("hex").toUpperCase(); 
       
-      // Semua mitra dibuat sudah mengisi survei (is_used = 1) kecuali mitra terakhir
+      
       const isFilled = i < 4; 
       
       const [invResult] = await db.query(
@@ -147,14 +147,14 @@ async function seed() {
       console.log(`Mitra: ${partner.name} | PIN: ${pin} | Status: ${isFilled ? "Sudah Mengisi" : "Belum Mengisi"}`);
 
       if (isFilled) {
-        // Buat Survey Response
+        
         const [respResult] = await db.query(
           "INSERT INTO survey_responses (survey_id, survey_invitation_id, submitted_at) VALUES (?, ?, NOW())",
           [surveyId, invitationId]
         );
         const responseId = respResult.insertId;
 
-        // Buat Jawaban (Answers)
+        
         for (const q of questionsData) {
           let answerText = null;
           let selectedOption = null;
@@ -168,7 +168,7 @@ async function seed() {
             ];
             answerText = essayAnswers[i % essayAnswers.length];
           } else {
-            // Pilih secara random salah satu opsi
+            
             const randIdx = Math.floor(Math.random() * q.options.length);
             selectedOption = q.options[randIdx];
           }

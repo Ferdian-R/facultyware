@@ -59,7 +59,7 @@
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
-    /* Responsive grid layout matching standard Basecoat */
+    
     .dashboard-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -72,7 +72,7 @@
       }
     }
 
-    /* Basecard enhancements */
+    
     .premium-card {
       border: 1px solid var(--border) !important;
       background: var(--card) !important;
@@ -86,7 +86,7 @@
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.06) !important;
     }
 
-    /* Select styling */
+    
     select {
       background-color: var(--card) !important;
       color: var(--foreground) !important;
@@ -106,7 +106,7 @@
       color-scheme: dark;
     }
 
-    /* Custom classes matching index.ejs */
+    
     .trend-badge {
       display: inline-flex !important;
       align-items: center !important;
@@ -174,7 +174,7 @@
 <body class="bg-background">
   <div class="relative flex min-h-screen">
 
-    <!-- Sidebar -->
+    
     <aside id="sidebar" class="sidebar border-r bg-card text-card-foreground shrink-0" data-side="left"
       aria-hidden="false">
       <nav aria-label="Sidebar navigation" class="flex flex-col h-full justify-between">
@@ -258,10 +258,10 @@
       </nav>
     </aside>
 
-    <!-- Main Content Area -->
+    
     <main id="content" class="flex-1 flex flex-col min-w-0 bg-muted/20">
 
-      <!-- Topbar Header -->
+      
       <header
         class="bg-background sticky inset-x-0 top-0 isolate flex shrink-0 items-center justify-between border-b z-10 h-14 px-4 gap-4" style="z-index: 40;">
         <div class="flex items-center gap-2">
@@ -286,10 +286,10 @@
         </div>
       </header>
 
-      <!-- Inner Content -->
+      
       <div class="p-6 md:p-8 flex-1 space-y-6">
 
-        <!-- Alerts -->
+        
         <% if (error) { %>
           <div
             class="bg-destructive/15 text-destructive text-sm p-4 rounded-md border border-destructive/20 flex items-center gap-2">
@@ -309,10 +309,10 @@
               </div>
               <% } %>
 
-                <!-- Stats Grid -->
+                
                 <div class="dashboard-grid gap-4">
 
-                  <!-- Card 1: Total -->
+                  
                   <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col justify-between gap-5">
                     <div class="flex items-start gap-4">
                       <div class="p-3 bg-indigo-500/10 rounded-2xl text-indigo-600 dark:text-indigo-400 border border-indigo-500/15 shrink-0">
@@ -337,7 +337,7 @@
                     </div>
                   </div>
 
-                  <!-- Card 2: Active -->
+                  
                   <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col justify-between gap-5">
                     <div class="flex items-start gap-4">
                       <div class="p-3 bg-emerald-500/10 rounded-2xl text-emerald-600 dark:text-emerald-400 border border-emerald-500/15 shrink-0">
@@ -362,7 +362,7 @@
                     </div>
                   </div>
 
-                  <!-- Card 3: Inactive -->
+                  
                   <div data-slot="card" class="premium-card rounded-2xl p-6 flex flex-col justify-between gap-5">
                     <div class="flex items-start gap-4">
                       <div class="p-3 bg-red-500/10 rounded-2xl text-red-600 dark:text-red-400 border border-red-500/15 shrink-0">
@@ -389,7 +389,7 @@
 
                 </div>
 
-                <!-- Filters and Data Table Card -->
+                
                 <div data-slot="card" class="premium-card rounded-2xl overflow-hidden">
                   <div class="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b">
                     <form method="GET" action="/admin/partners"
@@ -547,7 +547,7 @@
                     </table>
                   </div>
 
-                  <!-- Pagination Footer -->
+                  
                   <% if (locals.totalPages && totalPages> 1) { %>
                     <div class="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 border-t bg-muted/20">
                       <div class="text-xs text-muted-foreground">
@@ -598,7 +598,7 @@
     </main>
   </div>
 
-  <!-- Tambah Mitra Dialog Modal -->
+  
   <dialog id="add-dialog" class="dialog">
     <div class="!max-w-lg w-full max-h-[85vh] overflow-y-auto pr-1">
       <div class="flex items-center gap-2 border-b pb-3">
@@ -723,7 +723,7 @@
     </div>
   </dialog>
 
-  <!-- Ubah Mitra Dialog Modal -->
+  
   <dialog id="edit-dialog" class="dialog">
     <div class="!max-w-lg w-full max-h-[85vh] overflow-y-auto pr-1">
       <div class="flex items-center gap-2 border-b pb-3">

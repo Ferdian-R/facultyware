@@ -21,7 +21,7 @@ async function run() {
     await connection.query(schema);
     console.log("Schema deployed successfully!");
     
-    // Add missing column to partners if not exists
+    
     try {
       await connection.query("ALTER TABLE partners ADD COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1");
       console.log("is_active column added to partners.");

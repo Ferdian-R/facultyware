@@ -1,15 +1,11 @@
 const db = require("../config/db");
 
-/**
- * Display the survey filling page
- * GET /survey-mitra
- */
 const showSurveyPage = async (req, res, next) => {
-  const partnerId = req.session.partnerId; // Might be null if no partner matched, but session exists
+  const partnerId = req.session.partnerId; 
   const invitationId = req.session.invitationId;
 
   try {
-    // 1. Fetch invitation details
+    
     const [[invitation]] = await db.query(
       "SELECT survey_id, is_used FROM survey_invitations WHERE id = ?",
       [invitationId]
@@ -23,7 +19,7 @@ const showSurveyPage = async (req, res, next) => {
       });
     }
 
-    // 2. Check if a completed response already exists for this invitation
+    
     const [[existingResponse]] = await db.query(
       "SELECT id FROM survey_responses WHERE survey_invitation_id = ?",
       [invitationId]
@@ -34,7 +30,7 @@ const showSurveyPage = async (req, res, next) => {
       return res.redirect("/survey-mitra/success");
     }
 
-    // 3. Fetch survey details
+    
     const [[survey]] = await db.query(
       "SELECT title, description FROM surveys WHERE id = ?",
       [invitation.survey_id]
@@ -48,7 +44,7 @@ const showSurveyPage = async (req, res, next) => {
       });
     }
 
-    // 4. Fetch questions
+    
     const [questions] = await db.query(
       `SELECT sq.id, sq.question_text, sq.type, sqa.order AS order_number 
        FROM survey_questions sq 
@@ -58,7 +54,7 @@ const showSurveyPage = async (req, res, next) => {
       [invitation.survey_id]
     );
 
-    // 5. Fetch options
+    
     const [options] = await db.query(
       `SELECT sqo.id, sqo.survey_question_id, sqo.option_text, sqo.weight AS score 
        FROM survey_question_options sqo
@@ -68,7 +64,7 @@ const showSurveyPage = async (req, res, next) => {
       [invitation.survey_id]
     );
 
-    // Map options to questions
+    
     const questionsWithOptions = questions.map(q => {
       return {
         ...q,
@@ -88,10 +84,6 @@ const showSurveyPage = async (req, res, next) => {
   }
 };
 
-/**
- * Handle survey submission
- * POST /survey-mitra/submit
- */
 const submitSurvey = async (req, res, next) => {
   const partnerId = req.session.partnerId;
   const invitationId = req.session.invitationId;
@@ -100,7 +92,7 @@ const submitSurvey = async (req, res, next) => {
     return res.redirect("/login-mitra");
   }
 
-  // 1. Fetch invitation details to get survey_id
+  
   let invitation;
   try {
     const [[invRow]] = await db.query(
@@ -116,7 +108,7 @@ const submitSurvey = async (req, res, next) => {
     return res.redirect("/login-mitra?error=Sesi+tidak+valid.");
   }
 
-  // Double submission check
+  
   try {
     const [[existingResponse]] = await db.query(
       "SELECT id FROM survey_responses WHERE survey_invitation_id = ?",
@@ -130,7 +122,7 @@ const submitSurvey = async (req, res, next) => {
     return next(err);
   }
 
-  // Fetch all questions for this survey to process input
+  
   let questions;
   try {
     const [qRows] = await db.query(
@@ -154,7 +146,7 @@ const submitSurvey = async (req, res, next) => {
     for (const q of questions) {
       const inputVal = req.body[`question_${q.id}`];
       
-      // Validation: Check if answer is provided
+      
       if (inputVal === undefined || inputVal === null || inputVal === "") {
         throw new Error(`Jawaban untuk pertanyaan belum diisi.`);
       }
@@ -166,7 +158,7 @@ const submitSurvey = async (req, res, next) => {
           option_id: null
         });
       } else {
-        // multiple_choice, single_choice, or rating
+        
         const optionId = parseInt(inputVal);
         const [[option]] = await conn.query(
           "SELECT id FROM survey_question_options WHERE id = ? AND survey_question_id = ?",
@@ -185,7 +177,7 @@ const submitSurvey = async (req, res, next) => {
       }
     }
 
-    // 2. Insert into survey_responses
+    
     const [responseResult] = await conn.query(
       `INSERT INTO survey_responses (survey_id, survey_invitation_id, submitted_at) 
        VALUES (?, ?, NOW())`,
@@ -193,7 +185,7 @@ const submitSurvey = async (req, res, next) => {
     );
     const responseId = responseResult.insertId;
 
-    // 3. Insert individual answers into survey_answers and survey_answer_options
+    
     for (const ans of answersToProcess) {
       const [saResult] = await conn.query(
         `INSERT INTO survey_answers (survey_response_id, survey_question_id, answer_text) 
@@ -211,9 +203,9 @@ const submitSurvey = async (req, res, next) => {
       }
     }
 
-    // 4. Legacy Audit Trail removed (table not in v2 schema)
     
-    // 5. Burn PIN
+    
+    
     await conn.query(
       "UPDATE survey_invitations SET is_used = 1, used_at = NOW() WHERE id = ?",
       [invitationId]
@@ -222,8 +214,8 @@ const submitSurvey = async (req, res, next) => {
     await conn.commit();
     req.session.lastResponseId = responseId;
     
-    // Explicitly save the session so the success page can read lastResponseId,
-    // we'll destroy it AFTER the success page is rendered.
+    
+    
     req.session.save((err) => {
       if (err) return next(err);
       res.redirect("/survey-mitra/success");
@@ -236,10 +228,6 @@ const submitSurvey = async (req, res, next) => {
   }
 };
 
-/**
- * Display the success receipt page
- * GET /survey-mitra/success
- */
 const showSuccessPage = async (req, res, next) => {
   const responseId = req.session.lastResponseId;
 
@@ -261,7 +249,7 @@ const showSuccessPage = async (req, res, next) => {
       return res.redirect("/login-mitra?error=Detail+respon+tidak+ditemukan.");
     }
 
-    // Fetch questions and the partner's answers using v2 schema tables
+    
     const [answers] = await db.query(
       `SELECT 
         sq.question_text, 
@@ -280,7 +268,7 @@ const showSuccessPage = async (req, res, next) => {
       [responseDetail.survey_id, responseId]
     );
     
-    // We add a dummy score_total for UI compatibility if needed
+    
     let scoreTotal = 0;
     answers.forEach(a => {
       if (a.answer_score) scoreTotal += parseFloat(a.answer_score);

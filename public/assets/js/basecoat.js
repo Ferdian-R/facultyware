@@ -63,7 +63,7 @@
       return;
     }
     
-    // Clear initialization flag for this component
+    
     const flag = `data-${componentName}-initialized`;
     document.querySelectorAll(`[${flag}]`).forEach(el => {
       el.removeAttribute(flag);
@@ -73,7 +73,7 @@
   };
 
   const reinitAll = () => {
-    // Clear all initialization flags using the registry
+    
     Object.entries(componentRegistry).forEach(([name, { selector }]) => {
       const flag = `data-${name}-initialized`;
       document.querySelectorAll(`[${flag}]`).forEach(el => {

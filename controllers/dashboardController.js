@@ -1,9 +1,9 @@
 const db = require("../config/db");
 const pdfService = require("../services/pdfService");
 
-// Helper to generate a random 6-character alphanumeric PIN
+
 const generateRandomPin = () => {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Omit easily confused chars like 0, O, 1, I
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; 
   let pin = "";
   for (let i = 0; i < 6; i++) {
     pin += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -31,7 +31,7 @@ const showDashboard = async (req, res, next) => {
     );
     const [[{ total_pin }]] = await db.query("SELECT COUNT(*) AS total_pin FROM survey_invitations");
     
-    // Calculate average score using new schema
+    
     const [[{ average_skor }]] = await db.query(
       `SELECT AVG(total_weight) AS average_skor FROM (
          SELECT sa.survey_response_id, SUM(sqo.weight) as total_weight
@@ -42,7 +42,7 @@ const showDashboard = async (req, res, next) => {
        ) t`
     );
 
-    // 2. Query all partners for dropdown (exclude partners with active/unused PINs)
+    
     const [allPartners] = await db.query(
       `SELECT id, name FROM partners 
        WHERE name NOT IN (
@@ -51,7 +51,7 @@ const showDashboard = async (req, res, next) => {
        ORDER BY name ASC`
     );
 
-    // 3. Query PIN lists with search and pagination (joins partners and invitations)
+    
     const [invitationsCountRows] = await db.query(
       `SELECT COUNT(*) AS total FROM survey_invitations si 
        WHERE si.name LIKE ?`,
@@ -71,7 +71,7 @@ const showDashboard = async (req, res, next) => {
       [`%${search}%`, limit, offset]
     );
 
-    // Render index template
+    
     res.render("dashboard/index", {
       title: "Dashboard Admin | SUKAFTI",
       user: req.session.username || "Admin FTI",
@@ -93,12 +93,9 @@ const showDashboard = async (req, res, next) => {
   }
 };
 
-/**
- * RESTful API / Internal function to get dashboard stats & chart data in JSON
- */
 const getDashboardStats = async (req, res, next) => {
   try {
-    // General counts
+    
     const [[{ total_mitra }]] = await db.query("SELECT COUNT(*) AS total_mitra FROM partners");
     const [[{ total_pin_aktif }]] = await db.query(
       "SELECT COUNT(*) AS total_pin_aktif FROM survey_invitations WHERE is_used = 0"
@@ -107,7 +104,7 @@ const getDashboardStats = async (req, res, next) => {
       "SELECT COUNT(*) AS total_respons FROM survey_responses"
     );
 
-    // PIN status breakdown
+    
     const [[pinBreakdown]] = await db.query(
       `SELECT 
         SUM(CASE WHEN is_used = 0 THEN 1 ELSE 0 END) AS active,
@@ -134,9 +131,6 @@ const getDashboardStats = async (req, res, next) => {
   }
 };
 
-/**
- * Generate a new invitation PIN for a partner
- */
 const generatePIN = async (req, res, next) => {
   const { partner_id } = req.body;
 
@@ -145,13 +139,13 @@ const generatePIN = async (req, res, next) => {
   }
 
   try {
-    // Fetch partner details
+    
     const [[partner]] = await db.query("SELECT name, email, phone FROM partners WHERE id = ?", [partner_id]);
     if (!partner) {
       return res.status(404).json({ success: false, message: "Partner not found." });
     }
 
-    // Fetch the most recent published survey, or fallback to the latest survey
+    
     const [surveys] = await db.query(
       "SELECT id FROM surveys WHERE is_active = 1 ORDER BY id DESC LIMIT 1"
     );
@@ -160,7 +154,7 @@ const generatePIN = async (req, res, next) => {
     if (surveys.length > 0) {
       surveyId = surveys[0].id;
     } else {
-      // Fallback: get any latest survey
+      
       const [anySurveys] = await db.query("SELECT id FROM surveys ORDER BY id DESC LIMIT 1");
       if (anySurveys.length > 0) {
         surveyId = anySurveys[0].id;
@@ -174,7 +168,7 @@ const generatePIN = async (req, res, next) => {
       });
     }
 
-    // Check if partner already has an active (unused) PIN for this survey
+    
     const [existingPin] = await db.query(
       "SELECT id FROM survey_invitations WHERE name = ? AND survey_id = ? AND is_used = 0",
       [partner.name, surveyId]
@@ -189,7 +183,7 @@ const generatePIN = async (req, res, next) => {
 
     const pin = generateRandomPin();
 
-    // Insert into database
+    
     await db.query(
       "INSERT INTO survey_invitations (survey_id, name, email, phone, pin, is_used, created_at) VALUES (?, ?, ?, ?, ?, 0, NOW())",
       [surveyId, partner.name, partner.email, partner.phone, pin]
@@ -205,9 +199,6 @@ const generatePIN = async (req, res, next) => {
   }
 };
 
-/**
- * Filter and fetch survey results with search, pagination, and filter parameters
- */
 const filterSurveyResults = async (req, res, next) => {
   try {
     const search = req.query.search || "";
@@ -280,7 +271,7 @@ const exportDashboardPDF = async (req, res, next) => {
       "SELECT COUNT(*) AS total_respons FROM survey_responses"
     );
 
-    // Fetch partners with invitation usage status
+    
     const [invitations] = await db.query(
       `SELECT si.name AS nama_perusahaan, si.pin, si.is_used, si.used_at 
        FROM survey_invitations si
@@ -295,10 +286,10 @@ const exportDashboardPDF = async (req, res, next) => {
       generatedAt: new Date()
     };
 
-    // 2. Generate PDF stream
+    
     const doc = pdfService.buildDashboardReport(data);
 
-    // 3. Set headers and stream response
+    
     res.setHeader("Content-Disposition", "attachment; filename=Laporan_Dashboard_SUKAFTI.pdf");
     res.setHeader("Content-Type", "application/pdf");
     doc.pipe(res);

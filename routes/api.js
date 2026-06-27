@@ -4,7 +4,7 @@ const { body, param, validationResult } = require("express-validator");
 const db = require("../config/db");
 const dashboardController = require("../controllers/dashboardController");
 
-// Validation helper middleware
+
 const validateRequest = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -13,16 +13,10 @@ const validateRequest = (req, res, next) => {
   next();
 };
 
-/**
- * GET /api/dashboard-stats
- * Supplies total counts and donut chart data to the UI.
- */
+
 router.get("/dashboard-stats", dashboardController.getDashboardStats);
 
-/**
- * GET /api/pin-logs
- * Fetch all generated PIN codes and usage audit history.
- */
+
 router.get("/pin-logs", async (req, res, next) => {
   try {
     const search = req.query.search || "";
@@ -83,13 +77,13 @@ router.post(
     let { partner_id, survey_id, pin } = req.body;
 
     try {
-      // 1. Verify partner exists
+      
       const [[partner]] = await db.query("SELECT id, name, email, phone FROM partners WHERE id = ?", [partner_id]);
       if (!partner) {
         return res.status(404).json({ success: false, message: "Partner not found." });
       }
 
-      // 2. If survey_id not provided, find the latest survey
+      
       if (!survey_id) {
         const [surveys] = await db.query("SELECT id FROM surveys ORDER BY id DESC LIMIT 1");
         if (surveys.length === 0) {
@@ -98,7 +92,7 @@ router.post(
         survey_id = surveys[0].id;
       }
 
-      // 3. Generate PIN if not provided
+      
       if (!pin) {
         const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
         pin = "";
@@ -135,10 +129,7 @@ router.post(
   }
 );
 
-/**
- * PUT /api/pin-logs/:id
- * Update status of PIN or reset is_used status.
- */
+
 router.put(
   "/pin-logs/:id",
   [
@@ -195,10 +186,7 @@ router.put(
   }
 );
 
-/**
- * DELETE /api/pin-logs/:id
- * Delete a specific PIN code from database.
- */
+
 router.delete(
   "/pin-logs/:id",
   [param("id").isInt().withMessage("PIN ID must be an integer.")],
@@ -224,20 +212,14 @@ router.delete(
   }
 );
 
-// Import questionController & partnerController
+
 const questionController = require("../controllers/questionController");
 const partnerController = require("../controllers/partnerController");
 
-/**
- * GET /api/questions
- * Fetch all survey questions.
- */
+
 router.get("/questions", questionController.apiGetQuestions);
 
-/**
- * POST /api/questions
- * Create a new survey question programmatically via JSON API.
- */
+
 router.post(
   "/questions",
   [
@@ -253,16 +235,10 @@ router.post(
   questionController.apiCreateQuestion
 );
 
-/**
- * GET /api/partners
- * Fetch all candidate partners.
- */
+
 router.get("/partners", partnerController.apiGetPartners);
 
-/**
- * POST /api/partners
- * Create a new candidate partner programmatically via JSON API with primary contact.
- */
+
 router.post(
   "/partners",
   [
@@ -281,10 +257,7 @@ router.post(
   partnerController.apiCreatePartner
 );
 
-/**
- * GET /api/survey-responses
- * Fetch all survey responses (along with details/answers).
- */
+
 router.get("/survey-responses", async (req, res, next) => {
   try {
     const surveyId = parseInt(req.query.survey_id);
@@ -300,17 +273,17 @@ router.get("/survey-responses", async (req, res, next) => {
       whereClause += " AND sr.survey_id = ?";
       params.push(surveyId);
     }
-    // Note: Filtering by partnerId is no longer supported directly via survey_responses since partner_id is removed.
-    // If you need to filter by partner name, join survey_invitations and use LIKE. For now, we skip partnerId filter.
+    
+    
 
-    // Get count
+    
     const [countRows] = await db.query(
       `SELECT COUNT(*) AS total FROM survey_responses sr WHERE ${whereClause}`,
       params
     );
     const total = countRows[0].total;
 
-    // Get responses
+    
     const selectParams = [...params, limit, offset];
     const [responses] = await db.query(
       `SELECT sr.id, sr.survey_id, sr.survey_invitation_id, sr.submitted_at, sr.created_at,
@@ -332,7 +305,7 @@ router.get("/survey-responses", async (req, res, next) => {
       });
     }
 
-    // Get all answers for these responses
+    
     const responseIds = responses.map(r => r.id);
     const [answers] = await db.query(
       `SELECT sa.id, sa.survey_response_id, sa.survey_question_id, sa.survey_question_option_id, sa.answer_text, sa.score,
@@ -345,7 +318,7 @@ router.get("/survey-responses", async (req, res, next) => {
       [responseIds]
     );
 
-    // Map answers to responses
+    
     const data = responses.map(r => {
       return {
         ...r,
@@ -377,10 +350,7 @@ router.get("/survey-responses", async (req, res, next) => {
   }
 });
 
-/**
- * POST /api/survey-responses
- * Programmatic submission of a survey response.
- */
+
 router.post(
   "/survey-responses",
   [
@@ -395,7 +365,7 @@ router.post(
   async (req, res, next) => {
     const { survey_id, survey_invitation_id, answers } = req.body;
 
-    // 1. Verify survey exists
+    
     try {
       const [[survey]] = await db.query("SELECT id FROM surveys WHERE id = ?", [survey_id]);
       if (!survey) {
@@ -414,7 +384,7 @@ router.post(
       for (const ans of answers) {
         const qId = ans.survey_question_id;
 
-        // Fetch question details (must join with assignments to verify it belongs to survey)
+        
         const [qResult] = await conn.query(`
           SELECT sq.type 
           FROM survey_questions sq

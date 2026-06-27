@@ -61,7 +61,7 @@
         selectedOptions.clear();
         opts.forEach(opt => selectedOptions.add(opt));
 
-        // Get selected options in DOM order
+        
         const selected = options.filter(opt => selectedOptions.has(opt));
         if (selected.length === 0) {
           selectedLabel.textContent = placeholder;
@@ -194,7 +194,7 @@
       filter.addEventListener('input', filterOptions);
     }
 
-    // Initialization
+    
     if (isMultiple) {
       const ariaSelected = options.filter(opt => opt.getAttribute('aria-selected') === 'true');
       try {
@@ -204,7 +204,7 @@
 
         const initialOptions = [];
         if (initialValues.length > 0) {
-          // Match values to options in order, allowing duplicates
+          
           initialValues.forEach(val => {
             const opt = options.find(o => getValue(o) === val && !initialOptions.includes(o));
             if (opt) initialOptions.push(opt);
@@ -394,7 +394,7 @@
 
     popover.setAttribute('aria-hidden', 'true');
 
-    // Public API
+    
     Object.defineProperty(selectComponent, 'value', {
       get: () => {
         if (isMultiple) {
@@ -423,7 +423,7 @@
     });
 
     selectComponent.select = select;
-    selectComponent.selectByValue = select; // Backward compatibility alias
+    selectComponent.selectByValue = select; 
     if (isMultiple) {
       selectComponent.deselect = deselect;
       selectComponent.toggle = toggle;
