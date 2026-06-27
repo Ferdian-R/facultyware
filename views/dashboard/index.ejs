@@ -795,7 +795,7 @@
   <script>
     lucide.createIcons();
 
-    // Search field handler
+
     document.getElementById('topbar-search').addEventListener('keypress', function (e) {
       if (e.key === 'Enter') {
         window.location.href = '?search=' + encodeURIComponent(this.value);
@@ -804,7 +804,7 @@
 
 
 
-    // Dialog controls
+
     const pinDialog = document.getElementById('pin-dialog');
     const btnGeneratePin = document.getElementById('btn-generate-pin');
     const btnCloseDialog = document.getElementById('btn-close-dialog');
@@ -817,7 +817,7 @@
     });
 
     btnCloseDialog.addEventListener('click', () => {
-      pinDialog.close();
+      pinDialog.close();  
     });
 
     formGeneratePin.addEventListener('submit', (e) => {
@@ -851,7 +851,7 @@
         });
     });
 
-    // Actions
+
     document.querySelectorAll('.btn-reset-pin').forEach(btn => {
       btn.addEventListener('click', function () {
         const id = this.getAttribute('data-id');
@@ -920,11 +920,11 @@
       });
     });
 
-    // Chart.js Configuration
+
     if (typeof Chart !== 'undefined') {
       Chart.defaults.font.family = "system-ui, -apple-system, sans-serif";
 
-      // Bar Chart: Tren Survey per Bulan
+
       const ctxBar = document.getElementById('chartSurveyBar').getContext('2d');
       const isDark = document.documentElement.classList.contains('dark');
       const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)';
@@ -967,7 +967,7 @@
         }
       });
 
-      // Donut Chart: Status PIN
+
       let pinDonutChart = null;
 
       function renderDonutChart(active, used, expired) {
