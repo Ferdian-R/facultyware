@@ -11,9 +11,6 @@ const generateRandomPin = () => {
   return pin;
 };
 
-/**
- * Controller to manage Dashboard Analytics and PIN Logic
- */
 const showDashboard = async (req, res, next) => {
   try {
     const search = req.query.search || "";
@@ -21,7 +18,6 @@ const showDashboard = async (req, res, next) => {
     const limit = 5;
     const offset = (page - 1) * limit;
 
-    // 1. Query general counts
     const [[{ total_mitra }]] = await db.query("SELECT COUNT(*) AS total_mitra FROM partners");
     const [[{ total_pin_aktif }]] = await db.query(
       "SELECT COUNT(*) AS total_pin_aktif FROM survey_invitations WHERE is_used = 0"
@@ -202,7 +198,6 @@ const generatePIN = async (req, res, next) => {
 const filterSurveyResults = async (req, res, next) => {
   try {
     const search = req.query.search || "";
-    // Note: status filter is removed as all responses are completed in v2 schema
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
@@ -221,7 +216,6 @@ const filterSurveyResults = async (req, res, next) => {
     const totalItems = countRows[0].total;
     const totalPages = Math.ceil(totalItems / limit);
 
-    // Append limit/offset parameters
     queryParams.push(limit, offset);
 
     const [rows] = await db.query(
@@ -257,12 +251,8 @@ const filterSurveyResults = async (req, res, next) => {
   }
 };
 
-/**
- * Export Dashboard Report as PDF
- */
 const exportDashboardPDF = async (req, res, next) => {
   try {
-    // 1. Gather statistic metrics
     const [[{ total_mitra }]] = await db.query("SELECT COUNT(*) AS total_mitra FROM partners");
     const [[{ total_pin_aktif }]] = await db.query(
       "SELECT COUNT(*) AS total_pin_aktif FROM survey_invitations WHERE is_used = 0"

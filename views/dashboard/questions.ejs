@@ -1,666 +1,456 @@
-﻿<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
-
 <head>
-  <script>
-    (() => {
-      try {
-        localStorage.removeItem("themeVariant");
-      } catch (_) { }
-      try {
-        const stored = localStorage.getItem("themeMode");
-        if (
-          stored
-            ? stored === "dark"
-            : matchMedia("(prefers-color-scheme: dark)").matches
-        ) {
-          document.documentElement.classList.add("dark");
-        }
-      } catch (_) { }
-
-      const apply = (dark) => {
-        document.documentElement.classList.toggle("dark", dark);
-        try {
-          localStorage.setItem("themeMode", dark ? "dark" : "light");
-        } catch (_) { }
-      };
-
-      document.addEventListener("basecoat:theme", (event) => {
-        const mode = event.detail?.mode;
-        apply(
-          mode === "dark"
-            ? true
-            : mode === "light"
-              ? false
-              : !document.documentElement.classList.contains("dark"),
-        );
-      });
-    })();
-  </script>
-
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>
-    <%= title %>
-  </title>
-
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
-  <link rel="stylesheet" href="/assets/styles.css" />
-
-  <script src="/assets/js/basecoat.js?v=0.3.11" defer></script>
-  <script src="/assets/js/command.js?v=0.3.11" defer></script>
-  <script src="/assets/js/dropdown-menu.js?v=0.3.11" defer></script>
-  <script src="/assets/js/popover.js?v=0.3.11" defer></script>
-  <script src="/assets/js/select.js?v=0.3.11" defer></script>
-  <script src="/assets/js/sidebar.js?v=0.3.11" defer></script>
-  <script src="/assets/js/tabs.js?v=0.3.11" defer></script>
-  <script src="/assets/js/toast.js?v=0.3.11" defer></script>
-
-  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-  <style>
-    
-    .premium-card {
-      border: 1px solid var(--border) !important;
-      background: var(--card) !important;
-      color: var(--card-foreground) !important;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03) !important;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    }
-
-    .premium-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.06) !important;
-    }
-
-    
-    select {
-      background-color: var(--card) !important;
-      color: var(--foreground) !important;
-    }
-
-    select option {
-      background-color: var(--card) !important;
-      color: var(--foreground) !important;
-    }
-
-    .dark select option {
-      background-color: #1e293b !important;
-      color: #f8fafc !important;
-    }
-
-    .dark {
-      color-scheme: dark;
-    }
-
-    
-    .questions-table {
-      border-collapse: separate !important;
-      border-spacing: 0 !important;
-      width: 100% !important;
-    }
-    .questions-table tr {
-      transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    }
-    .questions-table tbody tr {
-      border-bottom: 1px solid var(--border) !important;
-    }
-    .questions-table tbody tr:hover {
-      background-color: rgba(0, 0, 0, 0.015) !important;
-    }
-    .dark .questions-table tbody tr:hover {
-      background-color: rgba(255, 255, 255, 0.01) !important;
-    }
-    .questions-table th {
-      padding: 1rem 1.25rem !important;
-      font-weight: 600 !important;
-      font-size: 0.75rem !important;
-      letter-spacing: 0.05em !important;
-      text-transform: uppercase !important;
-      color: var(--muted-foreground) !important;
-      border-bottom: 1px solid var(--border) !important;
-      vertical-align: middle !important;
-    }
-    .questions-table td {
-      padding: 1.5rem 1.25rem !important;
-      vertical-align: middle !important;
-    }
-  </style>
+  <!-- Basecoat UI -->
+  <link rel="stylesheet" href="https://unpkg.com/basecoat-css@latest/dist/basecoat.min.css" />
+  <!-- Dashboard CSS -->
+  <link rel="stylesheet" href="/assets/dashboard.css" />
 </head>
+<body>
 
-<body class="bg-background">
-  <div class="relative flex min-h-screen">
+<div class="app-shell">
 
-    
-    <aside id="sidebar" class="sidebar border-r bg-card text-card-foreground shrink-0" data-side="left"
-      aria-hidden="false">
-      <nav aria-label="Sidebar navigation" class="flex flex-col h-full justify-between">
-        <div>
-          <header class="p-4 border-b">
-            <a href="/admin/dashboard" class="flex items-center gap-2">
-              <img src="/image/fti%20logo.jpg" alt="Logo FTI"
-                class="h-8 w-8 rounded-lg object-contain bg-white p-0.5 border" />
-              <div class="grid flex-1 text-left text-sm leading-tight">
-                <span class="truncate font-semibold text-foreground">SUKAFTI</span>
-                <span class="truncate text-xs text-muted-foreground">Survey Kerjasama</span>
-              </div>
-            </a>
-          </header>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <img src="/image/fti logo.jpg" alt="Logo FTI" class="sidebar__logo" onerror="this.style.display='none'" />
+      <div>
+        <div class="sidebar__wordmark">SUKAFTI</div>
+        <div class="sidebar__tagline">Survey Kerjasama FTI</div>
+      </div>
+    </div>
 
-          <section class="p-4">
-            <div role="group" aria-labelledby="group-label">
-              <h3 id="group-label" class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                Menu Utama</h3>
-              <ul class="space-y-1">
-                <li>
-                  <a href="/admin/dashboard"
-                    class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                    <i data-lucide="layout-dashboard" class="size-4"></i>
-                    <span>Dashboard Overview</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="/admin/questions"
-                    class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-accent text-accent-foreground">
-                    <i data-lucide="help-circle" class="size-4 text-foreground"></i>
-                    <span>Pertanyaan Survey</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="/admin/partners"
-                    class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                    <i data-lucide="building-2" class="size-4"></i>
-                    <span>Manajemen Mitra</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="/admin/recap-answers"
-                    class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                    <i data-lucide="bar-chart-3" class="size-4"></i>
-                    <span>Hasil Survey</span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </section>
+    <div class="nav-section-label">Menu Utama</div>
+    <ul class="nav-list">
+      <li class="nav-item">
+        <a href="/admin/dashboard" id="nav-dashboard">
+          <i data-lucide="layout-dashboard"></i>Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/admin/questions" class="active" id="nav-questions">
+          <i data-lucide="help-circle"></i>Pertanyaan Survey
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/admin/partners" id="nav-mitra">
+          <i data-lucide="building-2"></i>Manajemen Mitra
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/admin/recap-answers" id="nav-hasil">
+          <i data-lucide="bar-chart-3"></i>Hasil Survey
+        </a>
+      </li>
+    </ul>
+
+    <div class="sidebar__footer">
+      <a href="/logout" id="btn-logout"><i data-lucide="log-out"></i>Keluar</a>
+    </div>
+  </aside>
+
+  <!-- MAIN WRAPPER -->
+  <div class="main-wrapper">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar__left">
+        <h2>Pertanyaan Survey</h2>
+        <p>Kelola daftar instrumen evaluasi kerja sama FTI</p>
+      </div>
+      <div class="topbar__right">
+        <div class="admin-chip" id="admin-chip">
+          <div class="admin-avatar">AF</div>
+          <span class="admin-chip__name"><%= user %></span>
         </div>
+      </div>
+    </header>
 
-        <footer class="p-4 border-t">
-          <div id="popover-profile" class="popover w-full">
-            <button id="popover-profile-trigger" type="button" aria-expanded="false"
-              aria-controls="popover-profile-popover"
-              class="flex w-full items-center gap-2 px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground justify-start text-left">
-              <div
-                class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xs shrink-0">
-                AF</div>
-              <div class="grid flex-1 text-xs leading-tight">
-                <span class="truncate font-semibold text-foreground">
-                  <%= user %>
-                </span>
-                <span class="truncate text-muted-foreground text-[10px]">Administrator</span>
-              </div>
-              <i data-lucide="chevrons-up-down" class="size-4 text-muted-foreground shrink-0 ml-auto"></i>
-            </button>
-            <div id="popover-profile-popover" data-popover aria-hidden="true" data-side="top" class="w-[200px]">
-              <div class="grid p-1 bg-popover text-popover-foreground border rounded-md shadow-md">
-                <a href="/logout"
-                  class="flex items-center gap-2 px-2 py-1.5 text-sm text-destructive hover:bg-destructive/10 rounded-sm">
-                  <i data-lucide="log-out" class="size-4"></i>
-                  <span>Keluar</span>
-                </a>
-              </div>
-            </div>
+    <!-- CONTENT AREA -->
+    <main class="content-area">
+
+      <!-- Alerts -->
+      <% if (success) { %>
+        <div style="background-color: #d1fae5; color: #065f46; padding: 1rem; border-radius: 8px; border: 1px solid #6ee7b7; font-size: 0.875rem; display: flex; align-items: center; gap: 0.5rem; width: 100%;">
+          <i data-lucide="check-circle-2" style="width: 1.25rem; height: 1.25rem; flex-shrink: 0;"></i>
+          <span><%= success %></span>
+        </div>
+      <% } %>
+      <% if (error) { %>
+        <div style="background-color: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 8px; border: 1px solid #fca5a5; font-size: 0.875rem; display: flex; align-items: center; gap: 0.5rem; width: 100%;">
+          <i data-lucide="alert-circle" style="width: 1.25rem; height: 1.25rem; flex-shrink: 0;"></i>
+          <span><%= error %></span>
+        </div>
+      <% } %>
+
+      <!-- TABLE CARD -->
+      <div class="table-card">
+        <div class="table-card__header">
+          <div>
+            <h2>Daftar Pertanyaan Kuesioner</h2>
+            <% const selectedSurvey = surveys.find(s => s.id === selectedSurveyId); %>
+            <p style="color:#64748b; font-size:0.75rem;"><%= selectedSurvey ? `${selectedSurvey.title} (${selectedSurvey.status})` : 'Tidak ada kuesioner aktif' %></p>
           </div>
-        </footer>
-      </nav>
-    </aside>
-
-    
-    <main id="content" class="flex-1 flex flex-col min-w-0 bg-muted/20">
-
-      
-      <header
-        class="bg-background sticky inset-x-0 top-0 isolate flex shrink-0 items-center justify-between border-b z-10 h-14 px-4 gap-4" style="z-index: 40;">
-        <div class="flex items-center gap-2">
-          <button type="button" onclick="document.dispatchEvent(new CustomEvent('basecoat:sidebar'))"
-            aria-label="Toggle sidebar"
-            class="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground md:hidden">
-            <i data-lucide="menu" class="size-4"></i>
-          </button>
-          <h1 class="text-sm font-semibold tracking-tight text-foreground">
-            Instrumen Pertanyaan Survei
-          </h1>
-        </div>
-
-        <div class="flex items-center gap-2">
-
-          <button type="button" aria-label="Toggle dark mode"
-            onclick="document.dispatchEvent(new CustomEvent('basecoat:theme'))"
-            class="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground">
-            <i data-lucide="sun" class="size-4 hidden dark:block"></i>
-            <i data-lucide="moon" class="size-4 block dark:hidden"></i>
-          </button>
-        </div>
-      </header>
-
-      
-      <div class="p-6 md:p-8 flex-1 space-y-6">
-
-        
-        <% if (success) { %>
-          <div
-            class="bg-emerald-500/10 text-emerald-500 text-sm p-4 rounded-md border border-emerald-500/20 flex items-center gap-2">
-            <i data-lucide="check-circle-2" class="size-4 shrink-0"></i>
-            <span>
-              <%= success %>
-            </span>
+          <div style="display:flex; gap:10px;">
+            <% if (selectedSurveyId) { %>
+              <a href="/admin/questions/export-pdf?survey_id=<%= selectedSurveyId %>" class="btn" style="border: 1px solid #cbd5e1; display:flex; align-items:center; gap:0.5rem; text-decoration:none; color:#334155; padding:0.5rem 1rem; font-size:0.875rem; border-radius:6px; background:#ffffff;">
+                <i data-lucide="printer" style="width:16px; height:16px;"></i> Cetak PDF
+              </a>
+              <button class="btn-generate" id="btn-add-question" type="button" style="background:#0f172a; color:#ffffff; border-radius:6px; border:none; padding:0.5rem 1rem; font-size:0.875rem; display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                <i data-lucide="plus-circle" style="width:16px; height:16px;"></i> Tambah Pertanyaan
+              </button>
+            <% } %>
           </div>
-          <% } %>
-            <% if (error) { %>
-              <div
-                class="bg-destructive/15 text-destructive text-sm p-4 rounded-md border border-destructive/20 flex items-center gap-2">
-                <i data-lucide="alert-circle" class="size-4 shrink-0"></i>
-                <span>
-                  <%= error %>
-                </span>
-              </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="text-align:center; width: 80px;">Urutan</th>
+                <th>Teks Pertanyaan</th>
+                <th style="width: 150px;">Tipe</th>
+                <th>Opsi Jawaban &amp; Bobot Skor</th>
+                <th style="text-align:center; width: 110px;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (locals.questions && questions.length > 0) { %>
+                <% questions.forEach(function(q) { %>
+                  <tr id="row-question-<%= q.id %>">
+                    <td style="text-align:center; font-weight:700; color:#1e293b;"><%= q.order_number %></td>
+                    <td style="font-weight:500; color:#1e293b; max-width: 20rem; line-height: 1.5;"><%= q.question_text %></td>
+                    <td>
+                      <% if (q.type === 'essay' || q.type === 'short_answer') { %>
+                        <span class="pill" style="background:#f1f5f9; color:#475569;">Jawaban Singkat</span>
+                      <% } else if (q.type === 'multiple_choice') { %>
+                        <span class="pill" style="background:#e0f2fe; color:#0369a1;">Pilihan Ganda</span>
+                      <% } else if (q.type === 'single_choice') { %>
+                        <span class="pill" style="background:#d1fae5; color:#065f46;">Pilihan Tunggal</span>
+                      <% } else if (q.type === 'rating') { %>
+                        <span class="pill" style="background:#e0e7ff; color:#4338ca;">Rating Skala</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (q.options && q.options.length > 0) { %>
+                        <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                          <% q.options.forEach(function(opt) { %>
+                            <span class="pill" style="font-size:0.7rem; font-weight:500; background:#f1f5f9; color:#334155; padding:0.2rem 0.5rem; display:inline-flex; align-items:center; gap:4px;">
+                              <span><%= opt.option_text %></span>
+                              <span style="color:#94a3b8;">•</span>
+                              <span style="font-weight:700; color:#64748b;"><%= opt.score %> pts</span>
+                            </span>
+                          <% }) %>
+                        </div>
+                      <% } else { %>
+                        <span style="font-size:0.75rem; color:#94a3b8; font-style:italic;">— Jawaban bebas deskriptif (Essay) —</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <div class="action-group" style="justify-content:center;">
+                        <button class="action-btn btn-edit-question" data-id="<%= q.id %>" data-text="<%= q.question_text %>" data-type="<%= q.type %>" data-order="<%= q.order_number %>" data-options='<%= JSON.stringify(q.options || []) %>' title="Ubah Pertanyaan"><i data-lucide="pencil"></i></button>
+                        <button class="action-btn action-btn--del" hx-delete="/admin/questions/<%= q.id %>?survey_id=<%= selectedSurveyId %>" hx-confirm="Apakah Anda yakin ingin menghapus pertanyaan ini?" hx-target="#row-question-<%= q.id %>" hx-swap="outerHTML" title="Hapus Pertanyaan"><i data-lucide="trash-2"></i></button>
+                      </div>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="5" style="text-align:center; color:#94a3b8; padding:3rem;">Belum ada data pertanyaan untuk survey ini. Klik tombol di kanan atas untuk membuat.</td>
+                </tr>
               <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div><!-- /.table-card -->
 
-                
-                <div data-slot="card" class="premium-card rounded-2xl overflow-hidden">
-                  <div class="p-8 md:p-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-border/60">
-                    <div class="space-y-1">
-                      <h3 class="text-lg font-bold leading-none tracking-tight">Daftar Pertanyaan Kuesioner</h3>
-                      <% const selectedSurvey = surveys.find(s => s.id === selectedSurveyId); %>
-                      <p class="text-xs text-muted-foreground">
-                        <%= selectedSurvey ? `${selectedSurvey.title} (${selectedSurvey.status})` : 'Tidak ada kuesioner aktif' %>
-                      </p>
-                    </div>
+    </main><!-- /.content-area -->
+  </div><!-- /.main-wrapper -->
+</div><!-- /.app-shell -->
 
-                    <div class="flex flex-wrap gap-2 w-full md:w-auto justify-end">
-                      <% if (selectedSurveyId) { %>
-                        <a href="/admin/questions/export-pdf?survey_id=<%= selectedSurveyId %>"
-                          class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-semibold transition-all border border-border/80 bg-background/50 hover:bg-muted text-muted-foreground hover:text-foreground h-9 px-4 py-2">
-                          <i data-lucide="printer" class="size-4"></i>
-                          <span>Cetak PDF</span>
-                        </a>
-                        <button id="btn-add-question"
-                          class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-semibold transition-all bg-primary text-primary-foreground hover:bg-primary/95 h-9 px-4 py-2 hover:scale-[1.01]">
-                          <i data-lucide="plus-circle" class="size-4"></i>
-                          <span>Tambah Pertanyaan</span>
-                        </button>
-                        <% } %>
-                    </div>
-                  </div>
+<!-- Add / Edit Dialog Styles -->
+<style>
+  dialog::backdrop {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+  }
+  dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    padding: 2rem;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+    max-width: 480px;
+    width: 90%;
+    background: #ffffff;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 0.75rem;
+  }
+  .form-row label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #334155;
+  }
+  .form-row input, .form-row select, .form-row textarea {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    outline: none;
+    background: #f8fafc;
+    color: #0f172a;
+    width: 100%;
+  }
+  .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
+    border-color: #1e293b;
+    background: #ffffff;
+  }
+</style>
 
-                  <div class="overflow-x-auto w-full">
-                    <table class="questions-table text-sm">
-                      <thead>
-                        <tr>
-                          <th class="text-center w-20">Urutan</th>
-                          <th class="text-left">Teks Pertanyaan</th>
-                          <th class="text-left w-36">Tipe</th>
-                          <th class="text-left">Opsi Jawaban &amp; Bobot Skor</th>
-                          <th class="text-center w-28">Aksi</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <% if (locals.questions && questions.length> 0) { %>
-                          <% questions.forEach(function(q) { %>
-                            <tr id="row-question-<%= q.id %>">
-                              <td class="text-center font-bold text-foreground">
-                                <%= q.order_number %>
-                              </td>
-                              <td class="font-medium text-foreground max-w-xs leading-relaxed">
-                                <%= q.question_text %>
-                              </td>
-                              <td>
-                                <% if (q.type === 'essay' || q.type === 'short_answer') { %>
-                                  <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-slate-500/10 text-slate-500 border-slate-500/20">Jawaban Singkat</span>
-                                <% } else if (q.type === 'multiple_choice') { %>
-                                  <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-sky-500/10 text-sky-500 border-sky-500/20">Pilihan Ganda</span>
-                                <% } else if (q.type === 'single_choice') { %>
-                                  <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-emerald-500/10 text-emerald-500 border-emerald-500/20">Pilihan Tunggal</span>
-                                <% } else if (q.type === 'rating') { %>
-                                  <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-blue-500/10 text-blue-500 border-blue-500/20">Rating Skala</span>
-                                <% } %>
-                              </td>
-                              <td>
-                                <% if (q.options && q.options.length> 0) { %>
-                                  <div class="flex flex-wrap gap-1.5">
-                                    <% q.options.forEach(function(opt) { %>
-                                      <span
-                                        class="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/40 hover:bg-muted px-2.5 py-1 text-xs text-foreground font-medium transition-colors">
-                                        <span>
-                                          <%= opt.option_text %>
-                                        </span>
-                                        <span class="text-muted-foreground/60 font-normal">&bull;</span>
-                                        <span class="text-[10px] font-extrabold text-muted-foreground"><%= opt.score %> pts</span>
-                                      </span>
-                                      <% }) %>
-                                  </div>
-                                  <% } else { %>
-                                    <span class="text-xs text-muted-foreground italic">— Jawaban bebas deskriptif (Essay) —</span>
-                                    <% } %>
-                              </td>
-                              <td class="text-center">
-                                <div class="flex items-center justify-center gap-2">
-                                  <button
-                                    style="width: 32px; height: 32px; min-width: 32px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;"
-                                    class="btn-edit-question rounded-md border hover:bg-accent hover:text-accent-foreground text-muted-foreground"
-                                    data-id="<%= q.id %>" data-text="<%= q.question_text %>" data-type="<%= q.type %>"
-                                    data-order="<%= q.order_number %>"
-                                    data-options='<%= JSON.stringify(q.options || []) %>' title="Ubah Pertanyaan">
-                                    <i data-lucide="edit-3" class="size-3.5"></i>
-                                  </button>
-                                  <button
-                                    style="width: 32px; height: 32px; min-width: 32px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;"
-                                    class="rounded-md border border-destructive/20 hover:bg-destructive/10 text-destructive"
-                                    hx-delete="/admin/questions/<%= q.id %>?survey_id=<%= selectedSurveyId %>"
-                                    hx-confirm="Apakah Anda yakin ingin menghapus pertanyaan ini?"
-                                    hx-target="#row-question-<%= q.id %>" hx-swap="outerHTML" title="Hapus Pertanyaan">
-                                    <i data-lucide="trash-2" class="size-3.5"></i>
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                            <% }); %>
-                              <% } else { %>
-                                <tr>
-                                  <td colspan="5" class="p-8 text-center text-muted-foreground">
-                                    Belum ada data pertanyaan untuk survey ini. Klik tombol di kanan atas untuk membuat.
-                                  </td>
-                                </tr>
-                                <% } %>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-      </div>
-    </main>
+<!-- Add Dialog -->
+<dialog id="add-dialog">
+  <div class="dialog-header">
+    <i data-lucide="help-circle"></i>
+    <h3 style="margin:0; font-size: 1.25rem; color: #0f172a;">Tambah Pertanyaan Baru</h3>
   </div>
-
-  
-  <dialog id="add-dialog" class="dialog">
-    <div class="!max-w-md w-full max-h-[85vh] overflow-y-auto pr-1">
-      <div class="flex items-center gap-2 border-b pb-3">
-        <div class="p-2 bg-primary/10 text-primary rounded-lg">
-          <i data-lucide="help-circle" class="size-5"></i>
-        </div>
-        <div>
-          <h3 class="text-lg font-semibold leading-none tracking-tight">Tambah Pertanyaan Baru</h3>
-          <p class="text-xs text-muted-foreground mt-1">Masukkan teks pertanyaan dan tentukan metode pengisian jawaban.
-          </p>
-        </div>
-      </div>
-
-      <form action="/admin/questions" method="POST" id="form-add-question" class="flex flex-col gap-4">
-        <input type="hidden" name="survey_id" value="<%= selectedSurveyId %>" />
-
-        <div class="flex flex-col gap-2">
-          <label class="text-sm font-medium leading-none" for="add-question-text">Teks Pertanyaan</label>
-          <textarea id="add-question-text" name="question_text"
-            class="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            placeholder="Tuliskan pertanyaan survei..." required></textarea>
-        </div>
-
-        <div class="flex flex-col gap-2">
-          <label class="text-sm font-medium leading-none" for="add-type">Tipe Jawaban</label>
-          <select id="add-type" name="type"
-            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            required>
-            <option value="essay">Essay (Teks Deskriptif)</option>
-            <option value="multiple_choice">Pilihan Ganda</option>
-            <option value="rating">Rating Skala (1-5)</option>
-          </select>
-        </div>
-
-        
-        <div id="add-options-section" class="border rounded-md p-4 bg-muted/30 flex flex-col gap-3"
-          style="display:none;">
-          <label class="text-sm font-semibold leading-none text-foreground">Daftar Pilihan &amp; Bobot Skor</label>
-          <div id="add-options-list" class="flex flex-col gap-2">
-            
-          </div>
-          <button type="button"
-            class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-semibold border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 py-1"
-            id="btn-add-option-row">
-            <i data-lucide="plus" class="size-3.5"></i>
-            <span>Tambah Opsi Jawaban</span>
-          </button>
-        </div>
-
-        <div class="flex justify-end gap-2 border-t pt-3 mt-2">
-          <button type="button" id="btn-close-add"
-            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
-            Batal
-          </button>
-          <button type="submit"
-            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
-            Simpan Pertanyaan
-          </button>
-        </div>
-      </form>
+  <p style="color:#64748b; margin-bottom:1rem; font-size:0.8125rem; line-height:1.4;">Masukkan teks pertanyaan dan tentukan metode pengisian jawaban.</p>
+  <form action="/admin/questions" method="POST" id="form-add-question">
+    <input type="hidden" name="survey_id" value="<%= selectedSurveyId %>" />
+    
+    <div class="form-row">
+      <label for="add-question-text">Teks Pertanyaan</label>
+      <textarea id="add-question-text" name="question_text" rows="3" placeholder="Tuliskan pertanyaan survei..." required></textarea>
     </div>
-  </dialog>
 
-  
-  <dialog id="edit-dialog" class="dialog">
-    <div class="!max-w-md w-full max-h-[85vh] overflow-y-auto pr-1">
-      <div class="flex items-center gap-2 border-b pb-3">
-        <div class="p-2 bg-primary/10 text-primary rounded-lg">
-          <i data-lucide="edit-3" class="size-5"></i>
-        </div>
-        <div>
-          <h3 class="text-lg font-semibold leading-none tracking-tight">Ubah Pertanyaan</h3>
-          <p class="text-xs text-muted-foreground mt-1">Perbarui teks pertanyaan, tipe, maupun urutan butir instrumen.
-          </p>
-        </div>
-      </div>
-
-      <form id="form-edit-question" method="POST" class="flex flex-col gap-4">
-        <input type="hidden" name="survey_id" value="<%= selectedSurveyId %>" />
-
-        <div class="flex flex-col gap-2">
-          <label class="text-sm font-medium leading-none" for="edit-question-text">Teks Pertanyaan</label>
-          <textarea id="edit-question-text" name="question_text"
-            class="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            placeholder="Tuliskan pertanyaan survei..." required></textarea>
-        </div>
-
-        <div class="flex flex-col gap-2">
-          <label class="text-sm font-medium leading-none" for="edit-type">Tipe Jawaban</label>
-          <select id="edit-type" name="type"
-            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            required>
-            <option value="essay">Essay (Teks Deskriptif)</option>
-            <option value="multiple_choice">Pilihan Ganda</option>
-            <option value="rating">Rating Skala (1-5)</option>
-          </select>
-        </div>
-
-        
-        <div id="edit-options-section" class="border rounded-md p-4 bg-muted/30 flex flex-col gap-3"
-          style="display:none;">
-          <label class="text-sm font-semibold leading-none text-foreground">Daftar Pilihan &amp; Bobot Skor</label>
-          <div id="edit-options-list" class="flex flex-col gap-2">
-            
-          </div>
-          <button type="button"
-            class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-semibold border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 py-1"
-            id="btn-edit-add-option-row">
-            <i data-lucide="plus" class="size-3.5"></i>
-            <span>Tambah Opsi Jawaban</span>
-          </button>
-        </div>
-
-        <div class="flex justify-end gap-2 border-t pt-3 mt-2">
-          <button type="button" id="btn-close-edit"
-            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
-            Batal
-          </button>
-          <button type="submit"
-            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
-            Simpan Perubahan
-          </button>
-        </div>
-      </form>
+    <div class="form-row">
+      <label for="add-type">Tipe Jawaban</label>
+      <select id="add-type" name="type" required>
+        <option value="essay">Essay (Teks Deskriptif)</option>
+        <option value="multiple_choice">Pilihan Ganda</option>
+        <option value="rating">Rating Skala (1-5)</option>
+      </select>
     </div>
-  </dialog>
 
-  <script>
+    <div id="add-options-section" style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 1rem; background: #f8fafc; margin-top: 1rem; display:none;">
+      <label style="display:block; font-size:0.8125rem; font-weight:700; color:#64748b; margin-bottom:0.75rem; text-transform:uppercase;">Daftar Pilihan &amp; Bobot Skor</label>
+      <div id="add-options-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+      <button type="button" id="btn-add-option-row" class="btn" style="border:1px dashed #cbd5e1; border-radius:6px; padding:0.4rem; background:transparent; font-size:0.75rem; width:100%; display:flex; align-items:center; justify-content:center; gap:4px; margin-top:0.75rem; cursor:pointer;">
+        <i data-lucide="plus" style="width:12px; height:12px;"></i> Tambah Opsi Jawaban
+      </button>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:0.75rem; border-top: 1px solid #e2e8f0; padding-top: 1rem; margin-top: 1rem;">
+      <button type="button" id="btn-close-add" class="btn" style="border:1px solid #cbd5e1; padding:0.5rem 1rem; border-radius:6px; background:transparent; cursor:pointer;">Batal</button>
+      <button type="submit" class="btn" style="background:#0f172a; color:white; border:none; border-radius:6px; padding:0.5rem 1rem; cursor:pointer;">Simpan Pertanyaan</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Edit Dialog -->
+<dialog id="edit-dialog">
+  <div class="dialog-header">
+    <i data-lucide="pencil"></i>
+    <h3 style="margin:0; font-size: 1.25rem; color: #0f172a;">Ubah Pertanyaan</h3>
+  </div>
+  <p style="color:#64748b; margin-bottom:1rem; font-size:0.8125rem; line-height:1.4;">Perbarui teks pertanyaan, tipe, maupun urutan butir instrumen.</p>
+  <form id="form-edit-question" method="POST">
+    <input type="hidden" name="survey_id" value="<%= selectedSurveyId %>" />
+    
+    <div class="form-row">
+      <label for="edit-question-text">Teks Pertanyaan</label>
+      <textarea id="edit-question-text" name="question_text" rows="3" required></textarea>
+    </div>
+
+    <div class="form-row">
+      <label for="edit-type">Tipe Jawaban</label>
+      <select id="edit-type" name="type" required>
+        <option value="essay">Essay (Teks Deskriptif)</option>
+        <option value="multiple_choice">Pilihan Ganda</option>
+        <option value="rating">Rating Skala (1-5)</option>
+      </select>
+    </div>
+
+    <div id="edit-options-section" style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 1rem; background: #f8fafc; margin-top: 1rem; display:none;">
+      <label style="display:block; font-size:0.8125rem; font-weight:700; color:#64748b; margin-bottom:0.75rem; text-transform:uppercase;">Daftar Pilihan &amp; Bobot Skor</label>
+      <div id="edit-options-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+      <button type="button" id="btn-edit-add-option-row" class="btn" style="border:1px dashed #cbd5e1; border-radius:6px; padding:0.4rem; background:transparent; font-size:0.75rem; width:100%; display:flex; align-items:center; justify-content:center; gap:4px; margin-top:0.75rem; cursor:pointer;">
+        <i data-lucide="plus" style="width:12px; height:12px;"></i> Tambah Opsi Jawaban
+      </button>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:0.75rem; border-top: 1px solid #e2e8f0; padding-top: 1rem; margin-top: 1rem;">
+      <button type="button" id="btn-close-edit" class="btn" style="border:1px solid #cbd5e1; padding:0.5rem 1rem; border-radius:6px; background:transparent; cursor:pointer;">Batal</button>
+      <button type="submit" class="btn" style="background:#0f172a; color:white; border:none; border-radius:6px; padding:0.5rem 1rem; cursor:pointer;">Simpan Perubahan</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  lucide.createIcons();
+
+  const addDialog = document.getElementById('add-dialog');
+  const editDialog = document.getElementById('edit-dialog');
+
+  const btnAddQuestion = document.getElementById('btn-add-question');
+  const btnCloseAdd = document.getElementById('btn-close-add');
+  const btnCloseEdit = document.getElementById('btn-close-edit');
+
+  const addTypeSelect = document.getElementById('add-type');
+  const addOptionsSection = document.getElementById('add-options-section');
+  const addOptionsList = document.getElementById('add-options-list');
+  const btnAddOptionRow = document.getElementById('btn-add-option-row');
+
+  const editTypeSelect = document.getElementById('edit-type');
+  const editOptionsSection = document.getElementById('edit-options-section');
+  const editOptionsList = document.getElementById('edit-options-list');
+  const btnEditAddOptionRow = document.getElementById('btn-edit-add-option-row');
+  const formEditQuestion = document.getElementById('form-edit-question');
+
+  function createOptionRowHTML(container, text = '', score = 0) {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; gap:8px; align-items:center;';
+
+    const textInput = document.createElement('input');
+    textInput.type = 'text';
+    textInput.name = 'option_text';
+    textInput.style.cssText = 'flex:3; padding:0.4rem; border:1px solid #cbd5e1; border-radius:6px; font-size:0.8rem; outline:none; background:#ffffff;';
+    textInput.placeholder = 'Misal: Puas';
+    textInput.value = text;
+    textInput.required = true;
+
+    const scoreInput = document.createElement('input');
+    scoreInput.type = 'number';
+    scoreInput.name = 'option_score';
+    scoreInput.style.cssText = 'flex:1; padding:0.4rem; border:1px solid #cbd5e1; border-radius:6px; font-size:0.8rem; outline:none; background:#ffffff; text-align:center;';
+    scoreInput.placeholder = 'Skor';
+    scoreInput.value = score;
+    scoreInput.min = '0';
+    scoreInput.required = true;
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'action-btn action-btn--del';
+    deleteBtn.style.cssText = 'flex-shrink:0;';
+    deleteBtn.innerHTML = '<i data-lucide="trash-2"></i>';
+    deleteBtn.addEventListener('click', () => {
+      row.remove();
+    });
+
+    row.appendChild(textInput);
+    row.appendChild(scoreInput);
+    row.appendChild(deleteBtn);
+    container.appendChild(row);
     lucide.createIcons();
+  }
 
-    const addDialog = document.getElementById('add-dialog');
-    const editDialog = document.getElementById('edit-dialog');
-
-    const btnAddQuestion = document.getElementById('btn-add-question');
-    const btnCloseAdd = document.getElementById('btn-close-add');
-    const btnCloseEdit = document.getElementById('btn-close-edit');
-
-    const addTypeSelect = document.getElementById('add-type');
-    const addOptionsSection = document.getElementById('add-options-section');
-    const addOptionsList = document.getElementById('add-options-list');
-    const btnAddOptionRow = document.getElementById('btn-add-option-row');
-
-    const editTypeSelect = document.getElementById('edit-type');
-    const editOptionsSection = document.getElementById('edit-options-section');
-    const editOptionsList = document.getElementById('edit-options-list');
-    const btnEditAddOptionRow = document.getElementById('btn-edit-add-option-row');
-    const formEditQuestion = document.getElementById('form-edit-question');
-
-    function createOptionRowHTML(container, text = '', score = 0) {
-      const row = document.createElement('div');
-      row.className = 'flex gap-2 items-center mb-2 last:mb-0';
-
-      const textInput = document.createElement('input');
-      textInput.type = 'text';
-      textInput.name = 'option_text';
-      textInput.className = 'flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground outline-none focus-visible:ring-1 focus-visible:ring-ring flex-[3]';
-      textInput.placeholder = 'Misal: Puas';
-      textInput.value = text;
-      textInput.required = true;
-
-      const scoreInput = document.createElement('input');
-      scoreInput.type = 'number';
-      scoreInput.name = 'option_score';
-      scoreInput.className = 'flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground outline-none focus-visible:ring-1 focus-visible:ring-ring flex-[1] text-center';
-      scoreInput.placeholder = 'Skor';
-      scoreInput.value = score;
-      scoreInput.min = '0';
-      scoreInput.required = true;
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.type = 'button';
-      deleteBtn.className = 'h-9 w-9 inline-flex items-center justify-center rounded-md border border-destructive/20 hover:bg-destructive/10 text-destructive shrink-0';
-      deleteBtn.innerHTML = '<i data-lucide="trash-2" class="size-3.5"></i>';
-      deleteBtn.addEventListener('click', () => {
-        row.remove();
-      });
-
-      row.appendChild(textInput);
-      row.appendChild(scoreInput);
-      row.appendChild(deleteBtn);
-      container.appendChild(row);
-      lucide.createIcons();
-    }
-
-    function toggleOptionsContainer(typeSelect, sectionElement, listElement) {
-      const val = typeSelect.value;
-      if (val === 'multiple_choice' || val === 'rating') {
-        sectionElement.style.display = 'block';
-        if (listElement.children.length === 0) {
-          if (val === 'rating') {
-            createOptionRowHTML(listElement, 'Sangat Tidak Puas', 1);
-            createOptionRowHTML(listElement, 'Tidak Puas', 2);
-            createOptionRowHTML(listElement, 'Cukup', 3);
-            createOptionRowHTML(listElement, 'Puas', 4);
-            createOptionRowHTML(listElement, 'Sangat Puas', 5);
-          } else {
-            createOptionRowHTML(listElement, 'Opsi 1', 1);
-            createOptionRowHTML(listElement, 'Opsi 2', 2);
-          }
-        }
-      } else {
-        sectionElement.style.display = 'none';
-      }
-    }
-
-    if (btnAddQuestion) {
-      btnAddQuestion.addEventListener('click', () => {
-        addDialog.showModal();
-        document.getElementById('add-question-text').value = '';
-        addTypeSelect.value = 'essay';
-        addOptionsList.innerHTML = '';
-        addOptionsSection.style.display = 'none';
-      });
-    }
-
-    btnCloseAdd.addEventListener('click', () => {
-      addDialog.close();
-    });
-
-    addTypeSelect.addEventListener('change', () => {
-      toggleOptionsContainer(addTypeSelect, addOptionsSection, addOptionsList);
-    });
-
-    btnAddOptionRow.addEventListener('click', () => {
-      createOptionRowHTML(addOptionsList, '', 0);
-    });
-
-    document.querySelectorAll('.btn-edit-question').forEach(btn => {
-      btn.addEventListener('click', function () {
-        const id = this.getAttribute('data-id');
-        const text = this.getAttribute('data-text');
-        const type = this.getAttribute('data-type');
-        const order = this.getAttribute('data-order');
-        const options = JSON.parse(this.getAttribute('data-options') || '[]');
-
-        formEditQuestion.action = `/admin/questions/${id}/update`;
-
-        document.getElementById('edit-question-text').value = text;
-        editTypeSelect.value = type;
-
-        editOptionsList.innerHTML = '';
-        if (type === 'multiple_choice' || type === 'rating') {
-          editOptionsSection.style.display = 'block';
-          options.forEach(opt => {
-            createOptionRowHTML(editOptionsList, opt.option_text, opt.score);
-          });
+  function toggleOptionsContainer(typeSelect, sectionElement, listElement) {
+    const val = typeSelect.value;
+    if (val === 'multiple_choice' || val === 'rating') {
+      sectionElement.style.display = 'block';
+      if (listElement.children.length === 0) {
+        if (val === 'rating') {
+          createOptionRowHTML(listElement, 'Sangat Tidak Puas', 1);
+          createOptionRowHTML(listElement, 'Tidak Puas', 2);
+          createOptionRowHTML(listElement, 'Cukup', 3);
+          createOptionRowHTML(listElement, 'Puas', 4);
+          createOptionRowHTML(listElement, 'Sangat Puas', 5);
         } else {
-          editOptionsSection.style.display = 'none';
+          createOptionRowHTML(listElement, 'Opsi 1', 1);
+          createOptionRowHTML(listElement, 'Opsi 2', 2);
         }
-
-        editDialog.showModal();
-      });
-    });
-
-    btnCloseEdit.addEventListener('click', () => {
-      editDialog.close();
-    });
-
-    editTypeSelect.addEventListener('change', () => {
-      toggleOptionsContainer(editTypeSelect, editOptionsSection, editOptionsList);
-    });
-
-    btnEditAddOptionRow.addEventListener('click', () => {
-      createOptionRowHTML(editOptionsList, '', 0);
-    });
-
-    document.body.addEventListener('htmx:afterOnLoad', function (evt) {
-      if (evt.detail.requestConfig.method === 'DELETE' && evt.detail.requestConfig.path.includes('/admin/questions/')) {
-        const rows = document.querySelectorAll('.data-table tbody tr');
-        let index = 1;
-        rows.forEach(row => {
-          const orderCell = row.querySelector('td:first-child');
-          if (orderCell && !row.classList.contains('empty-row')) {
-            orderCell.textContent = index++;
-          }
-        });
       }
-    });
-  </script>
-</body>
+    } else {
+      sectionElement.style.display = 'none';
+    }
+  }
 
+  if (btnAddQuestion) {
+    btnAddQuestion.addEventListener('click', () => {
+      addDialog.showModal();
+      document.getElementById('add-question-text').value = '';
+      addTypeSelect.value = 'essay';
+      addOptionsList.innerHTML = '';
+      addOptionsSection.style.display = 'none';
+    });
+  }
+
+  btnCloseAdd.addEventListener('click', () => {
+    addDialog.close();
+  });
+
+  addTypeSelect.addEventListener('change', () => {
+    toggleOptionsContainer(addTypeSelect, addOptionsSection, addOptionsList);
+  });
+
+  btnAddOptionRow.addEventListener('click', () => {
+    createOptionRowHTML(addOptionsList, '', 0);
+  });
+
+  document.querySelectorAll('.btn-edit-question').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const id = this.getAttribute('data-id');
+      const text = this.getAttribute('data-text');
+      const type = this.getAttribute('data-type');
+      const options = JSON.parse(this.getAttribute('data-options') || '[]');
+
+      formEditQuestion.action = `/admin/questions/${id}/update`;
+
+      document.getElementById('edit-question-text').value = text;
+      editTypeSelect.value = type;
+
+      editOptionsList.innerHTML = '';
+      if (type === 'multiple_choice' || type === 'rating') {
+        editOptionsSection.style.display = 'block';
+        options.forEach(opt => {
+          createOptionRowHTML(editOptionsList, opt.option_text, opt.score);
+        });
+      } else {
+        editOptionsSection.style.display = 'none';
+      }
+
+      editDialog.showModal();
+    });
+  });
+
+  btnCloseEdit.addEventListener('click', () => {
+    editDialog.close();
+  });
+
+  editTypeSelect.addEventListener('change', () => {
+    toggleOptionsContainer(editTypeSelect, editOptionsSection, editOptionsList);
+  });
+
+  btnEditAddOptionRow.addEventListener('click', () => {
+    createOptionRowHTML(editOptionsList, '', 0);
+  });
+
+  document.body.addEventListener('htmx:afterOnLoad', function (evt) {
+    if (evt.detail.requestConfig.method === 'DELETE' && evt.detail.requestConfig.path.includes('/admin/questions/')) {
+      const rows = document.querySelectorAll('.data-table tbody tr');
+      let index = 1;
+      rows.forEach(row => {
+        const orderCell = row.querySelector('td:first-child');
+        if (orderCell && row.id.startsWith('row-question-')) {
+          orderCell.textContent = index++;
+        }
+      });
+    }
+  });
+</script>
+</body>
 </html>

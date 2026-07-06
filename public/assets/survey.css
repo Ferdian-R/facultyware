@@ -1,0 +1,90 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #f5f6f8;
+    color: #111827;
+}
+
+.survey-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.survey-header {
+    background: linear-gradient(135deg, #2d3a52, #1b2537);
+    color: white;
+    padding: 40px;
+    border-radius: 20px;
+    margin-bottom: 30px;
+}
+
+.survey-header h1 {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.survey-header p {
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.form-card {
+    background: white;
+    padding: 30px;
+    border-radius: 18px;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.form-card h2 {
+    margin-bottom: 20px;
+    color: #2d3a52;
+}
+
+.form-group {
+    margin-bottom: 22px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 15px;
+    outline: none;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.submit-btn {
+    width: 100%;
+    background: #2d3a52;
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.submit-btn:hover {
+    background: #1b2537;
+}

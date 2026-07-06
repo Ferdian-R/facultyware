@@ -1,347 +1,322 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
-  <head>
-    <script>
-      (() => {
-        try {
-          localStorage.removeItem("themeVariant");
-        } catch (_) {}
-        try {
-          const stored = localStorage.getItem("themeMode");
-          if (
-            stored
-              ? stored === "dark"
-              : matchMedia("(prefers-color-scheme: dark)").matches
-          ) {
-            document.documentElement.classList.add("dark");
-          }
-        } catch (_) {}
-
-        const apply = (dark) => {
-          document.documentElement.classList.toggle("dark", dark);
-          try {
-            localStorage.setItem("themeMode", dark ? "dark" : "light");
-          } catch (_) {}
-        };
-
-        document.addEventListener("basecoat:theme", (event) => {
-          const mode = event.detail?.mode;
-          apply(
-            mode === "dark"
-              ? true
-              : mode === "light"
-                ? false
-                : !document.documentElement.classList.contains("dark"),
-          );
-        });
-      })();
-    </script>
-
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title><%= title %></title>
-    <meta name="description" content="Survei Kerja Sama Berhasil Dikirim — SUKAFTI FTI Universitas Andalas." />
-    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
-
-    <link rel="stylesheet" href="/assets/styles.css" />
-
-    <script src="/assets/js/basecoat.js?v=0.3.11" defer></script>
-    <script src="/assets/js/command.js?v=0.3.11" defer></script>
-    <script src="/assets/js/dropdown-menu.js?v=0.3.11" defer></script>
-    <script src="/assets/js/popover.js?v=0.3.11" defer></script>
-    <script src="/assets/js/select.js?v=0.3.11" defer></script>
-    <script src="/assets/js/sidebar.js?v=0.3.11" defer></script>
-    <script src="/assets/js/tabs.js?v=0.3.11" defer></script>
-    <script src="/assets/js/toast.js?v=0.3.11" defer></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <meta name="description" content="Survei Kerja Sama Berhasil Dikirim — SUKAFTI FTI Universitas Andalas." />
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <!-- Survey CSS -->
+  <link rel="stylesheet" href="/assets/survey.css" />
+  <style>
+    .meta-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      margin-top: 15px;
+    }
+    .meta-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .meta-table td:first-child {
+      color: #64748b;
+      font-weight: 500;
+      width: 140px;
+    }
+    .meta-table td:last-child {
+      color: #1e293b;
+      font-weight: 700;
+    }
+    .answer-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 20px;
+      background: #ffffff;
+      border-left: 4px solid #2d3a52;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .action-btn-custom {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      flex: 1;
+      max-width: 240px;
+    }
+    .btn-primary-custom {
+      background: #2d3a52;
+      color: white;
+      border: none;
+    }
+    .btn-primary-custom:hover {
+      background: #1b2537;
+    }
+    .btn-outline-custom {
+      background: white;
+      color: #374151;
+      border: 1px solid #d1d5db;
+    }
+    .btn-outline-custom:hover {
+      background: #f9fafb;
+    }
+    .hidden {
+      display: none !important;
+    }
     
-    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-    <style>
-      
-      .premium-card {
-        border: 1px solid var(--border) !important;
-        background: var(--card) !important;
-        color: var(--card-foreground) !important;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03) !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+        margin: 1.5cm !important;
+        padding: 0 !important;
       }
-      .premium-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.06) !important;
+      .no-print {
+        display: none !important;
       }
-      
-      
-      @media print {
-        body {
-          background: white !important;
-          color: black !important;
-          font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
-          margin: 1.5cm !important;
-          padding: 0 !important;
-        }
-        
-        .no-print {
-          display: none !important;
-        }
-        
-        
-        .print\:flex {
-          display: flex !important;
-        }
-        .print\:block {
-          display: block !important;
-        }
-        .print\:table {
-          display: table !important;
-        }
-        .print\:grid {
-          display: grid !important;
-        }
-        
-        
-        div.flex.min-h-screen, div.min-h-screen, .min-h-screen {
-          display: block !important;
-          min-height: auto !important;
-          padding: 0 !important;
-          margin: 0 !important;
-        }
-        div.w-full.max-w-3xl, .max-w-3xl, .max-w-md, .max-w-4xl {
-          max-width: 100% !important;
-          width: 100% !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          display: block !important;
-          box-shadow: none !important;
-          border: none !important;
-        }
-        
-        
-        .print-card {
-          border: none !important;
-          box-shadow: none !important;
-          background: white !important;
-          color: black !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          width: 100% !important;
-          max-width: 100% !important;
-          display: block !important;
-        }
-        
-        
-        body, p, span, h1, h2, h3, h4, th, td, strong, a, div {
-          color: black !important;
-          border-color: black !important;
-          -webkit-print-color-adjust: exact;
-          print-color-adjust: exact;
-        }
-        
-        
-        .print-table {
-          border-collapse: collapse !important;
-          width: 100% !important;
-          margin-top: 10px !important;
-        }
-        .print-table th, .print-table td {
-          border: 1px solid #000 !important;
-          padding: 8px !important;
-          text-align: left !important;
-          color: black !important;
-          background: transparent !important;
-        }
-        .print-table th {
-          background-color: #f2f2f2 !important;
-        }
+      .print-card {
+        border: none !important;
+        box-shadow: none !important;
+        background: white !important;
+        color: black !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
       }
-    </style>
-  </head>
-  <body class="bg-muted/30 text-foreground">
-    <div class="flex min-h-screen items-center justify-center p-6">
-      <div class="w-full max-w-3xl flex flex-col gap-6 text-center">
-        
-        
-        <div class="flex flex-col items-center gap-4 no-print mt-6">
-          <div class="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 shadow-sm">
-            <i data-lucide="check-circle-2" class="size-8"></i>
-          </div>
-          <div>
-            <h1 class="text-2xl font-bold tracking-tight text-foreground">Terima Kasih!</h1>
-            <p class="text-sm text-muted-foreground mt-1.5 leading-relaxed">
-              Kuesioner evaluasi survei kerja sama Anda telah berhasil disimpan di server SUKAFTI.
-            </p>
-          </div>
-        </div>
+      body, p, span, h1, h2, h3, h4, th, td, strong, a, div {
+        color: black !important;
+        border-color: black !important;
+        print-color-adjust: exact;
+      }
+      .print-table {
+        border-collapse: collapse !important;
+        width: 100% !important;
+        margin-top: 15px !important;
+      }
+      .print-table th, .print-table td {
+        border: 1px solid #000 !important;
+        padding: 8px !important;
+        text-align: left !important;
+        background: transparent !important;
+      }
+      .print-table th {
+        background-color: #f2f2f2 !important;
+      }
+      .hidden {
+        display: none !important;
+      }
+      .print\:block {
+        display: block !important;
+      }
+      .print\:table {
+        display: table !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="survey-container">
 
-        
-        <div data-slot="card" class="premium-card print-card rounded-2xl p-6 md:p-8 text-left flex flex-col gap-6">
-          
-          <div class="hidden print:block text-center mb-6">
-            <h1 class="text-lg font-extrabold text-black uppercase tracking-wider">REKAPITULASI JAWABAN SURVEI EVALUASI KERJA SAMA</h1>
-            <p class="text-xs text-slate-700 mt-1 font-mono">ID Respon: #RSP-<%= response.id.toString().padStart(5, '0') %></p>
-          </div>
-
-          
-          <div class="flex justify-between items-center border-b pb-3 no-print">
-            <span class="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Rincian Hasil Pengisian Survei</span>
-            <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-bold bg-emerald-500/10 text-emerald-500 border-emerald-500/20 uppercase">Selesai</span>
-          </div>
-
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs no-print">
-            <div class="flex justify-between md:justify-start gap-4 border-b border-border/40 pb-2 md:border-b-0 md:pb-0">
-              <span class="text-muted-foreground w-28 shrink-0">ID Respon:</span>
-              <span class="font-mono font-semibold text-foreground">#RSP-<%= response.id.toString().padStart(5, '0') %></span>
-            </div>
-
-            <div class="flex justify-between md:justify-start gap-4 border-b border-border/40 pb-2 md:border-b-0 md:pb-0">
-              <span class="text-muted-foreground w-28 shrink-0">Mitra Industri:</span>
-              <span class="font-semibold text-foreground"><%= response.partner_name %></span>
-            </div>
-
-            <div class="flex justify-between md:justify-start gap-4 border-b border-border/40 pb-2 md:border-b-0 md:pb-0">
-              <span class="text-muted-foreground w-28 shrink-0">Judul Survei:</span>
-              <span class="font-semibold text-foreground"><%= response.survey_title %></span>
-            </div>
-
-            <div class="flex justify-between md:justify-start gap-4 border-b border-border/40 pb-2 md:border-b-0 md:pb-0">
-              <span class="text-muted-foreground w-28 shrink-0">Tanggal Submit:</span>
-              <span class="font-semibold text-foreground">
-                <% const dateObj = new Date(response.submitted_at); %>
-                <%= dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) %> 
-                <%= dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) %> WIB
-              </span>
-            </div>
-            
-            <div class="flex justify-between md:justify-start gap-4 col-span-1 md:col-span-2 bg-muted/30 p-2.5 rounded-lg border">
-              <span class="text-muted-foreground w-28 shrink-0 flex items-center">Total Skor Evaluasi:</span>
-              <span class="font-extrabold text-foreground text-sm flex items-center"><%= response.score_total %> Poin</span>
-            </div>
-          </div>
-
-          
-          <table class="hidden print:table w-full text-xs mb-6 border-collapse print-table">
-            <tbody>
-              <tr>
-                <td class="p-2 font-bold bg-neutral-100 w-44">Nama Instansi / Mitra</td>
-                <td class="p-2 font-semibold"><%= response.partner_name %></td>
-              </tr>
-              <tr>
-                <td class="p-2 font-bold bg-neutral-100">Kategori / Judul Survei</td>
-                <td class="p-2 font-semibold"><%= response.survey_title %></td>
-              </tr>
-              <tr>
-                <td class="p-2 font-bold bg-neutral-100">Tanggal &amp; Waktu Pengisian</td>
-                <td class="p-2 font-semibold">
-                  <%= dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) %> 
-                  - Pukul <%= dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) %> WIB
-                </td>
-              </tr>
-              <tr>
-                <td class="p-2 font-bold bg-neutral-100">Total Skor Evaluasi</td>
-                <td class="p-2 font-extrabold text-black"><%= response.score_total %> Poin</td>
-              </tr>
-            </tbody>
-          </table>
-
-          
-          <div class="border-t border-border/80 pt-5 no-print">
-            <h3 class="text-base font-bold text-foreground mb-5 flex items-center gap-2">
-              <i data-lucide="list-checks" class="size-5 text-primary"></i>
-              <span>Hasil Jawaban Kuesioner Anda</span>
-            </h3>
-            
-            <div class="space-y-6">
-              <% answers.forEach(function(ans) { %>
-                <div class="border border-border/80 rounded-xl p-6 bg-card/50 hover:shadow-xs transition-all duration-300 border-l-4 border-l-primary/70 space-y-4">
-                  <div class="flex items-center justify-between gap-4 border-b border-border/40 pb-2">
-                    <span class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Pertanyaan <%= ans.order_number %></span>
-                    <% if (ans.question_type !== 'short_answer') { %>
-                      <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-extrabold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                        Skor: <%= ans.answer_score %>
-                      </span>
-                    <% } else { %>
-                      <span class="inline-flex items-center rounded-full bg-indigo-500/10 px-2.5 py-0.5 text-xs font-extrabold text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
-                        Essay
-                      </span>
-                    <% } %>
-                  </div>
-                  
-                  <p class="text-sm font-semibold text-foreground leading-relaxed"><%= ans.question_text %></p>
-                  
-                  <div class="pt-3 border-t border-border/40 text-xs">
-                    <span class="text-muted-foreground font-semibold">Jawaban Anda:</span>
-                    <% if (ans.question_type !== 'short_answer') { %>
-                      <p class="text-foreground font-bold mt-1.5 flex items-center gap-2 text-sm">
-                        <i data-lucide="check-circle-2" class="size-4 text-emerald-500 shrink-0"></i>
-                        <span><%= ans.selected_option %></span>
-                      </p>
-                    <% } else { %>
-                      <p class="text-foreground italic mt-1.5 bg-muted/40 p-3.5 rounded-lg leading-relaxed whitespace-pre-wrap"><%= ans.answer_text %></p>
-                    <% } %>
-                  </div>
-                </div>
-              <% }) %>
-            </div>
-          </div>
-
-          
-          <div class="hidden print:block mt-6">
-            <h3 class="text-xs font-extrabold text-black uppercase mb-3 border-b pb-1">Lampiran Rekapitulasi Jawaban</h3>
-            <table class="w-full text-xs print-table border-collapse">
-              <thead>
-                <tr>
-                  <th class="p-2 text-center w-10 font-bold bg-neutral-100">No</th>
-                  <th class="p-2 text-left font-bold bg-neutral-100">Butir Pertanyaan Evaluasi</th>
-                  <th class="p-2 text-left font-bold bg-neutral-100">Jawaban Pilihan / Uraian</th>
-                  <th class="p-2 text-center w-16 font-bold bg-neutral-100">Skor</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% answers.forEach(function(ans) { %>
-                  <tr>
-                    <td class="p-2 text-center font-bold"><%= ans.order_number %></td>
-                    <td class="p-2 leading-relaxed"><%= ans.question_text %></td>
-                    <td class="p-2">
-                      <% if (ans.question_type !== 'short_answer') { %>
-                        <strong><%= ans.selected_option %></strong>
-                      <% } else { %>
-                        <span class="italic"><%= ans.answer_text %></span>
-                      <% } %>
-                    </td>
-                    <td class="p-2 text-center font-bold">
-                      <%= ans.question_type !== 'short_answer' ? ans.answer_score : '—' %>
-                    </td>
-                  </tr>
-                <% }) %>
-              </tbody>
-            </table>
-          </div>
-
-
-
-          
-          <div class="border-t border-border/40 pt-4 text-[10px] text-muted-foreground text-center leading-relaxed no-print">
-            Bukti pengisian digital ini sah dihasilkan secara otomatis oleh sistem informasi SUKAFTI FTI Universitas Andalas.
-          </div>
-        </div>
-
-        
-        <div class="flex flex-col sm:flex-row gap-2 justify-center no-print mb-8">
-          <button onclick="window.print()" class="inline-flex items-center justify-center gap-1.5 rounded-md text-sm font-semibold transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 flex-1 sm:flex-initial">
-            <i data-lucide="printer" class="size-4"></i>
-            <span>Cetak Bukti &amp; Jawaban (PDF)</span>
-          </button>
-          <a href="/logout" class="inline-flex items-center justify-center gap-1.5 rounded-md text-sm font-semibold transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 flex-1 sm:flex-initial">
-            <i data-lucide="log-out" class="size-4"></i>
-            <span>Keluar dari Sistem</span>
-          </a>
-        </div>
-
+    <!-- Success status icon -->
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; margin-bottom: 30px;" class="no-print">
+      <div style="width: 4.5rem; height: 4.5rem; border-radius: 50%; background: #d1fae5; border: 2px solid #a7f3d0; color: #10b981; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(16,185,129,0.1);">
+        <i data-lucide="check-circle-2" style="width: 2.5rem; height: 2.5rem;"></i>
+      </div>
+      <div>
+        <h1 style="font-size: 1.75rem; font-weight: 800; color: #111827; margin: 0;">Terima Kasih!</h1>
+        <p style="font-size: 0.875rem; color: #4b5563; margin-top: 6px;">
+          Kuesioner evaluasi survei kerja sama Anda telah berhasil disimpan di server SUKAFTI.
+        </p>
       </div>
     </div>
 
-    <script>
-      lucide.createIcons();
-    </script>
-  </body>
+    <!-- Main Card Details -->
+    <div class="form-card print-card">
+      
+      <!-- Print Title Header -->
+      <div class="hidden print:block" style="text-align: center; margin-bottom: 25px;">
+        <h1 style="font-size: 1.25rem; font-weight: 800; color: #000; text-transform: uppercase;">REKAPITULASI JAWABAN SURVEI EVALUASI KERJA SAMA</h1>
+        <p style="font-size: 0.75rem; color: #4b5563; font-family: monospace; margin-top: 4px;">ID Respon: #RSP-<%= response.id.toString().padStart(5, '0') %></p>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 12px; margin-bottom: 15px;" class="no-print">
+        <h2 style="font-size: 1.1rem; color: #2d3a52; margin: 0;">Rincian Hasil Pengisian Survei</h2>
+        <span class="pill" style="background:#d1fae5; color:#065f46; font-size:0.7rem; font-weight:700;">SELESAI</span>
+      </div>
+
+      <!-- Detail Grid Screen version -->
+      <table class="meta-table no-print">
+        <tbody>
+          <tr>
+            <td>ID Respon:</td>
+            <td style="font-family: monospace;">#RSP-<%= response.id.toString().padStart(5, '0') %></td>
+          </tr>
+          <tr>
+            <td>Mitra Industri:</td>
+            <td><%= response.partner_name %></td>
+          </tr>
+          <tr>
+            <td>Judul Survei:</td>
+            <td><%= response.survey_title %></td>
+          </tr>
+          <tr>
+            <td>Tanggal Submit:</td>
+            <td>
+              <% const dateObj = new Date(response.submitted_at); %>
+              <%= dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) %> 
+              <%= dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) %> WIB
+            </td>
+          </tr>
+          <tr style="background: #f8fafc;">
+            <td style="font-weight: 600;">Skor Evaluasi:</td>
+            <td style="color:#2d3a52; font-size: 0.95rem; font-weight: 850;"><%= response.score_total %> Poin</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Meta Table Print Version -->
+      <table class="hidden print:table print-table">
+        <tbody>
+          <tr>
+            <td style="font-weight: bold; background-color: #f2f2f2; width: 180px;">Nama Instansi / Mitra</td>
+            <td><%= response.partner_name %></td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; background-color: #f2f2f2;">Kategori / Judul Survei</td>
+            <td><%= response.survey_title %></td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; background-color: #f2f2f2;">Tanggal &amp; Waktu Pengisian</td>
+            <td>
+              <%= dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) %> 
+              - Pukul <%= dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) %> WIB
+            </td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; background-color: #f2f2f2;">Total Skor Evaluasi</td>
+            <td style="font-weight: bold;"><%= response.score_total %> Poin</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Answers Recap Screen Version -->
+      <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 20px;" class="no-print">
+        <h3 style="font-size: 0.95rem; font-weight: 700; color: #2d3a52; margin-bottom: 15px; display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="list-checks" style="width: 18px; height: 18px; color: #2d3a52;"></i>
+          <span>Hasil Jawaban Kuesioner Anda</span>
+        </h3>
+        
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <% answers.forEach(function(ans) { %>
+            <div class="answer-card">
+              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; font-size: 0.7rem; color: #94a3b8; font-weight: 700;">
+                <span>PERTANYAAN <%= ans.order_number %></span>
+                <% if (ans.question_type !== 'short_answer') { %>
+                  <span class="pill" style="background:#d1fae5; color:#065f46; font-size:0.65rem; font-weight:800;">
+                    Skor: <%= ans.answer_score %>
+                  </span>
+                <% } else { %>
+                  <span class="pill" style="background:#f1f5f9; color:#475569; font-size:0.65rem; font-weight:800;">
+                    Essay
+                  </span>
+                <% } %>
+              </div>
+              
+              <p style="font-size: 0.875rem; font-weight: 700; color: #1f2937; margin: 0; line-height: 1.4;"><%= ans.question_text %></p>
+              
+              <div style="font-size: 0.75rem; margin-top: 5px;">
+                <span style="color: #94a3b8; font-weight: 600;">Jawaban Anda:</span>
+                <% if (ans.question_type !== 'short_answer') { %>
+                  <p style="color: #1e293b; font-weight: 700; margin: 5px 0 0 0; display: flex; align-items: center; gap: 6px; font-size: 0.8125rem;">
+                    <i data-lucide="check-circle-2" style="width: 14px; height: 14px; color: #10b981; flex-shrink: 0;"></i>
+                    <span><%= ans.selected_option %></span>
+                  </p>
+                <% } else { %>
+                  <p style="color: #374151; font-style: italic; margin: 5px 0 0 0; background: #f8fafc; border: 1px solid #e5e7eb; padding: 10px; border-radius: 8px; line-height: 1.5; white-space: pre-wrap;"><%= ans.answer_text %></p>
+                <% } %>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+
+      <!-- Answers Recap Print Version -->
+      <div class="hidden print:block" style="margin-top: 25px;">
+        <h3 style="font-size: 0.85rem; font-weight: bold; color: black; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #000; padding-bottom: 4px;">Lampiran Rekapitulasi Jawaban</h3>
+        <table class="print-table">
+          <thead>
+            <tr>
+              <th style="text-align: center; width: 35px; font-weight: bold; background-color: #f2f2f2;">No</th>
+              <th style="text-align: left; font-weight: bold; background-color: #f2f2f2;">Butir Pertanyaan Evaluasi</th>
+              <th style="text-align: left; font-weight: bold; background-color: #f2f2f2;">Jawaban Pilihan / Uraian</th>
+              <th style="text-align: center; width: 50px; font-weight: bold; background-color: #f2f2f2;">Skor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% answers.forEach(function(ans) { %>
+              <tr>
+                <td style="text-align: center; font-weight: bold;"><%= ans.order_number %></td>
+                <td style="line-height: 1.4;"><%= ans.question_text %></td>
+                <td>
+                  <% if (ans.question_type !== 'short_answer') { %>
+                    <strong><%= ans.selected_option %></strong>
+                  <% } else { %>
+                    <span style="font-style: italic;"><%= ans.answer_text %></span>
+                  <% } %>
+                </td>
+                <td style="text-align: center; font-weight: bold;">
+                  <%= ans.question_type !== 'short_answer' ? ans.answer_score : '—' %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="border-top: 1px solid #e5e7eb; padding-top: 15px; font-size: 0.6875rem; color: #94a3b8; text-align: center; line-height: 1.4; margin-top: 15px;" class="no-print">
+        Bukti pengisian digital ini sah dihasilkan secara otomatis oleh sistem informasi SUKAFTI FTI Universitas Andalas.
+      </div>
+    </div>
+
+    <!-- Action Buttons Row -->
+    <div class="btn-row no-print">
+      <button onclick="window.print()" class="action-btn-custom btn-primary-custom">
+        <i data-lucide="printer" style="width: 16px; height: 16px;"></i>
+        <span>Cetak Bukti (PDF)</span>
+      </button>
+      <a href="/logout" class="action-btn-custom btn-outline-custom">
+        <i data-lucide="log-out" style="width: 16px; height: 16px;"></i>
+        <span>Keluar Portal</span>
+      </a>
+    </div>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
 </html>

@@ -1,488 +1,362 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
-
 <head>
-  <script>
-    (() => {
-      try {
-        localStorage.removeItem("themeVariant");
-      } catch (_) { }
-      try {
-        const stored = localStorage.getItem("themeMode");
-        if (
-          stored
-            ? stored === "dark"
-            : matchMedia("(prefers-color-scheme: dark)").matches
-        ) {
-          document.documentElement.classList.add("dark");
-        }
-      } catch (_) { }
-
-      const apply = (dark) => {
-        document.documentElement.classList.toggle("dark", dark);
-        try {
-          localStorage.setItem("themeMode", dark ? "dark" : "light");
-        } catch (_) { }
-      };
-
-      document.addEventListener("basecoat:theme", (event) => {
-        const mode = event.detail?.mode;
-        apply(
-          mode === "dark"
-            ? true
-            : mode === "light"
-              ? false
-              : !document.documentElement.classList.contains("dark"),
-        );
-      });
-    })();
-  </script>
-
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>
-    <%= title %>
-  </title>
-
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
-  <link rel="stylesheet" href="/assets/styles.css" />
-
-  <script src="/assets/js/basecoat.js?v=0.3.11" defer></script>
-  <script src="/assets/js/command.js?v=0.3.11" defer></script>
-  <script src="/assets/js/dropdown-menu.js?v=0.3.11" defer></script>
-  <script src="/assets/js/popover.js?v=0.3.11" defer></script>
-  <script src="/assets/js/select.js?v=0.3.11" defer></script>
-  <script src="/assets/js/sidebar.js?v=0.3.11" defer></script>
-  <script src="/assets/js/tabs.js?v=0.3.11" defer></script>
-  <script src="/assets/js/toast.js?v=0.3.11" defer></script>
-
-  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-  <style>
-    
-    .premium-card {
-      border: 1px solid var(--border) !important;
-      background: var(--card) !important;
-      color: var(--card-foreground) !important;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03) !important;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    }
-
-    .premium-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.06) !important;
-    }
-
-    
-    select {
-      background-color: var(--card) !important;
-      color: var(--foreground) !important;
-    }
-
-    select option {
-      background-color: var(--card) !important;
-      color: var(--foreground) !important;
-    }
-
-    .dark select option {
-      background-color: #1e293b !important;
-      color: #f8fafc !important;
-    }
-
-    .dark {
-      color-scheme: dark;
-    }
-  </style>
+  <!-- Basecoat UI -->
+  <link rel="stylesheet" href="https://unpkg.com/basecoat-css@latest/dist/basecoat.min.css" />
+  <!-- Dashboard CSS -->
+  <link rel="stylesheet" href="/assets/dashboard.css" />
 </head>
+<body>
 
-<body class="bg-background">
-  <div class="relative flex min-h-screen">
+<div class="app-shell">
 
-    
-    <aside id="sidebar" class="sidebar border-r bg-card text-card-foreground shrink-0" data-side="left"
-      aria-hidden="false">
-      <nav aria-label="Sidebar navigation" class="flex flex-col h-full justify-between">
-        <div>
-          <header class="p-4 border-b">
-            <a href="/admin/dashboard" class="flex items-center gap-2">
-              <img src="/image/fti%20logo.jpg" alt="Logo FTI"
-                class="h-8 w-8 rounded-lg object-contain bg-white p-0.5 border" />
-              <div class="grid flex-1 text-left text-sm leading-tight">
-                <span class="truncate font-semibold text-foreground">SUKAFTI</span>
-                <span class="truncate text-xs text-muted-foreground">Survey Kerjasama</span>
-              </div>
-            </a>
-          </header>
-
-          <section class="p-4">
-            <div role="group" aria-labelledby="group-label">
-              <h3 id="group-label" class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                Menu Utama</h3>
-              <ul class="space-y-1">
-                <li>
-                  <a href="/admin/dashboard"
-                    class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                    <i data-lucide="layout-dashboard" class="size-4"></i>
-                    <span>Dashboard Overview</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="/admin/questions"
-                    class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                    <i data-lucide="help-circle" class="size-4"></i>
-                    <span>Pertanyaan Survey</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="/admin/partners"
-                    class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-                    <i data-lucide="building-2" class="size-4"></i>
-                    <span>Manajemen Mitra</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="/admin/recap-answers"
-                    class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-accent text-accent-foreground">
-                    <i data-lucide="bar-chart-3" class="size-4 text-foreground"></i>
-                    <span>Hasil Survey</span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </section>
-        </div>
-
-        <footer class="p-4 border-t">
-          <div id="popover-profile" class="popover w-full">
-            <button id="popover-profile-trigger" type="button" aria-expanded="false"
-              aria-controls="popover-profile-popover"
-              class="flex w-full items-center gap-2 px-3 py-2 rounded-md hover:bg-accent hover:text-accent-foreground justify-start text-left">
-              <div
-                class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xs shrink-0">
-                AF</div>
-              <div class="grid flex-1 text-xs leading-tight">
-                <span class="truncate font-semibold text-foreground">
-                  <%= user %>
-                </span>
-                <span class="truncate text-muted-foreground text-[10px]">Administrator</span>
-              </div>
-              <i data-lucide="chevrons-up-down" class="size-4 text-muted-foreground shrink-0 ml-auto"></i>
-            </button>
-            <div id="popover-profile-popover" data-popover aria-hidden="true" data-side="top" class="w-[200px]">
-              <div class="grid p-1 bg-popover text-popover-foreground border rounded-md shadow-md">
-                <a href="/logout"
-                  class="flex items-center gap-2 px-2 py-1.5 text-sm text-destructive hover:bg-destructive/10 rounded-sm">
-                  <i data-lucide="log-out" class="size-4"></i>
-                  <span>Keluar</span>
-                </a>
-              </div>
-            </div>
-          </div>
-        </footer>
-      </nav>
-    </aside>
-
-    
-    <main id="content" class="flex-1 flex flex-col min-w-0 bg-muted/20">
-
-      
-      <header
-        class="bg-background sticky inset-x-0 top-0 isolate flex shrink-0 items-center justify-between border-b z-10 h-14 px-4 gap-4" style="z-index: 40;">
-        <div class="flex items-center gap-2">
-          <button type="button" onclick="document.dispatchEvent(new CustomEvent('basecoat:sidebar'))"
-            aria-label="Toggle sidebar"
-            class="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground md:hidden">
-            <i data-lucide="menu" class="size-4"></i>
-          </button>
-          <h1 class="text-sm font-semibold tracking-tight text-foreground">
-            Rekap Jawaban Mitra
-          </h1>
-        </div>
-
-        <div class="flex items-center gap-2">
-
-          <button type="button" aria-label="Toggle dark mode"
-            onclick="document.dispatchEvent(new CustomEvent('basecoat:theme'))"
-            class="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground">
-            <i data-lucide="sun" class="size-4 hidden dark:block"></i>
-            <i data-lucide="moon" class="size-4 block dark:hidden"></i>
-          </button>
-        </div>
-      </header>
-
-      
-      <div class="p-6 md:p-8 flex-1 space-y-6">
-
-        
-        <div data-slot="card" class="premium-card rounded-2xl overflow-hidden">
-          <div class="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b">
-            <div>
-              <h3 class="text-lg font-semibold leading-none tracking-tight">Tabel Rekapitulasi Respon Kuesioner</h3>
-              <p class="text-xs text-muted-foreground mt-1.5">Jawaban mentah hasil pengisian survei dari seluruh mitra
-                FTI</p>
-            </div>
-            <div class="flex flex-wrap gap-2 w-full md:w-auto">
-              <label class="relative flex items-center flex-1 md:flex-initial">
-                <i data-lucide="search" class="text-muted-foreground"
-                  style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; pointer-events: none;"></i>
-                <input type="text" id="topbar-search" placeholder="Cari nama mitra/survey..." value="<%= search %>"
-                  autocomplete="off" style="padding-left: 36px;"
-                  class="h-9 rounded-md border border-border bg-background/60 hover:bg-background/80 focus:bg-background text-sm w-full md:w-60 outline-none focus-visible:ring-1 focus-visible:ring-primary transition-all" />
-              </label>
-              <a href="/admin/recap-answers/export-excel"
-                class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3 py-2">
-                <i data-lucide="file-spreadsheet" class="size-4"></i>
-                <span>Ekspor Excel</span>
-              </a>
-            </div>
-          </div>
-
-          <div class="overflow-x-auto w-full">
-            <table class="w-full text-sm">
-              <thead class="bg-muted/50 border-b">
-                <tr class="transition-colors hover:bg-muted/50">
-                  <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Nama Perusahaan Mitra
-                  </th>
-                  <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Judul Survei Kemitraan
-                  </th>
-                  <th class="h-10 px-4 text-center align-middle font-medium text-muted-foreground w-32">Total Skor</th>
-                  <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Tanggal Pengisian</th>
-                  <th class="h-10 px-4 text-center align-middle font-medium text-muted-foreground w-28">Aksi</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y">
-                <% if (locals.responses && responses.length> 0) { %>
-                  <% responses.forEach(function(r) { const avatarStr=r.partner_name.substring(0, 2).toUpperCase(); let
-                    formattedDate="—" ; if (r.submitted_at) { const dateObj=new Date(r.submitted_at);
-                    formattedDate=dateObj.toLocaleDateString('id-ID', { day: '2-digit' , month: 'short' ,
-                    year: 'numeric' }) + " " + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit' , minute: '2-digit'
-                    }); } %>
-                    <tr class="hover:bg-muted/30 transition-colors">
-                      <td class="p-4 align-middle font-medium">
-                        <div class="flex items-center gap-3">
-                          <div
-                            class="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-muted-foreground text-xs font-bold">
-                            <%= avatarStr %>
-                          </div>
-                          <div class="text-foreground">
-                            <%= r.partner_name %>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="p-4 align-middle text-muted-foreground font-semibold">
-                        <%= r.survey_title %>
-                      </td>
-                      <td class="p-4 align-middle text-center font-bold text-foreground">
-                        <span
-                          class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-muted border-input">
-                          <%= r.score_total %> Poin
-                        </span>
-                      </td>
-                      <td class="p-4 align-middle text-muted-foreground text-xs">
-                        <%= formattedDate %>
-                      </td>
-                      <td class="p-4 align-middle text-center">
-                        <button
-                          class="btn-view-detail inline-flex items-center justify-center gap-1 rounded-md text-xs font-semibold border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 py-1"
-                          data-id="<%= r.id %>">
-                          <i data-lucide="eye" class="size-3.5"></i>
-                          <span>Detail</span>
-                        </button>
-                      </td>
-                    </tr>
-                    <% }); %>
-                      <% } else { %>
-                        <tr>
-                          <td colspan="5" class="p-8 text-center text-muted-foreground">
-                            Belum ada kuesioner yang diselesaikan oleh mitra.
-                          </td>
-                        </tr>
-                        <% } %>
-              </tbody>
-            </table>
-          </div>
-
-          
-          <% if (locals.totalPages && totalPages> 1) { %>
-            <div class="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 border-t bg-muted/20">
-              <div class="text-xs text-muted-foreground">
-                Menampilkan halaman <strong>
-                  <%= page %>
-                </strong> dari <strong>
-                  <%= totalPages %>
-                </strong> (Total: <%= totalItems %> data)
-              </div>
-              <div class="flex gap-1" style="display: flex; gap: 4px;">
-                <% if (page> 1) { %>
-                  <a href="?search=<%= search %>&page=<%= page - 1 %>"
-                    style="width: 32px; min-width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;"
-                    class="rounded-md border hover:bg-accent hover:text-accent-foreground text-muted-foreground"><i
-                      data-lucide="chevron-left" class="size-4"></i></a>
-                  <% } else { %>
-                    <span
-                      style="width: 32px; min-width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;"
-                      class="rounded-md border opacity-50 cursor-not-allowed text-muted-foreground"><i
-                        data-lucide="chevron-left" class="size-4"></i></span>
-                    <% } %>
-
-                      <% for(let i=1; i <=totalPages; i++) { %>
-                        <a href="?search=<%= search %>&page=<%= i %>"
-                          style="width: 32px; min-width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;"
-                          class="rounded-md border text-sm <%= page === i ? 'bg-primary text-primary-foreground font-semibold border-primary' : 'hover:bg-accent hover:text-accent-foreground text-muted-foreground' %>">
-                          <%= i %>
-                        </a>
-                        <% } %>
-
-                          <% if (page < totalPages) { %>
-                            <a href="?search=<%= search %>&page=<%= page + 1 %>"
-                              style="width: 32px; min-width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;"
-                              class="rounded-md border hover:bg-accent hover:text-accent-foreground text-muted-foreground"><i
-                                data-lucide="chevron-right" class="size-4"></i></a>
-                            <% } else { %>
-                              <span
-                                style="width: 32px; min-width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;"
-                                class="rounded-md border opacity-50 cursor-not-allowed text-muted-foreground"><i
-                                  data-lucide="chevron-right" class="size-4"></i></span>
-                              <% } %>
-              </div>
-            </div>
-            <% } %>
-        </div>
-
-      </div>
-    </main>
-  </div>
-
-  
-  <dialog id="detail-dialog" class="dialog">
-    <div class="!max-w-2xl w-full max-h-[85vh] overflow-y-auto pr-1">
-      <div class="flex items-center gap-2 border-b pb-3">
-        <div class="p-2 bg-primary/10 text-primary rounded-lg">
-          <i data-lucide="file-text" class="size-5"></i>
-        </div>
-        <div>
-          <h3 class="text-lg font-semibold leading-none tracking-tight">Rincian Jawaban Kuesioner</h3>
-          <p class="text-xs text-muted-foreground mt-1">Jawaban mentah yang diserahkan oleh mitra perusahaan.</p>
-        </div>
-      </div>
-
-      <div class="text-xs text-muted-foreground grid grid-cols-2 gap-2 border rounded-md p-4 bg-muted/20">
-        <div><strong>Mitra Perusahaan:</strong> <span id="lbl-detail-partner"
-            class="text-foreground font-medium">...</span></div>
-        <div><strong>Judul Kuesioner:</strong> <span id="lbl-detail-survey"
-            class="text-foreground font-medium">...</span>
-        </div>
-        <div><strong>Tanggal Kirim:</strong> <span id="lbl-detail-date" class="text-foreground font-medium">...</span>
-        </div>
-        <div><strong>Total Nilai Evaluasi:</strong> <span id="lbl-detail-score"
-            class="text-foreground font-bold">...</span></div>
-      </div>
-
-      <div id="detail-loading" class="text-center py-8 text-muted-foreground text-sm">
-        <p>Memuat rincian data...</p>
-      </div>
-
-      <div class="flex flex-col gap-4" id="detail-answers-list" style="display:none;">
-        
-      </div>
-
-      <div class="flex justify-end gap-2 border-t pt-3 mt-2">
-        <button type="button" id="btn-close-detail"
-          class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
-          Tutup
-        </button>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <img src="/image/fti logo.jpg" alt="Logo FTI" class="sidebar__logo" onerror="this.style.display='none'" />
+      <div>
+        <div class="sidebar__wordmark">SUKAFTI</div>
+        <div class="sidebar__tagline">Survey Kerjasama FTI</div>
       </div>
     </div>
-  </dialog>
 
-  <script>
-    lucide.createIcons();
+    <div class="nav-section-label">Menu Utama</div>
+    <ul class="nav-list">
+      <li class="nav-item">
+        <a href="/admin/dashboard" id="nav-dashboard">
+          <i data-lucide="layout-dashboard"></i>Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/admin/questions" id="nav-questions">
+          <i data-lucide="help-circle"></i>Pertanyaan Survey
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/admin/partners" id="nav-mitra">
+          <i data-lucide="building-2"></i>Manajemen Mitra
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/admin/recap-answers" class="active" id="nav-hasil">
+          <i data-lucide="bar-chart-3"></i>Hasil Survey
+        </a>
+      </li>
+    </ul>
 
-    document.getElementById('topbar-search').addEventListener('keypress', function (e) {
-      if (e.key === 'Enter') {
-        window.location.href = '?search=' + encodeURIComponent(this.value);
-      }
+    <div class="sidebar__footer">
+      <a href="/logout" id="btn-logout"><i data-lucide="log-out"></i>Keluar</a>
+    </div>
+  </aside>
+
+  <!-- MAIN WRAPPER -->
+  <div class="main-wrapper">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar__left">
+        <h2>Hasil Survey</h2>
+        <p>Rekapitulasi tanggapan dan jawaban evaluasi mitra</p>
+      </div>
+      <div class="topbar__right">
+        <div class="admin-chip" id="admin-chip">
+          <div class="admin-avatar">AF</div>
+          <span class="admin-chip__name"><%= user %></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT AREA -->
+    <main class="content-area">
+
+      <!-- TABLE CARD -->
+      <div class="table-card">
+        <div class="table-card__header" style="flex-wrap: wrap; gap: 1rem; align-items: center;">
+          <div>
+            <h2>Tabel Rekapitulasi Respon Kuesioner</h2>
+            <p>Jawaban hasil pengisian survei dari seluruh mitra FTI</p>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+            <div style="position:relative; width: 15rem;">
+              <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #94a3b8;"></i>
+              <input type="text" id="topbar-search" placeholder="Cari nama mitra/survey..." value="<%= search %>" autocomplete="off" style="width:100%; padding:0.5rem 1rem 0.5rem 2.4rem; border:1px solid #cbd5e1; border-radius:999px; font-size:0.85rem; outline:none; background:#f8fafc;" />
+            </div>
+
+            <a href="/admin/recap-answers/export-excel" class="btn" style="background-color:#10b981; color:white; padding:0.5rem 1rem; border-radius:6px; text-decoration:none; font-size:0.875rem; display:flex; align-items:center; gap:0.5rem;">
+              <i data-lucide="file-spreadsheet" style="width:16px; height:16px;"></i> Ekspor Excel
+            </a>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Nama Perusahaan Mitra</th>
+                <th>Judul Survei Kemitraan</th>
+                <th style="text-align:center; width: 120px;">Total Skor</th>
+                <th>Tanggal Pengisian</th>
+                <th style="text-align:center; width: 100px;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (locals.responses && responses.length > 0) { %>
+                <% responses.forEach(function(r) { 
+                     const avatarStr = r.partner_name.substring(0, 2).toUpperCase();
+                     let formattedDate = "—";
+                     if (r.submitted_at) {
+                         const dateObj = new Date(r.submitted_at);
+                         const d = dateObj.getDate().toString().padStart(2, '0');
+                         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+                         const m = months[dateObj.getMonth()];
+                         const y = dateObj.getFullYear();
+                         const hrs = dateObj.getHours().toString().padStart(2, '0');
+                         const mins = dateObj.getMinutes().toString().padStart(2, '0');
+                         formattedDate = `${d} ${m} ${y} ${hrs}:${mins}`;
+                     }
+                %>
+                <tr>
+                  <td>
+                    <div class="company-cell">
+                      <div class="company-avatar" style="background:#f1f5f9;color:#1e293b;"><%= avatarStr %></div>
+                      <div class="company-name" style="font-weight:700;"><%= r.partner_name %></div>
+                    </div>
+                  </td>
+                  <td style="font-weight:500; color:#475569;"><%= r.survey_title %></td>
+                  <td style="text-align:center;">
+                    <span class="pill" style="background:#e0f2fe; color:#0369a1; font-weight:700; font-size:0.75rem;"><%= r.score_total %> Poin</span>
+                  </td>
+                  <td><%= formattedDate %></td>
+                  <td style="text-align:center;">
+                    <button class="action-btn btn-view-detail" data-id="<%= r.id %>" style="display:inline-flex; align-items:center; gap:4px; font-size:0.75rem; border:1px solid #cbd5e1; padding:0.25rem 0.5rem; border-radius:6px; background:#ffffff; color:#334155; cursor:pointer;">
+                      <i data-lucide="eye" style="width:14px; height:14px;"></i> Detail
+                    </button>
+                  </td>
+                </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="5" style="text-align:center; color:#94a3b8; padding:3rem;">Belum ada kuesioner yang diselesaikan oleh mitra.</td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <% if (locals.totalPages && totalPages > 1) { %>
+          <div style="padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; font-size: 0.8125rem;">
+            <div style="color: #64748b;">
+              Halaman <strong><%= page %></strong> dari <strong><%= totalPages %></strong> (Total: <%= totalItems %> data)
+            </div>
+            <div style="display: flex; gap: 4px;">
+              <% if (page > 1) { %>
+                <a href="?search=<%= search %>&page=<%= page - 1 %>" class="btn" style="border: 1px solid #cbd5e1; padding: 0.25rem 0.5rem; border-radius: 4px; text-decoration: none; color: #334155;">Sebelumnya</a>
+              <% } %>
+              <% for(let i = 1; i <= totalPages; i++) { %>
+                <a href="?search=<%= search %>&page=<%= i %>" class="btn" style="border: 1px solid <%= page === i ? '#1e293b' : '#cbd5e1' %>; background-color: <%= page === i ? '#1e293b' : 'white' %>; color: <%= page === i ? 'white' : '#334155' %>; padding: 0.25rem 0.5rem; border-radius: 4px; text-decoration: none;"><%= i %></a>
+              <% } %>
+              <% if (page < totalPages) { %>
+                <a href="?search=<%= search %>&page=<%= page + 1 %>" class="btn" style="border: 1px solid #cbd5e1; padding: 0.25rem 0.5rem; border-radius: 4px; text-decoration: none; color: #334155;">Selanjutnya</a>
+              <% } %>
+            </div>
+          </div>
+        <% } %>
+      </div><!-- /.table-card -->
+
+    </main><!-- /.content-area -->
+  </div><!-- /.main-wrapper -->
+</div><!-- /.app-shell -->
+
+<!-- Detail Dialog Styles -->
+<style>
+  dialog::backdrop {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+  }
+  dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    padding: 2rem;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+    max-width: 600px;
+    width: 90%;
+    background: #ffffff;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  .meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 1rem;
+    background: #f8fafc;
+    margin-bottom: 1.25rem;
+  }
+  .meta-grid strong {
+    color: #1e293b;
+  }
+  .answer-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    background: #ffffff;
+    border-left: 4px solid #1e293b;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+</style>
+
+<!-- Detail Dialog -->
+<dialog id="detail-dialog">
+  <div class="dialog-header">
+    <i data-lucide="file-text" style="color:#0f172a;"></i>
+    <h3 style="margin:0; font-size: 1.25rem; color: #0f172a;">Rincian Jawaban Kuesioner</h3>
+  </div>
+  <p style="color:#64748b; margin-bottom:1rem; font-size:0.8125rem; line-height:1.4;">Jawaban mentah yang diserahkan oleh mitra perusahaan.</p>
+
+  <div class="meta-grid">
+    <div><strong>Mitra Perusahaan:</strong> <span id="lbl-detail-partner">...</span></div>
+    <div><strong>Judul Kuesioner:</strong> <span id="lbl-detail-survey">...</span></div>
+    <div><strong>Tanggal Kirim:</strong> <span id="lbl-detail-date">...</span></div>
+    <div><strong>Total Nilai:</strong> <span id="lbl-detail-score" style="font-weight:700;">...</span></div>
+  </div>
+
+  <div id="detail-loading" style="text-align:center; padding:2rem; color:#94a3b8; font-size:0.875rem;">Memuat rincian data...</div>
+  <div id="detail-answers-list" style="display:none; flex-direction:column; gap:12px;"></div>
+
+  <div style="display:flex; justify-content:flex-end; border-top: 1px solid #e2e8f0; padding-top: 1rem; margin-top: 1.25rem;">
+    <button type="button" id="btn-close-detail" class="btn" style="border:1px solid #cbd5e1; padding:0.5rem 1rem; border-radius:6px; background:transparent; cursor:pointer;">Tutup</button>
+  </div>
+</dialog>
+
+<script>
+  lucide.createIcons();
+
+  document.getElementById('topbar-search').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
+      window.location.href = '?search=' + encodeURIComponent(this.value);
+    }
+  });
+
+  const detailDialog = document.getElementById('detail-dialog');
+  const btnCloseDetail = document.getElementById('btn-close-detail');
+
+  const lblPartner = document.getElementById('lbl-detail-partner');
+  const lblSurvey = document.getElementById('lbl-detail-survey');
+  const lblDate = document.getElementById('lbl-detail-date');
+  const lblScore = document.getElementById('lbl-detail-score');
+
+  const loadingBlock = document.getElementById('detail-loading');
+  const answersList = document.getElementById('detail-answers-list');
+
+  document.querySelectorAll('.btn-view-detail').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const id = this.getAttribute('data-id');
+
+      loadingBlock.style.display = 'block';
+      answersList.style.display = 'none';
+      answersList.innerHTML = '';
+
+      detailDialog.showModal();
+
+      fetch(`/admin/recap-answers/${id}/json`)
+        .then(res => res.json())
+        .then(res => {
+          if (res.success) {
+            const data = res.data;
+
+            lblPartner.innerText = data.response.partner_name;
+            lblSurvey.innerText = data.response.survey_title;
+            lblScore.innerText = data.response.score_total + ' Poin';
+
+            const dateObj = new Date(data.response.submitted_at);
+            lblDate.innerText = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) + ' ' + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+            data.answers.forEach((ans, index) => {
+              const item = document.createElement('div');
+              item.className = 'answer-card';
+
+              const qHeader = document.createElement('div');
+              qHeader.style.cssText = 'display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #f1f5f9; padding-bottom:4px; font-size:0.7rem; color:#94a3b8; font-weight:700;';
+              
+              const qNum = document.createElement('span');
+              qNum.innerText = `PERTANYAAN ${ans.order_number || (index + 1)}`;
+              qHeader.appendChild(qNum);
+
+              if (ans.question_type !== 'essay' && ans.question_type !== 'short_answer') {
+                const qScore = document.createElement('span');
+                qScore.className = 'pill';
+                qScore.style.cssText = 'background:#d1fae5; color:#065f46; font-size:0.65rem; padding:0.1rem 0.4rem;';
+                qScore.innerText = `Skor: ${ans.score}`;
+                qHeader.appendChild(qScore);
+              } else {
+                const qScore = document.createElement('span');
+                qScore.className = 'pill';
+                qScore.style.cssText = 'background:#f1f5f9; color:#475569; font-size:0.65rem; padding:0.1rem 0.4rem;';
+                qScore.innerText = 'Essay';
+                qHeader.appendChild(qScore);
+              }
+              item.appendChild(qHeader);
+
+              const qText = document.createElement('div');
+              qText.style.cssText = 'font-weight:700; color:#1e293b; font-size:0.875rem; line-height:1.4;';
+              qText.innerText = ans.question_text;
+              item.appendChild(qText);
+
+              const answerTextVal = (ans.question_type === 'essay' || ans.question_type === 'short_answer')
+                ? (ans.answer_text || '— Tidak diisi —')
+                : ans.option_text || '—';
+
+              const ansLabel = document.createElement('div');
+              ansLabel.style.cssText = 'font-size:0.7rem; color:#94a3b8; font-weight:600; margin-top:4px;';
+              ansLabel.innerText = 'Jawaban Anda:';
+              item.appendChild(ansLabel);
+
+              const ansContent = document.createElement('div');
+              if (ans.question_type === 'essay' || ans.question_type === 'short_answer') {
+                ansContent.style.cssText = 'font-size:0.75rem; color:#334155; font-style:italic; background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:0.5rem; white-space:pre-wrap; line-height:1.4;';
+              } else {
+                ansContent.style.cssText = 'font-size:0.8125rem; color:#1e293b; font-weight:700; display:flex; align-items:center; gap:4px;';
+                ansContent.innerHTML = '<i data-lucide="check-circle-2" style="width:14px; height:14px; color:#10b981;"></i> <span>' + answerTextVal + '</span>';
+              }
+              ansContent.innerText = answerTextVal;
+              item.appendChild(ansContent);
+
+              answersList.appendChild(item);
+            });
+
+            loadingBlock.style.display = 'none';
+            answersList.style.display = 'flex';
+            lucide.createIcons();
+          } else {
+            loadingBlock.innerHTML = `<p style="color:#ef4444;">Gagal memuat detail: ${res.message}</p>`;
+          }
+        })
+        .catch(err => {
+          loadingBlock.innerHTML = '<p style="color:#ef4444;">Terjadi kesalahan sistem saat memuat data.</p>';
+        });
     });
+  });
 
-    const detailDialog = document.getElementById('detail-dialog');
-    const btnCloseDetail = document.getElementById('btn-close-detail');
-
-    const lblPartner = document.getElementById('lbl-detail-partner');
-    const lblSurvey = document.getElementById('lbl-detail-survey');
-    const lblDate = document.getElementById('lbl-detail-date');
-    const lblScore = document.getElementById('lbl-detail-score');
-
-    const loadingBlock = document.getElementById('detail-loading');
-    const answersList = document.getElementById('detail-answers-list');
-
-    document.querySelectorAll('.btn-view-detail').forEach(btn => {
-      btn.addEventListener('click', function () {
-        const id = this.getAttribute('data-id');
-
-        loadingBlock.style.display = 'block';
-        answersList.style.display = 'none';
-        answersList.innerHTML = '';
-
-        detailDialog.showModal();
-
-        fetch(`/admin/recap-answers/${id}/json`)
-          .then(res => res.json())
-          .then(res => {
-            if (res.success) {
-              const data = res.data;
-
-              lblPartner.innerText = data.response.partner_name;
-              lblSurvey.innerText = data.response.survey_title;
-              lblScore.innerText = data.response.score_total + ' Poin';
-
-              const dateObj = new Date(data.response.submitted_at);
-              lblDate.innerText = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) + ' ' + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-
-              data.answers.forEach((ans, index) => {
-                const item = document.createElement('div');
-                item.className = 'rounded-lg border bg-muted/30 p-4';
-
-                const qText = document.createElement('div');
-                qText.className = 'font-semibold text-foreground text-sm';
-                qText.innerText = `${index + 1}. ${ans.question_text}`;
-                item.appendChild(qText);
-
-                const answerTextVal = (ans.question_type === 'essay' || ans.question_type === 'short_answer')
-                  ? (ans.answer_text || '— Tidak diisi —')
-                  : `${ans.option_text || '—'} (Skor: ${ans.score})`;
-
-                const ansDiv = document.createElement('div');
-                ansDiv.className = 'text-xs text-muted-foreground bg-background border rounded-md p-2 mt-2 leading-relaxed';
-                ansDiv.innerText = answerTextVal;
-                item.appendChild(ansDiv);
-
-                if (ans.question_type !== 'essay' && ans.question_type !== 'short_answer') {
-                  const scoreBadge = document.createElement('span');
-                  scoreBadge.className = 'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-bold bg-emerald-500/10 text-emerald-500 border-emerald-500/20 mt-2';
-                  scoreBadge.innerHTML = '<i data-lucide="check" class="size-3"></i> Skor Bobot: ' + ans.score;
-                  item.appendChild(scoreBadge);
-                }
-
-                answersList.appendChild(item);
-              });
-
-              loadingBlock.style.display = 'none';
-              answersList.style.display = 'flex';
-              lucide.createIcons();
-            } else {
-              loadingBlock.innerHTML = `<p class="text-destructive">Gagal memuat detail: ${res.message}</p>`;
-            }
-          })
-          .catch(err => {
-            loadingBlock.innerHTML = '<p class="text-destructive">Terjadi kesalahan sistem saat memuat data.</p>';
-          });
-      });
-    });
-
-    btnCloseDetail.addEventListener('click', () => {
-      detailDialog.close();
-    });
-  </script>
+  btnCloseDetail.addEventListener('click', () => {
+    detailDialog.close();
+  });
+</script>
 </body>
-
 </html>

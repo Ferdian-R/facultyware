@@ -1,263 +1,238 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 
 <head>
-  <script>
-    (() => {
-      try {
-        localStorage.removeItem("themeVariant");
-      } catch (_) {}
-      try {
-        const stored = localStorage.getItem("themeMode");
-        if (
-          stored
-            ? stored === "dark"
-            : matchMedia("(prefers-color-scheme: dark)").matches
-        ) {
-          document.documentElement.classList.add("dark");
-        }
-      } catch (_) { }
-
-      const apply = (dark) => {
-        document.documentElement.classList.toggle("dark", dark);
-        try {
-          localStorage.setItem("themeMode", dark ? "dark" : "light");
-        } catch (_) { }
-      };
-
-      document.addEventListener("basecoat:theme", (event) => {
-        const mode = event.detail?.mode;
-        apply(
-          mode === "dark"
-            ? true
-            : mode === "light"
-              ? false
-              : !document.documentElement.classList.contains("dark"),
-        );
-      });
-    })();
-  </script>
-
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>
-    <%= title %>
-  </title>
-  <meta name="description" content="Portal Pengisian Survei Kepuasan Mitra Kerja Sama FTI Universitas Andalas." />
-
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
-  <link rel="stylesheet" href="/assets/styles.css" />
-
-  <script src="/assets/js/basecoat.js?v=0.3.11" defer></script>
-  <script src="/assets/js/command.js?v=0.3.11" defer></script>
-  <script src="/assets/js/dropdown-menu.js?v=0.3.11" defer></script>
-  <script src="/assets/js/popover.js?v=0.3.11" defer></script>
-  <script src="/assets/js/select.js?v=0.3.11" defer></script>
-  <script src="/assets/js/sidebar.js?v=0.3.11" defer></script>
-  <script src="/assets/js/tabs.js?v=0.3.11" defer></script>
-  <script src="/assets/js/toast.js?v=0.3.11" defer></script>
-
-  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <!-- Survey CSS -->
+  <link rel="stylesheet" href="/assets/survey.css" />
   <style>
-    
-    .welcome-banner {
-      background: linear-gradient(135deg, #1e293b 0%, #111827 50%, #0f172a 100%) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-    }
-    .dark .welcome-banner {
-      background: linear-gradient(135deg, #0f172a 0%, #030712 100%) !important;
-      border-color: rgba(255, 255, 255, 0.08) !important;
-    }
-    .welcome-title {
-      color: #ffffff !important;
-      font-weight: 700;
-    }
-    .welcome-desc {
-      color: #cbd5e1 !important;
-      opacity: 0.95;
-    }
-    .dark .welcome-desc {
-      color: #cbd5e1 !important;
-    }
-
-    
-    .premium-card {
-      border: 1px solid var(--border) !important;
-      background: var(--card) !important;
-      color: var(--card-foreground) !important;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03) !important;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    }
-    .premium-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.06) !important;
-    }
-
-    
-    .rating-btn {
+    .header-bar {
       display: flex;
-      height: 3rem;
-      width: 3rem;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      padding: 15px 30px;
+      border-radius: 14px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+    .progress-wrap {
+      background: white;
+      padding: 20px 30px;
+      border-radius: 14px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+    .progress-bar-track {
+      height: 8px;
+      width: 100%;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #2d3a52, #1b2537);
+      border-radius: 999px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+    /* Rating Buttons Styling */
+    .rating-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .rating-label-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      flex: 1;
+      min-width: 60px;
+      padding: 12px 6px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      background: #ffffff;
+      transition: all 0.2s ease;
+    }
+    .rating-label-box:hover {
+      border-color: #2d3a52;
+      background: #f8fafc;
+    }
+    .rating-btn-circle {
+      display: flex;
+      width: 2.75rem;
+      height: 2.75rem;
       align-items: center;
       justify-content: center;
-      border-radius: 9999px;
-      border: 1px solid var(--border);
-      background-color: var(--card);
+      border-radius: 50%;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
       font-weight: 700;
-      color: var(--muted-foreground);
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      color: #64748b;
+      transition: all 0.2s ease;
+    }
+    .rating-label-box input[type="radio"]:checked + .rating-btn-circle {
+      background: #2d3a52;
+      color: #ffffff;
+      border-color: #2d3a52;
+      box-shadow: 0 0 10px rgba(45, 58, 82, 0.3);
+    }
+    .rating-label-box input[type="radio"]:checked ~ span.text-desc {
+      color: #111827;
+      font-weight: 600;
+    }
+    /* Custom Select Choice radio list */
+    .radio-choice-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .radio-choice-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      background: #ffffff;
       cursor: pointer;
+      transition: all 0.2s ease;
     }
-    .rating-btn:hover {
-      border-color: var(--primary);
-      transform: scale(1.05);
-      color: var(--foreground);
+    .radio-choice-item:hover {
+      border-color: #2d3a52;
+      background: #f8fafc;
     }
-    
-    input[type="radio"]:checked + .rating-btn {
-      background-color: var(--primary) !important;
-      color: var(--primary-foreground) !important;
-      border-color: var(--primary) !important;
-      box-shadow: 0 0 12px rgba(99, 102, 241, 0.4) !important;
+    .radio-choice-item input[type="radio"]:checked {
+      accent-color: #2d3a52;
+    }
+    .radio-choice-item.checked {
+      background: #f0f4f8;
+      border-color: #2d3a52;
+    }
+    .radio-choice-item.checked span {
+      font-weight: 600;
+      color: #111827;
     }
   </style>
 </head>
 
-<body class="bg-muted/30">
-  <div class="max-w-3xl mx-auto px-4 py-8 md:py-12 space-y-6">
+<body>
+  <div class="survey-container">
 
-    
-    <header class="flex items-center justify-between border rounded-lg bg-card text-card-foreground shadow-sm p-4">
-      <div class="flex items-center gap-2">
-        <img src="/image/fti%20logo.jpg" alt="Logo FTI" class="h-8 w-8 rounded-lg object-contain bg-white p-0.5 border" />
-        <span class="text-sm font-semibold tracking-tight text-foreground">SUKAFTI Portal</span>
+    <!-- Header bar -->
+    <div class="header-bar">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <img src="/image/fti logo.jpg" alt="Logo FTI" style="width:28px; height:28px; border-radius:6px; object-fit:contain;" />
+        <span style="font-size:0.875rem; font-weight:700; color:#1f2937;">SUKAFTI Portal</span>
       </div>
-      <button type="button" aria-label="Toggle dark mode"
-        onclick="document.dispatchEvent(new CustomEvent('basecoat:theme'))"
-        class="h-8 w-8 inline-flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground bg-background">
-        <i data-lucide="sun" class="size-4 hidden dark:block"></i>
-        <i data-lucide="moon" class="size-4 block dark:hidden"></i>
-      </button>
-    </header>
+      <a href="/logout" style="text-decoration:none; font-size:0.75rem; font-weight:600; color:#ef4444; display:flex; align-items:center; gap:4px;">
+        <i data-lucide="log-out" style="width:14px; height:14px;"></i> Keluar
+      </a>
+    </div>
 
-    
-    <div data-slot="card"
-      class="welcome-banner rounded-2xl p-6 relative overflow-hidden">
-      <div class="relative z-10 space-y-3">
-        <span
-          class="inline-flex items-center gap-1 rounded-full bg-white/10 border border-white/10 px-2.5 py-0.5 text-xs font-semibold" style="color: #ffffff !important;">
-          <i data-lucide="building-2" class="size-3.5"></i>
-          <%= partnerName %>
-        </span>
-        <h1 class="text-2xl font-bold tracking-tight welcome-title">
-          <%= survey.title %>
-        </h1>
-        <p class="text-xs text-slate-300 leading-relaxed max-w-2xl welcome-desc">
-          <%= survey.description
-            || "Silakan luangkan waktu sejenak untuk mengisi survei evaluasi kerja sama ini. Tanggapan Anda sangat berharga bagi peningkatan layanan akademik dan kolaborasi industri FTI."
-            %>
-        </p>
+    <!-- Survey Header -->
+    <div class="survey-header">
+      <span class="pill" style="background:rgba(255,255,255,0.15); color:#ffffff; font-size:0.7rem; font-weight:600; padding:0.2rem 0.5rem; display:inline-flex; align-items:center; gap:4px; margin-bottom:12px;">
+        <i data-lucide="building-2" style="width:12px; height:12px;"></i> <%= partnerName %>
+      </span>
+      <h1><%= survey.title %></h1>
+      <p>
+        <%= survey.description || "Silakan luangkan waktu sejenak untuk mengisi survei evaluasi kerja sama ini. Tanggapan Anda sangat berharga bagi peningkatan layanan akademik dan kolaborasi FTI." %>
+      </p>
+    </div>
+
+    <!-- Progress Card -->
+    <div class="progress-wrap">
+      <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; font-weight:600; color:#64748b;">
+        <span>Progress Pengisian</span>
+        <span id="progress-text">0% Selesai (0 / <%= questions.length %> Pertanyaan)</span>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progress-fill"></div>
       </div>
     </div>
 
-    
+    <!-- Errors -->
     <% if (error) { %>
-      <div
-        class="bg-destructive/15 text-destructive text-sm p-4 rounded-md border border-destructive/20 flex items-center gap-2">
-        <i data-lucide="alert-circle" class="size-4 shrink-0"></i>
-        <span>
-          <%= error %>
-        </span>
+      <div style="background-color: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 8px; border: 1px solid #fca5a5; font-size: 0.875rem; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 20px;">
+        <i data-lucide="alert-circle" style="width: 1.25rem; height: 1.25rem; flex-shrink: 0;"></i>
+        <span><%= error %></span>
       </div>
-      <% } %>
+    <% } %>
 
-        
-        <div data-slot="card" class="premium-card rounded-2xl p-4 flex flex-col gap-3">
-          <div class="flex justify-between items-center text-xs font-semibold text-muted-foreground">
-            <span>Progress Pengisian</span>
-            <span id="progress-text">0% Selesai (0 / <%= questions.length %> Pertanyaan)</span>
+    <!-- Survey Form -->
+    <form action="/survey-mitra/submit" method="POST" id="survey-form" style="display: flex; flex-direction: column;">
+
+      <% questions.forEach(function(q, index) { %>
+        <div class="form-card" id="card-q-<%= q.id %>">
+          <div style="display:flex; align-items:flex-start; gap:10px; margin-bottom:15px;">
+            <span style="display:flex; width:22px; height:22px; border-radius:6px; background:#f1f5f9; color:#1e293b; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; font-family:monospace; margin-top:2px;">
+              <%= index + 1 %>
+            </span>
+            <h2 style="font-size: 1rem; font-weight: 700; color: #2d3a52; margin: 0; line-height:1.4;"><%= q.question_text %></h2>
           </div>
-          <div data-slot="progress" class="relative h-2.5 w-full overflow-hidden rounded-full bg-secondary">
-            <div class="h-full bg-primary transition-all duration-300 rounded-full" id="progress-fill"
-              style="width: 0%"></div>
+
+          <div class="form-group" style="margin-bottom:0;">
+            <% if (q.type==='rating' || (q.type==='single_choice' && q.options[0] && q.options[0].score !== undefined && (q.options[0].score === 1 || q.options[0].score === '1') && q.options.length === 5 && q.options[0].option_text.includes('Buruk'))) { %>
+              
+              <!-- Rating layout -->
+              <div class="rating-row">
+                <% q.options.forEach(function(opt) { %>
+                  <label class="rating-label-box">
+                    <input type="radio" name="question_<%= q.id %>" value="<%= opt.id %>" style="display:none;" required />
+                    <span class="rating-btn-circle">
+                      <%= opt.score %>
+                    </span>
+                    <span class="text-desc" style="font-size:0.6875rem; text-align:center; color:#64748b; font-weight:500; line-height:1.2; max-width:80px;">
+                      <%= opt.option_text %>
+                    </span>
+                  </label>
+                <% }) %>
+              </div>
+
+            <% } else if (q.type==='multiple_choice' || q.type==='single_choice') { %>
+              
+              <!-- Standard choices list layout -->
+              <div class="radio-choice-list">
+                <% q.options.forEach(function(opt) { %>
+                  <label class="radio-choice-item" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid #e5e7eb; border-radius: 10px; background: #ffffff; cursor: pointer; transition: all 0.2s ease;">
+                    <input type="radio" name="question_<%= q.id %>" value="<%= opt.id %>" style="width: 16px !important; height: 16px !important; margin: 0 !important; padding: 0 !important; cursor: pointer; flex-shrink: 0;" required />
+                    <span style="font-size:0.875rem; font-weight:500; color:#374151;">
+                      <%= opt.option_text %>
+                    </span>
+                  </label>
+                <% }) %>
+              </div>
+
+            <% } else if (q.type==='short_answer' || q.type==='essay') { %>
+              
+              <!-- Text area essay -->
+              <textarea name="question_<%= q.id %>" rows="4" placeholder="Tuliskan jawaban deskriptif Anda secara lengkap..." required></textarea>
+
+            <% } %>
           </div>
         </div>
+      <% }) %>
 
-        
-        <form action="/survey-mitra/submit" method="POST" id="survey-form" class="space-y-6">
-
-          <% questions.forEach(function(q, index) { %>
-            <div data-slot="card"
-              class="premium-card rounded-2xl p-6 flex flex-col gap-4"
-              id="card-q-<%= q.id %>">
-              <div class="flex items-center gap-2">
-                <span
-                  class="flex h-6 w-6 items-center justify-center rounded-md bg-muted text-muted-foreground text-xs font-bold">
-                  <%= index + 1 %>
-                </span>
-                <h2 class="text-sm font-semibold tracking-tight text-foreground leading-relaxed">
-                  <%= q.question_text %>
-                </h2>
-              </div>
-
-              <div class="w-full">
-                <% if (q.type==='rating' || (q.type==='single_choice' && q.options[0] && q.options[0].score !== undefined && (q.options[0].score === 1 || q.options[0].score === '1') && q.options.length === 5 && q.options[0].option_text.includes('Buruk'))) { %>
-                  
-                  <div class="flex flex-wrap justify-between gap-4 mt-2">
-                    <% q.options.forEach(function(opt) { %>
-                      <label class="flex flex-col items-center gap-2 cursor-pointer flex-1 min-w-[70px]">
-                        <input type="radio" name="question_<%= q.id %>" value="<%= opt.id %>" class="peer sr-only"
-                          required />
-                        <span class="rating-btn">
-                          <%= opt.score %>
-                        </span>
-                        <span
-                          class="text-[10px] text-muted-foreground font-medium text-center max-w-[90px] leading-tight peer-checked:text-foreground peer-checked:font-semibold">
-                          <%= opt.option_text %>
-                        </span>
-                      </label>
-                      <% }) %>
-                  </div>
-                  <% } else if (q.type==='multiple_choice' || q.type==='single_choice') { %>
-                    
-                    <div class="flex flex-col gap-2.5 mt-2">
-                      <% q.options.forEach(function(opt) { %>
-                        <label
-                          class="flex items-center gap-3 rounded-lg border bg-background p-3 cursor-pointer hover:bg-muted/40 transition-colors border-input">
-                          <input type="radio" name="question_<%= q.id %>" value="<%= opt.id %>"
-                            class="h-4 w-4 rounded-full border-input text-primary focus:ring-ring" required />
-                          <span class="text-xs font-medium text-foreground leading-tight">
-                            <%= opt.option_text %>
-                          </span>
-                        </label>
-                        <% }) %>
-                    </div>
-                    <% } else if (q.type==='short_answer' || q.type==='essay' ) { %>
-                      
-                      <textarea name="question_<%= q.id %>"
-                        class="flex min-h-[100px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-xs shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring mt-2"
-                        placeholder="Tuliskan jawaban deskriptif Anda secara lengkap..." required></textarea>
-                      <% } %>
-              </div>
-            </div>
-            <% }) %>
-
-              
-              <div class="flex items-center justify-between border-t pt-6 mt-8">
-                <a href="/logout"
-                  class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-semibold border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
-                  <i data-lucide="log-out" class="size-4"></i>
-                  <span>Keluar</span>
-                </a>
-                <button type="submit"
-                  class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
-                  <span>Kirim Jawaban</span>
-                  <i data-lucide="send" class="size-3.5"></i>
-                </button>
-              </div>
-        </form>
+      <button type="submit" class="submit-btn" style="margin-top:10px;">
+        Kirim Survey
+      </button>
+    </form>
 
   </div>
 
@@ -292,8 +267,34 @@
       progressText.innerText = `${percentage}% Selesai (${answeredCount} / ${totalQuestions} Pertanyaan)`;
     }
 
+    // Toggle checked styles on rating label boxes and radio choice items
+    function updateOptionStyles() {
+      form.querySelectorAll('.rating-label-box').forEach(el => {
+        const input = el.querySelector('input');
+        if (input.checked) {
+          el.style.borderColor = '#2d3a52';
+          el.style.background = '#f0f4f8';
+        } else {
+          el.style.borderColor = '#e5e7eb';
+          el.style.background = '#ffffff';
+        }
+      });
+
+      form.querySelectorAll('.radio-choice-item').forEach(el => {
+        const input = el.querySelector('input');
+        if (input.checked) {
+          el.classList.add('checked');
+        } else {
+          el.classList.remove('checked');
+        }
+      });
+    }
+
     form.querySelectorAll('input[type="radio"]').forEach(radio => {
-      radio.addEventListener('change', calculateProgress);
+      radio.addEventListener('change', () => {
+        calculateProgress();
+        updateOptionStyles();
+      });
     });
 
     form.querySelectorAll('textarea').forEach(ta => {
@@ -301,6 +302,7 @@
     });
 
     calculateProgress();
+    updateOptionStyles();
   </script>
 </body>
 
